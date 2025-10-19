@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #4f46e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            margin: 0 auto 1rem;
+            font-weight: bold;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-role {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4f46e5;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .checkbox-input {
+            width: 18px;
+            height: 18px;
+            accent-color: #4f46e5;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3730a3;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .sidebar-content {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quick-action-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            color: #374151;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .quick-action-btn:hover {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        .recent-activity {
+            margin-top: 1.5rem;
+        }
+
+        .activity-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-meta {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .mood-entry {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .mood-emoji {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+        }
+
+        .mood-content {
+            flex: 1;
+        }
+
+        .mood-date {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar">{{ user.first_name|first|upper }}</div>
+        <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
+        <p class="profile-bio">
+            {% if user.bio %}
+                {{ user.bio }}
+            {% else %}
+                Welcome to my SafeTalk profile! I'm here to support mental health and well-being.
+            {% endif %}
+        </p>
+        <div class="profile-meta">
+            <span class="profile-role">{{ user.get_role_display }}</span>
+            <span class="profile-joined">Member since {{ user.date_joined|date:"M Y" }}</span>
+        </div>
+
+        <div class="profile-actions">
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary">
+                ✏️ Edit Profile
+            </a>
+            <a href="{% url 'settings' %}" class="btn btn-secondary">
+                ⚙️ Account Settings
+            </a>
+        </div>
+    </div>
+
+    <!-- Profile Preview -->
+    <div class="profile-preview">
+        <div class="preview-section">
+            <h3 class="section-title">👤 Basic Information</h3>
+            <div class="info-list">
+                <div class="info-row">
+                    <span class="info-label">Full Name:</span>
+                    <span class="info-value">{{ user.first_name }} {{ user.last_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ user.email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Username:</span>
+                    <span class="info-value">{{ user.username }}</span>
+                </div>
+                {% if user.phone_number %}
+                <div class="info-row">
+                    <span class="info-label">Phone:</span>
+                    <span class="info-value">{{ user.phone_number }}</span>
+                </div>
+                {% endif %}
+                {% if user.date_of_birth %}
+                <div class="info-row">
+                    <span class="info-label">Date of Birth:</span>
+                    <span class="info-value">{{ user.date_of_birth|date:"M j, Y" }}</span>
+                </div>
+                {% endif %}
+                {% if user.timezone %}
+                <div class="info-row">
+                    <span class="info-label">Timezone:</span>
+                    <span class="info-value">{{ user.timezone }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if mood_entries %}
+        <div class="preview-section">
+            <h3 class="section-title">📊 Activity Summary</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number">{{ mood_entries.count }}</div>
+                    <div class="stat-label">Mood Entries</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">{{ upcoming_appointments.count }}</div>
+                    <div class="stat-label">Upcoming Sessions</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">{{ achievements.count }}</div>
+                    <div class="stat-label">Achievements</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if mood_entries %}
+        <div class="preview-section">
+            <h3 class="section-title">😊 Latest Mood</h3>
+            {% with latest_mood=mood_entries.first %}
+            <div class="latest-mood">
+                <div class="mood-display">
+                    <span class="mood-emoji">{{ latest_mood.get_mood_display }}</span>
+                    <span class="mood-text">{{ latest_mood.get_mood_display }}</span>
+                </div>
+                {% if latest_mood.note %}
+                <div class="mood-note">{{ latest_mood.note }}</div>
+                {% endif %}
+                <div class="mood-date">{{ latest_mood.date|date:"M j, Y" }}</div>
+            </div>
+            {% endwith %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 0 auto 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.profile-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.profile-bio {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 2;
+}
+
+.profile-meta {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.profile-role {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.profile-joined {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.profile-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Profile Preview */
+.profile-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.preview-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: #4f46e5;
+    border-radius: 2px;
+}
+
+/* Information List */
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.info-value {
+    color: #6b7280;
+}
+
+/* Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-box {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #4f46e5;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Latest Mood */
+.latest-mood {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.mood-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mood-emoji {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #dbeafe;
+    border-radius: 50%;
+}
+
+.mood-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.mood-note {
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+.mood-date {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 1rem;
+    }
+
+    .profile-header {
+        padding: 2rem 1rem;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+    }
+
+    .profile-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-name {
+        font-size: 1.75rem;
+    }
+
+    .preview-section {
+        padding: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

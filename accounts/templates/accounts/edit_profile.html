@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - SafeTalk{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Edit Profile</h1>
+    <p class="page-subtitle">Update your personal information and profile details</p>
+</div>
+
+<div class="settings-container">
+    <!-- Basic Information -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3>👤 Basic Information</h3>
+            <p>Your core profile information</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="settings-form">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">First Name *</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="error-message">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Last Name *</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="error-message">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email Address *</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="error-message">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                    <small>This email will be used for account notifications</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Username *</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="error-message">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                    <small>Choose a unique username for your account</small>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Basic Information</button>
+        </form>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3>📋 Additional Information</h3>
+            <p>Optional details to enhance your profile</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="settings-form">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                        <div class="error-message">{{ form.phone_number.errors.0 }}</div>
+                    {% endif %}
+                    <small>Optional: Used for emergency contact and notifications</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                    {{ form.date_of_birth }}
+                    {% if form.date_of_birth.errors %}
+                        <div class="error-message">{{ form.date_of_birth.errors.0 }}</div>
+                    {% endif %}
+                    <small>Optional: Helps us provide age-appropriate content</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.timezone.id_for_label }}">Timezone</label>
+                    {{ form.timezone }}
+                    {% if form.timezone.errors %}
+                        <div class="error-message">{{ form.timezone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Additional Information</button>
+        </form>
+    </div>
+
+    <!-- Bio Section -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3>📝 About You</h3>
+            <p>Tell others about yourself</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="settings-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.bio.id_for_label }}">Bio</label>
+                {{ form.bio }}
+                {% if form.bio.errors %}
+                    <div class="error-message">{{ form.bio.errors.0 }}</div>
+                {% endif %}
+                <small>Share a bit about yourself (optional)</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Bio</button>
+        </form>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+        <a href="{% url 'profile' %}" class="btn btn-secondary">
+            ← Back to Profile
+        </a>
+        <a href="{% url 'settings' %}" class="btn btn-secondary">
+            ⚙️ Account Settings
+        </a>
+    </div>
+</div>
+
+<style>
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.settings-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.section-header h3 {
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.section-header p {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.settings-form {
+    margin-top: 1.5rem;
+}
+
+.form-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+    position: relative;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.checkbox-container input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.checkmark {
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    margin-right: 12px;
+    margin-top: 2px;
+    position: relative;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container small {
+    color: #6b7280;
+    font-weight: normal;
+    margin-top: 0.25rem;
+    margin-left: 32px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #4f46e5;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3730a3;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.danger-zone {
+    border: 2px solid #fee2e2;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background: #fef2f2;
+}
+
+.action-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem 0;
+    border-bottom: 1px solid #fecaca;
+}
+
+.action-item:last-child {
+    border-bottom: none;
+}
+
+.action-info h4 {
+    color: #dc2626;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.action-info p {
+    color: #991b1b;
+    font-size: 0.875rem;
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 0 1rem;
+    }
+
+    .settings-section {
+        padding: 1.5rem;
+    }
+
+    .action-item {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-grid {
+        gap: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+    <script>
+        // Form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+
+            form.addEventListener('submit', function(e) {
+                // Basic client-side validation
+                const requiredFields = form.querySelectorAll('input[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Please fill in all required fields.');
+                }
+            });
+
+            // Real-time validation
+            const inputs = form.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.hasAttribute('required') && !this.value.trim()) {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

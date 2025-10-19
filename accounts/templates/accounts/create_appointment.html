@@ -1,0 +1,998 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit Appointment{% else %}Create Appointment{% endif %} - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        /* Dashboard-Inspired Appointment Creation/Edit Form */
+
+        .appointment-form-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Page Header - Dashboard Style */
+        .page-header {
+            margin-bottom: 2rem;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Dashboard Card Style */
+        .dashboard-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover .card-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .card-content {
+            padding: 1.25rem 1.5rem;
+        }
+
+        /* Form Elements - Dashboard Inspired */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-help {
+            color: #6b7280;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Dashboard Button Style */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+            min-height: 44px;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-secondary {
+            padding: 0.75rem 1.5rem;
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        /* Counselor/Client Info - Dashboard Style */
+        .counselor-list {
+            min-height: 200px;
+        }
+
+        .counselor-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .counselor-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .counselor-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .counselor-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .counselor-details h4 {
+            margin: 0 0 0.5rem 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+
+        .counselor-details p {
+            margin: 0.25rem 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .counselor-specializations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .specialization-tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Guidelines - Dashboard Style */
+        .guidelines {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .guideline-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .guideline-item i {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .guideline-item h4 {
+            margin: 0 0 0.5rem 0;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+
+        .guideline-item p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Responsive Design - Dashboard Style */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .dashboard-card {
+                margin: 0 0.5rem;
+            }
+
+            .card-header {
+                padding: 1rem 1.25rem 0.5rem;
+            }
+
+            .card-content {
+                padding: 1rem 1.25rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn-secondary,
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .guideline-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .guideline-item i {
+                margin-top: 0;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .card-title {
+                font-size: 1rem;
+            }
+
+            .stat-label, .stat-value {
+                font-size: 0.8rem;
+            }
+
+            .action-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+                width: 100%;
+            }
+        }
+
+        /* Animation for cards - Dashboard Style */
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dashboard-card {
+            animation: cardSlideIn 0.6s ease-out;
+        }
+
+        .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+        .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Loading states - Dashboard Style */
+        .dashboard-card.loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Dark theme support - Dashboard Style */
+        body.dark-theme .dashboard-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        body.dark-theme .card-header {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #475569;
+        }
+
+        body.dark-theme .card-title {
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .stat-label {
+            color: #94a3b8;
+        }
+
+        body.dark-theme .stat-value {
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .page-title {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.dark-theme .page-subtitle {
+            color: #94a3b8;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="appointment-form-container">
+    <!-- Page Header - Dashboard Style -->
+    <div class="page-header">
+        <h1 class="page-title">{% if is_edit %}Edit Appointment{% else %}Schedule New Appointment{% endif %}</h1>
+        <p class="page-subtitle">{% if is_edit %}Update your appointment details{% else %}Book a session with a counselor{% endif %}</p>
+    </div>
+
+    <!-- Dashboard Grid Layout -->
+    <div class="dashboard-grid">
+        <!-- Appointment Details Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">Appointment Details</h3>
+                <div class="card-icon">📝</div>
+            </div>
+            <div class="card-content">
+                <form method="post" id="appointment-form">
+                    {% csrf_token %}
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="id_title">Appointment Title</label>
+                            <input type="text" name="title" id="id_title" placeholder="e.g., Weekly Check-in" value="{% if is_edit %}{{ appointment.title }}{% endif %}" required>
+                            <small class="form-help">Give your appointment a descriptive title</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_description">Description (Optional)</label>
+                            <textarea name="description" id="id_description" rows="3" placeholder="Describe what you'd like to discuss...">{% if is_edit %}{{ appointment.description }}{% endif %}</textarea>
+                            <small class="form-help">Share any specific topics or concerns</small>
+                        </div>
+
+                        {% if is_counselor %}
+                        <div class="form-group">
+                            <label for="id_client">Select Client</label>
+                            <select name="client" id="id_client" required>
+                                <option value="">Choose a client...</option>
+                                {% for client in clients %}
+                                <option value="{{ client.id }}">
+                                    {{ client.first_name }} {{ client.last_name }} ({{ client.username }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-help">Select the client for this appointment</small>
+                        </div>
+                        {% else %}
+                        {% if not is_edit or user.role == 'counselor' %}
+                        <div class="form-group">
+                            <label for="id_counselor">Select Counselor</label>
+                            <select name="counselor" id="id_counselor" {% if is_edit and user.role == 'client' %}disabled{% endif %} required>
+                                <option value="">Choose a counselor...</option>
+                                {% for counselor in counselors %}
+                                <option value="{{ counselor.id }}" {% if is_edit and appointment.counselor.id == counselor.id %}selected{% endif %}>
+                                    {{ counselor.first_name }} {{ counselor.last_name }}
+                                    {% if counselor.specializations %}
+                                        - {{ counselor.specializations|join:", " }}
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-help">Select the counselor you'd like to meet with</small>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="id_scheduled_date">Date & Time</label>
+                            <input type="datetime-local" name="scheduled_date" id="id_scheduled_date" value="{% if is_edit %}{{ appointment.scheduled_date|date:'Y-m-d H:i' }}{% endif %}" required>
+                            <small class="form-help">Choose a convenient date and time</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_duration">Session Duration</label>
+                            <select name="duration" id="id_duration">
+                                <option value="30" {% if is_edit and appointment.duration_minutes == 30 %}selected{% endif %}>30 minutes</option>
+                                <option value="45" {% if is_edit and appointment.duration_minutes == 45 %}selected{% endif %}>45 minutes</option>
+                                <option value="60" {% if is_edit and appointment.duration_minutes == 60 %}selected{% endif %}>1 hour</option>
+                                <option value="90" {% if is_edit and appointment.duration_minutes == 90 %}selected{% endif %}>1.5 hours</option>
+                                <option value="120" {% if is_edit and appointment.duration_minutes == 120 %}selected{% endif %}>2 hours</option>
+                            </select>
+                            <small class="form-help">How long would you like the session to be?</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'appointments_list' %}" class="btn-secondary">Cancel</a>
+                        <button type="submit" class="action-btn">
+                            <i class="fas fa-{% if is_edit %}save{% else %}calendar-plus{% endif %}"></i>
+                            {% if is_edit %}Update Appointment{% else %}Schedule Appointment{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Counselor/Client Information Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">{% if is_counselor %}Client Information{% else %}Counselor Information{% endif %}</h3>
+                <div class="card-icon">👤</div>
+            </div>
+            <div class="card-content">
+                <div id="counselor-info" class="counselor-list">
+                    <div class="counselor-placeholder">
+                        <i class="fas fa-users"></i>
+                        <p>{% if is_counselor %}Select a client to view their information{% else %}Select a counselor to view their information{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Guidelines Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">Appointment Guidelines</h3>
+                <div class="card-icon">📋</div>
+            </div>
+            <div class="card-content">
+                <div class="guidelines">
+                    <div class="guideline-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h4>Session Timing</h4>
+                            <p>Appointments are scheduled in your local timezone. Please arrive 5-10 minutes early.</p>
+                        </div>
+                    </div>
+
+                    <div class="guideline-item">
+                        <i class="fas fa-video"></i>
+                        <div>
+                            <h4>Session Format</h4>
+                            <p>Sessions can be conducted via video call, phone, or in-person depending on counselor availability.</p>
+                        </div>
+                    </div>
+
+                    <div class="guideline-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <div>
+                            <h4>Cancellation Policy</h4>
+                            <p>Please cancel or reschedule at least 24 hours in advance. Late cancellations may incur a fee.</p>
+                        </div>
+                    </div>
+
+                    <div class="guideline-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <h4>Confidentiality</h4>
+                            <p>All sessions are completely confidential and protected by professional ethics and privacy laws.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-help {
+    color: #6b7280;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
+.action-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+}
+
+.counselor-list {
+    min-height: 200px;
+}
+
+.counselor-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.counselor-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.counselor-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.counselor-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.counselor-details h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+    font-size: 1.1rem;
+}
+
+.counselor-details p {
+    margin: 0.25rem 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.counselor-specializations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.specialization-tag {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.guidelines {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.guideline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.guideline-item i {
+    color: #4f46e5;
+    font-size: 1.2rem;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+}
+
+.guideline-item h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+    font-size: 1rem;
+}
+
+.guideline-item p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-secondary,
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .guideline-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .guideline-item i {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+
+<script>
+// Set minimum date and pre-fill values
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('id_scheduled_date');
+    const isEdit = '{{ is_edit|yesno:"true,false" }}' === 'true';
+
+    if (!isEdit) {
+        // For new appointments, set minimum date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(9, 0, 0, 0); // Default to 9 AM
+
+        const minDateTime = tomorrow.toISOString().slice(0, 16);
+        dateInput.min = minDateTime;
+        if (!dateInput.value) {
+            dateInput.value = minDateTime;
+        }
+    } else {
+        // For editing, ensure the date is properly formatted
+        if (dateInput.value) {
+            // Convert Django datetime format to HTML datetime-local format
+            const date = new Date(dateInput.value.replace(' ', 'T'));
+            dateInput.value = date.toISOString().slice(0, 16);
+        }
+    }
+
+    // Counselor or client selection handler
+    const counselorSelect = document.getElementById('id_counselor');
+    const clientSelect = document.getElementById('id_client');
+
+    if (counselorSelect) {
+        counselorSelect.addEventListener('change', function() {
+            updateCounselorInfo(this.value);
+        });
+    }
+
+    if (clientSelect) {
+        clientSelect.addEventListener('change', function() {
+            updateClientInfo(this.value);
+        });
+    }
+
+    // Form validation
+    document.getElementById('appointment-form').addEventListener('submit', function(e) {
+        const selectedDate = new Date(dateInput.value);
+        const now = new Date();
+
+        if (selectedDate <= now) {
+            e.preventDefault();
+            alert('Please select a future date and time for your appointment.');
+            return false;
+        }
+
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scheduling...';
+        submitBtn.disabled = true;
+
+        // Re-enable after 10 seconds as fallback
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 10000);
+    });
+});
+
+function updateCounselorInfo(counselorId) {
+    const infoContainer = document.getElementById('counselor-info');
+
+    if (!counselorId) {
+        infoContainer.innerHTML = `
+            <div class="counselor-placeholder">
+                <i class="fas fa-users"></i>
+                <p>Select a counselor to view their information</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Find counselor data (in a real app, this would be an AJAX call)
+    const counselorSelect = document.getElementById('id_counselor');
+    const selectedOption = counselorSelect.querySelector(`option[value="${counselorId}"]`);
+
+    if (selectedOption) {
+        const counselorName = selectedOption.textContent.split(' - ')[0];
+        const specializations = selectedOption.textContent.split(' - ')[1] || 'General Counseling';
+
+        infoContainer.innerHTML = `
+            <div class="counselor-info">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <div class="counselor-avatar">${counselorName.charAt(0)}</div>
+                    <div class="counselor-details">
+                        <h4>${counselorName}</h4>
+                        <p><i class="fas fa-user-md"></i> Licensed Counselor</p>
+                        <p><i class="fas fa-clock"></i> Available for appointments</p>
+                    </div>
+                </div>
+                <div class="counselor-specializations">
+                    <div class="specialization-tag">${specializations}</div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function updateClientInfo(clientId) {
+    const infoContainer = document.getElementById('counselor-info');
+
+    if (!clientId) {
+        infoContainer.innerHTML = `
+            <div class="counselor-placeholder">
+                <i class="fas fa-users"></i>
+                <p>Select a client to view their information</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Find client data (in a real app, this would be an AJAX call)
+    const clientSelect = document.getElementById('id_client');
+    const selectedOption = clientSelect.querySelector(`option[value="${clientId}"]`);
+
+    if (selectedOption) {
+        const clientName = selectedOption.textContent.split(' (')[0];
+
+        infoContainer.innerHTML = `
+            <div class="counselor-info">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <div class="counselor-avatar">${clientName.charAt(0)}</div>
+                    <div class="counselor-details">
+                        <h4>${clientName}</h4>
+                        <p><i class="fas fa-user"></i> Client</p>
+                        <p><i class="fas fa-calendar-check"></i> Ready for appointment</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Set default time slots based on duration
+document.getElementById('id_duration').addEventListener('change', function() {
+    const dateInput = document.getElementById('id_scheduled_date');
+    const currentValue = dateInput.value;
+
+    if (currentValue) {
+        const date = new Date(currentValue);
+        // Reset to nearest hour for longer sessions
+        if (this.value >= 90) {
+            date.setMinutes(0, 0, 0);
+        }
+        dateInput.value = date.toISOString().slice(0, 16);
+    }
+});
+</script>
+{% endblock %}

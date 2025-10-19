@@ -1,0 +1,866 @@
+{% extends "base.html" %}
+
+{% block title %}Content Management - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .content-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+        }
+
+        .content-sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-select,
+        .filter-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .content-main {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .content-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .add-content-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .add-content-btn:hover {
+            background: #3730a3;
+        }
+
+        .content-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4f46e5;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .content-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .content-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .content-image {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .content-body {
+            padding: 1rem;
+        }
+
+        .content-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .content-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .content-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        .content-category {
+            background: #f3f4f6;
+            color: #4f46e5;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .content-stats {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .action-btn.edit {
+            color: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .action-btn.delete {
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .action-btn.publish {
+            color: #059669;
+            border-color: #059669;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover,
+        .page-btn.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        @media (max-width: 768px) {
+            .content-layout {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .content-sidebar {
+                display: none;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="content-layout">
+        <!-- Sidebar Filters -->
+        <div class="content-sidebar">
+            <div class="filter-section">
+                <h3 class="filter-title">Filters</h3>
+
+                <div class="filter-group">
+                    <label class="filter-label">Category</label>
+                    <select class="filter-select" id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="anxiety">Anxiety</option>
+                        <option value="depression">Depression</option>
+                        <option value="stress">Stress Management</option>
+                        <option value="relationships">Relationships</option>
+                        <option value="self-care">Self Care</option>
+                        <option value="mindfulness">Mindfulness</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Type</label>
+                    <select class="filter-select" id="typeFilter">
+                        <option value="">All Types</option>
+                        <option value="article">Article</option>
+                        <option value="video">Video</option>
+                        <option value="exercise">Exercise</option>
+                        <option value="tool">Tool</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Search</label>
+                    <input type="text" class="filter-input" id="searchFilter" placeholder="Search content...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-main">
+            <div class="content-header">
+                <h1 class="content-title">Content Management</h1>
+                <button class="add-content-btn" onclick="openAddContentModal()">Add New Content</button>
+            </div>
+
+            <div class="content-stats" id="contentStats">
+                <!-- Stats will be loaded here -->
+            </div>
+
+            <div class="content-grid" id="contentGrid">
+                <!-- Content will be loaded here -->
+            </div>
+
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Content Modal -->
+    <div class="modal" id="contentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add New Content</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form id="contentForm">
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-input" id="title" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="anxiety">Anxiety</option>
+                        <option value="depression">Depression</option>
+                        <option value="stress">Stress Management</option>
+                        <option value="relationships">Relationships</option>
+                        <option value="self-care">Self Care</option>
+                        <option value="mindfulness">Mindfulness</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="contentType" name="content_type" required>
+                        <option value="article">Article</option>
+                        <option value="video">Video</option>
+                        <option value="exercise">Exercise</option>
+                        <option value="tool">Tool</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="description" name="description" placeholder="Brief description of the content..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Content</label>
+                    <textarea class="form-textarea" id="content" name="content" placeholder="Full content or URL..." rows="8"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tags (comma-separated)</label>
+                    <input type="text" class="form-input" id="tags" name="tags" placeholder="anxiety, coping, mental-health">
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save Content</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Deletion</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <p style="margin-bottom: 2rem; color: #374151;">
+                Are you sure you want to delete this content? This action cannot be undone.
+            </p>
+
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-danger" onclick="confirmDelete()">Delete Content</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        let currentUser = null;
+        let accessToken = null;
+        let currentFilters = {
+            category: '',
+            status: '',
+            type: '',
+            search: '',
+            page: 1
+        };
+        let contentToDelete = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            accessToken = localStorage.getItem('access_token');
+            const userData = localStorage.getItem('user');
+
+            if (!accessToken || !userData) {
+                window.location.href = '/login/';
+                return;
+            }
+
+            currentUser = JSON.parse(userData);
+
+            // Check if user is admin or counselor
+            if (!['admin', 'counselor'].includes(currentUser.role)) {
+                alert('Access denied. Admin or counselor privileges required.');
+                window.location.href = '/dashboard/';
+                return;
+            }
+
+            initializeContent();
+        });
+
+        function initializeContent() {
+            setupEventListeners();
+            loadContent();
+            loadStats();
+        }
+
+        function setupEventListeners() {
+            // Filters
+            document.getElementById('categoryFilter').addEventListener('change', function(e) {
+                currentFilters.category = e.target.value;
+                currentFilters.page = 1;
+                loadContent();
+            });
+
+            document.getElementById('statusFilter').addEventListener('change', function(e) {
+                currentFilters.status = e.target.value;
+                currentFilters.page = 1;
+                loadContent();
+            });
+
+            document.getElementById('typeFilter').addEventListener('change', function(e) {
+                currentFilters.type = e.target.value;
+                currentFilters.page = 1;
+                loadContent();
+            });
+
+            document.getElementById('searchFilter').addEventListener('input', function(e) {
+                currentFilters.search = e.target.value;
+                currentFilters.page = 1;
+                loadContent();
+            });
+
+            // Content form
+            document.getElementById('contentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveContent();
+            });
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            const response = await fetch(endpoint, { ...defaultOptions, ...options });
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+            return response.json();
+        }
+
+        async function loadContent() {
+            try {
+                const params = new URLSearchParams({
+                    page: currentFilters.page,
+                    category: currentFilters.category,
+                    status: currentFilters.status,
+                    content_type: currentFilters.type,
+                    search: currentFilters.search
+                });
+
+                const data = await apiCall(`/api/admin/content/?${params}`);
+                displayContent(data.results || data);
+                displayPagination(data);
+            } catch (error) {
+                console.error('Error loading content:', error);
+                showError('Failed to load content. Please try again.');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const stats = await apiCall('/api/admin/content/stats/');
+                displayStats(stats);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function displayStats(stats) {
+            const container = document.getElementById('contentStats');
+            container.innerHTML = `
+                <div class="stat-card">
+                    <span class="stat-number">${stats.total_content || 0}</span>
+                    <span class="stat-label">Total Content</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">${stats.published_content || 0}</span>
+                    <span class="stat-label">Published</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">${stats.draft_content || 0}</span>
+                    <span class="stat-label">Drafts</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">${stats.total_views || 0}</span>
+                    <span class="stat-label">Total Views</span>
+                </div>
+            `;
+        }
+
+        function displayContent(content) {
+            const container = document.getElementById('contentGrid');
+
+            if (!content || content.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6b7280; grid-column: 1 / -1;">No content found</div>';
+                return;
+            }
+
+            container.innerHTML = content.map(item => `
+                <div class="content-card" onclick="editContent(${item.id})">
+                    <div class="content-image">
+                        ${getContentIcon(item.content_type)}
+                    </div>
+                    <div class="content-body">
+                        <h3 class="content-title">${item.title}</h3>
+                        <p class="content-description">${item.description || 'No description'}</p>
+                        <div class="content-meta">
+                            <span class="content-category">${item.category_name || 'General'}</span>
+                            <div class="content-stats">
+                                <span>👁 ${item.view_count || 0}</span>
+                                <span>⭐ ${item.average_rating ? item.average_rating.toFixed(1) : 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="action-btn edit" onclick="event.stopPropagation(); editContent(${item.id})">Edit</button>
+                            <button class="action-btn ${item.status === 'published' ? 'delete' : 'publish'}" onclick="event.stopPropagation(); togglePublish(${item.id}, '${item.status}')">
+                                ${item.status === 'published' ? 'Unpublish' : 'Publish'}
+                            </button>
+                            <button class="action-btn delete" onclick="event.stopPropagation(); deleteContent(${item.id})">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getContentIcon(type) {
+            const icons = {
+                'article': '📄',
+                'video': '🎥',
+                'exercise': '🏃',
+                'tool': '🛠️'
+            };
+            return icons[type] || '📚';
+        }
+
+        function displayPagination(data) {
+            const container = document.getElementById('pagination');
+            const totalPages = Math.ceil((data.count || 0) / 12); // Assuming 12 items per page
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            if (currentFilters.page > 1) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentFilters.page - 1})">Previous</button>`;
+            }
+
+            // Page numbers
+            for (let i = Math.max(1, currentFilters.page - 2); i <= Math.min(totalPages, currentFilters.page + 2); i++) {
+                paginationHTML += `<button class="page-btn ${i === currentFilters.page ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            }
+
+            // Next button
+            if (currentFilters.page < totalPages) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentFilters.page + 1})">Next</button>`;
+            }
+
+            container.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentFilters.page = page;
+            loadContent();
+            window.scrollTo(0, 0);
+        }
+
+        function openAddContentModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Content';
+            document.getElementById('contentForm').reset();
+            document.getElementById('contentModal').classList.add('show');
+        }
+
+        function editContent(contentId) {
+            // This would load content data and open edit modal
+            alert('Edit content functionality would be implemented here');
+        }
+
+        async function togglePublish(contentId, currentStatus) {
+            const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+
+            try {
+                await apiCall(`/api/admin/content/${contentId}/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                loadContent(); // Refresh the list
+                alert(`Content ${newStatus === 'published' ? 'published' : 'unpublished'} successfully`);
+            } catch (error) {
+                console.error('Error toggling publish status:', error);
+                alert('Failed to update content status. Please try again.');
+            }
+        }
+
+        function deleteContent(contentId) {
+            contentToDelete = contentId;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        async function confirmDelete() {
+            if (!contentToDelete) return;
+
+            try {
+                await apiCall(`/api/admin/content/${contentToDelete}/`, {
+                    method: 'DELETE'
+                });
+
+                closeModal();
+                loadContent(); // Refresh the list
+                loadStats(); // Refresh stats
+                alert('Content deleted successfully');
+            } catch (error) {
+                console.error('Error deleting content:', error);
+                alert('Failed to delete content. Please try again.');
+            }
+
+            contentToDelete = null;
+        }
+
+        async function saveContent() {
+            const formData = {
+                title: document.getElementById('title').value,
+                category: document.getElementById('category').value,
+                content_type: document.getElementById('contentType').value,
+                description: document.getElementById('description').value,
+                content: document.getElementById('content').value,
+                tags: document.getElementById('tags').value
+            };
+
+            try {
+                await apiCall('/api/admin/content/', {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+
+                closeModal();
+                loadContent(); // Refresh the list
+                loadStats(); // Refresh stats
+                alert('Content created successfully');
+            } catch (error) {
+                console.error('Error saving content:', error);
+                alert('Failed to save content. Please try again.');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('contentModal').classList.remove('show');
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        function showError(message) {
+            const container = document.getElementById('contentGrid');
+            container.innerHTML = `<div style="text-align: center; padding: 3rem; color: #dc2626; grid-column: 1 / -1;">${message}</div>`;
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('contentModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+{% endblock %}

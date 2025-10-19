@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SafeTalk</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <link rel="icon" href="{% static 'img/favicon.png' %}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="{% url 'welcome' %}">SafeTalk</a>
+            </div>
+            <div class="nav-links">
+                <a href="{% url 'welcome' %}" class="nav-link">Home</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Container -->
+    <div class="auth-container">
+        <div class="auth-decoration">
+            <div class="decoration-circle circle-1"></div>
+            <div class="decoration-circle circle-2"></div>
+            <div class="decoration-circle circle-3"></div>
+        </div>
+
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to your SafeTalk account</p>
+            </div>
+
+            <!-- Alert Container -->
+            <div class="alert-container">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form" method="post" novalidate id="loginForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="id_username" class="form-label">Username or Email</label>
+                    <input type="text" id="id_username" name="username" class="form-input"
+                           placeholder="Enter your username or email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password" class="form-label">Password</label>
+                    <input type="password" id="id_password" name="password" class="form-input"
+                           placeholder="Enter your password" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" name="remember_me" id="id_remember_me">
+                        <span class="checkmark"></span>
+                        Remember me
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{% url 'register' %}" class="auth-link">Create one here</a></p>
+                <p><a href="#" class="auth-link">Forgot your password?</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form validation and enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.auth-form');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            // Real-time validation
+            const inputs = form.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
+
+                input.addEventListener('input', function() {
+                    if (this.classList.contains('is-invalid')) {
+                        validateField(this);
+                    }
+                });
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                let isValid = true;
+
+                inputs.forEach(input => {
+                    if (!validateField(input)) {
+                        isValid = false;
+                    }
+                });
+
+                if (!isValid) {
+                    return false;
+                }
+
+                // Show loading state
+                form.classList.add('submitting');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+
+                // Perform AJAX login
+                performLogin();
+            });
+
+            function validateField(field) {
+                const value = field.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+
+                // Remove existing error
+                field.classList.remove('is-invalid');
+                let existingError = field.parentNode.querySelector('.form-error');
+                if (existingError) {
+                    existingError.remove();
+                }
+
+                // Validation rules
+                if (field.name === 'username') {
+                    if (!value) {
+                        isValid = false;
+                        errorMessage = 'Username or email is required';
+                    }
+                } else if (field.name === 'password') {
+                    if (!value) {
+                        isValid = false;
+                        errorMessage = 'Password is required';
+                    }
+                }
+
+                if (!isValid) {
+                    field.classList.add('is-invalid');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'form-error';
+                    errorDiv.textContent = errorMessage;
+                    field.parentNode.appendChild(errorDiv);
+                }
+
+                return isValid;
+            }
+
+            async function performLogin() {
+                const formData = new FormData(form);
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                try {
+                    const response = await fetch('/accounts/login/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        // Store authentication data
+                        localStorage.setItem('access_token', data.access_token);
+                        localStorage.setItem('refresh_token', data.refresh_token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+
+                        // Show success message
+                        showAlert('Login successful! Redirecting...', 'success');
+
+                        // Redirect to dashboard instantly
+                        window.location.href = '/dashboard/';
+                    } else {
+                        // Show error message
+                        showAlert(data.error || 'Login failed. Please check your credentials.', 'error');
+
+                        // Reset form state
+                        form.classList.remove('submitting');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Sign In';
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showAlert('Network error. Please try again.', 'error');
+
+                    // Reset form state
+                    form.classList.remove('submitting');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Sign In';
+                }
+            }
+
+            function showAlert(message, type) {
+                // Remove existing alerts
+                const existingAlerts = document.querySelectorAll('.alert');
+                existingAlerts.forEach(alert => alert.remove());
+
+                // Create new alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type}`;
+                alertDiv.textContent = message;
+
+                // Insert at the beginning of alert container
+                const alertContainer = document.querySelector('.alert-container');
+                alertContainer.insertBefore(alertDiv, alertContainer.firstChild);
+
+                // Auto-hide success alerts after 3 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 3000);
+                }
+            }
+
+            // Auto-focus first field
+            const firstInput = form.querySelector('.form-input');
+            if (firstInput) {
+                firstInput.focus();
+            }
+
+            // Enter key navigation
+            inputs.forEach((input, index) => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const nextInput = inputs[index + 1];
+                        if (nextInput) {
+                            nextInput.focus();
+                        } else {
+                            form.dispatchEvent(new Event('submit'));
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

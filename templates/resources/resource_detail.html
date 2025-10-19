@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+
+{% block title %}{{ resource.title }} - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .resource-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.06);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+        }
+
+        .resource-header {
+            margin-bottom: 2rem;
+        }
+
+        .resource-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1f2937 0%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .resource-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .resource-type {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            font-size: 0.8rem;
+        }
+
+        .resource-category {
+            background: #f3f4f6;
+            color: #4f46e5;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .resource-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resource-date {
+            color: #9ca3af;
+        }
+
+        .resource-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #374151;
+            margin-bottom: 2rem;
+            white-space: pre-wrap;
+        }
+
+        .resource-tags {
+            margin-bottom: 2rem;
+        }
+
+        .tags-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+
+        .tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #4f46e5;
+            padding: 0.375rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .resource-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            padding-top: 2rem;
+            border-top: 2px solid #f3f4f6;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 0.025em;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #5b21b6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-color: #d1d5db;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .resource-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .stat-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .resource-container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+                border-radius: 12px;
+            }
+
+            .resource-title {
+                font-size: 2rem;
+            }
+
+            .resource-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .resource-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .resource-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .btn {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .tags-list {
+                gap: 0.375rem;
+            }
+
+            .tag {
+                font-size: 0.8rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="resource-container">
+        <!-- Resource Header -->
+        <div class="resource-header">
+            <h1 class="resource-title">{{ resource.title }}</h1>
+
+            <div class="resource-meta">
+                <span class="resource-type">{{ resource.get_resource_type_display }}</span>
+                {% if resource.category %}
+                    <span class="resource-category">{{ resource.category.name }}</span>
+                {% endif %}
+                <div class="resource-author">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                    </svg>
+                    {% if resource.created_by %}
+                        {{ resource.created_by.get_full_name|default:resource.created_by.username }}
+                    {% else %}
+                        Anonymous
+                    {% endif %}
+                </div>
+                <span class="resource-date">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20" style="margin-right: 0.25rem;">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                    </svg>
+                    {{ resource.created_at|date:"M j, Y" }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Resource Stats -->
+        <div class="resource-stats">
+            <div class="stat-item">
+                <svg class="stat-icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                </svg>
+                <span>{{ resource.view_count|default:0 }} views</span>
+            </div>
+            <div class="stat-item">
+                <svg class="stat-icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                </svg>
+                <span>{{ resource.average_rating|default:'N/A' }} rating</span>
+            </div>
+        </div>
+
+        <!-- Resource Content -->
+        <div class="resource-content">
+            {{ resource.content }}
+        </div>
+
+        <!-- Resource Attachment -->
+        {% if resource.attachment %}
+            <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e5e7eb; border-radius: 12px;">
+                <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                    </svg>
+                    Attached Media
+                </h3>
+
+                {% with file_url=resource.attachment.url file_name=resource.attachment_name|default:resource.attachment.name file_ext=file_name|slice:"-4:"|lower %}
+                    <!-- Image Preview -->
+                    {% if file_ext in '.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg' %}
+                        <div style="text-align: center; margin-bottom: 1rem;">
+                            <img src="{{ file_url }}" alt="{{ file_name }}" style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" loading="lazy">
+                        </div>
+
+                    <!-- Video Preview -->
+                    {% elif file_ext in '.mp4,.avi,.mov,.wmv,.flv,.webm,.m4v' %}
+                        <div style="text-align: center; margin-bottom: 1rem;">
+                            <video controls style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" preload="metadata">
+                                <source src="{{ file_url }}" type="video/{{ file_ext|slice:"1:" }}">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+
+                    <!-- Audio Preview -->
+                    {% elif file_ext in '.mp3,.wav,.ogg,.aac,.m4a,.flac' %}
+                        <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <audio controls style="width: 100%;" preload="metadata">
+                                <source src="{{ file_url }}" type="audio/{{ file_ext|slice:"1:" }}">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+
+                    <!-- PDF Preview -->
+                    {% elif file_ext == '.pdf' %}
+                        <div style="margin-bottom: 1rem; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                            <iframe src="{{ file_url }}" style="width: 100%; height: 500px; border: none;" title="{{ file_name }}">
+                                <p>Your browser does not support iframes. <a href="{{ file_url }}" target="_blank">Click here to view the PDF</a></p>
+                            </iframe>
+                        </div>
+
+                    <!-- Document Preview (Basic) -->
+                    {% elif file_ext in '.doc,.docx,.txt,.rtf' %}
+                        <div style="margin-bottom: 1rem; padding: 2rem; background: white; border: 1px solid #e5e7eb; border-radius: 8px; text-align: center;">
+                            <svg width="64" height="64" fill="currentColor" viewBox="0 0 20 20" style="color: #6b7280; margin-bottom: 1rem;">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                            </svg>
+                            <p style="color: #6b7280; margin-bottom: 1rem;">Document Preview Not Available</p>
+                            <p style="font-size: 0.9rem; color: #9ca3af;">{{ file_name }}</p>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- File Info and Download -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <p style="font-weight: 500; color: #374151; margin-bottom: 0.25rem;">{{ resource.attachment_name|default:resource.attachment.name }}</p>
+                        <p style="font-size: 0.9rem; color: #6b7280;">
+                            {% if resource.attachment_size %}
+                                Size: {{ resource.attachment_size|filesizeformat }}
+                            {% else %}
+                                File attachment
+                            {% endif %}
+                        </p>
+                    </div>
+                    <a href="{{ resource.attachment.url }}" target="_blank" rel="noopener noreferrer" download
+                       style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Download
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Resource Tags -->
+        {% if resource.tags %}
+            <div class="resource-tags">
+                <h3 class="tags-title">Tags</h3>
+                <div class="tags-list">
+                    {% for tag in resource.get_tags_list %}
+                        <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Resource Actions -->
+        <div class="resource-actions">
+            <a href="{% url 'resource_list' %}" class="btn btn-secondary">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Resources
+            </a>
+
+            {% if user.role == 'admin' or user == resource.created_by %}
+                <a href="{% url 'resource_edit' resource.id %}" class="btn btn-primary">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Edit Resource
+                </a>
+
+                {% if user.role == 'admin' or user == resource.created_by %}
+                    <a href="{% url 'resource_delete' resource.id %}" class="btn btn-danger">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Delete Resource
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        // Add view count tracking
+        document.addEventListener('DOMContentLoaded', function() {
+            // Could add view tracking here if needed
+            console.log('Resource viewed: {{ resource.title }}');
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,866 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+        }
+
+        .profile-sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-role {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-transform: capitalize;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4f46e5;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .action-btn:hover {
+            background: #f9fafb;
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+
+        .profile-main {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .profile-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .mood-history {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .mood-entry {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .mood-emoji {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+
+        .mood-info {
+            flex: 1;
+        }
+
+        .mood-date {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .mood-note {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .achievement-card {
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .achievement-card.unlocked {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-color: #0ea5e9;
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .achievement-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .settings-label {
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .settings-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            border-radius: 24px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        input:checked + .toggle-slider {
+            background: #4f46e5;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        @media (max-width: 768px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .profile-sidebar {
+                padding: 1.5rem;
+            }
+
+            .profile-avatar-large {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="profile-layout">
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+            <div class="profile-avatar-large" id="profileAvatar">U</div>
+            <h2 class="profile-name" id="profileName">User Name</h2>
+            <p class="profile-role" id="profileRole">Client</p>
+
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="moodEntries">0</span>
+                    <span class="stat-label">Mood Entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="achievements">0</span>
+                    <span class="stat-label">Achievements</span>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="action-btn" onclick="editProfile()">
+                    ✏️ Edit Profile
+                </button>
+                <button class="action-btn" onclick="viewMoodHistory()">
+                    📊 Mood History
+                </button>
+                <button class="action-btn" onclick="viewAchievements()">
+                    🏆 Achievements
+                </button>
+                <button class="action-btn" onclick="exportData()">
+                    📥 Export Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Main Content -->
+        <div class="profile-main">
+            <div class="profile-tabs">
+                <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+                <button class="tab-btn" onclick="switchTab('edit')">Edit Profile</button>
+                <button class="tab-btn" onclick="switchTab('mood')">Mood History</button>
+                <button class="tab-btn" onclick="switchTab('achievements')">Achievements</button>
+                <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overviewTab" class="tab-content active">
+                <div class="form-section">
+                    <h3 class="section-title">Profile Information</h3>
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div id="overviewName" class="form-input" readonly>User Name</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <div id="overviewEmail" class="form-input" readonly>user@example.com</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <div id="overviewRole" class="form-input" readonly>Client</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Member Since</label>
+                        <div id="overviewJoined" class="form-input" readonly>January 2024</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Tab -->
+            <div id="editTab" class="tab-content">
+                <form id="editProfileForm">
+                    <div class="form-section">
+                        <h3 class="section-title">Personal Information</h3>
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-input" id="firstName" name="first_name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-input" id="lastName" name="last_name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="email" name="email">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Bio</label>
+                            <textarea class="form-input form-textarea" id="bio" name="bio" placeholder="Tell us about yourself..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Preferences</h3>
+                        <div class="form-group">
+                            <label class="form-label">Timezone</label>
+                            <select class="form-input" id="timezone" name="timezone">
+                                <option value="UTC">UTC</option>
+                                <option value="America/New_York">Eastern Time</option>
+                                <option value="America/Chicago">Central Time</option>
+                                <option value="America/Denver">Mountain Time</option>
+                                <option value="America/Los_Angeles">Pacific Time</option>
+                                <option value="Europe/London">London</option>
+                                <option value="Europe/Paris">Paris</option>
+                                <option value="Asia/Tokyo">Tokyo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+
+            <!-- Mood History Tab -->
+            <div id="moodTab" class="tab-content">
+                <div class="form-section">
+                    <h3 class="section-title">Recent Mood Entries</h3>
+                    <div id="moodHistory" class="mood-history">
+                        <!-- Mood entries will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Tab -->
+            <div id="achievementsTab" class="tab-content">
+                <div class="form-section">
+                    <h3 class="section-title">Your Achievements</h3>
+                    <div id="achievementsGrid" class="achievements-grid">
+                        <!-- Achievements will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content">
+                <div class="settings-section">
+                    <h3 class="section-title">Notifications</h3>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Email Notifications</div>
+                            <div class="settings-description">Receive email updates about your account</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="emailNotifications">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Push Notifications</div>
+                            <div class="settings-description">Receive push notifications in your browser</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pushNotifications">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Appointment Reminders</div>
+                            <div class="settings-description">Get reminded about upcoming appointments</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="appointmentReminders" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="section-title">Privacy</h3>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Profile Visibility</div>
+                            <div class="settings-description">Make your profile visible to other users</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="profileVisibility">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Data Sharing</div>
+                            <div class="settings-description">Allow anonymous data sharing for research</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dataSharing">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="section-title">Account</h3>
+                    <button class="btn btn-secondary" onclick="changePassword()">Change Password</button>
+                    <button class="btn btn-secondary" onclick="deleteAccount()" style="margin-left: 1rem; background: #fee2e2; color: #dc2626;">Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        let currentUser = null;
+        let accessToken = null;
+        let currentTab = 'overview';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            accessToken = localStorage.getItem('access_token');
+            const userData = localStorage.getItem('user');
+
+            if (!accessToken || !userData) {
+                window.location.href = '/login/';
+                return;
+            }
+
+            currentUser = JSON.parse(userData);
+            initializeProfile();
+        });
+
+        function initializeProfile() {
+            loadProfileData();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Edit profile form
+            document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveProfile();
+            });
+
+            // Settings toggles
+            document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+                toggle.addEventListener('change', function() {
+                    updateSetting(this.id, this.checked);
+                });
+            });
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            const response = await fetch(endpoint, { ...defaultOptions, ...options });
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+            return response.json();
+        }
+
+        async function loadProfileData() {
+            try {
+                // Load user profile
+                const profileData = await apiCall('/api/accounts/profile/');
+
+                // Update sidebar
+                document.getElementById('profileName').textContent =
+                    `${profileData.first_name} ${profileData.last_name}`;
+                document.getElementById('profileRole').textContent = profileData.role;
+                document.getElementById('profileAvatar').textContent =
+                    profileData.first_name.charAt(0).toUpperCase();
+
+                // Update overview tab
+                document.getElementById('overviewName').textContent =
+                    `${profileData.first_name} ${profileData.last_name}`;
+                document.getElementById('overviewEmail').textContent = profileData.email;
+                document.getElementById('overviewRole').textContent =
+                    profileData.role.charAt(0).toUpperCase() + profileData.role.slice(1);
+                document.getElementById('overviewJoined').textContent =
+                    new Date(profileData.date_joined).toLocaleDateString();
+
+                // Update edit form
+                document.getElementById('firstName').value = profileData.first_name;
+                document.getElementById('lastName').value = profileData.last_name;
+                document.getElementById('email').value = profileData.email;
+                document.getElementById('bio').value = profileData.bio || '';
+                document.getElementById('timezone').value = profileData.timezone || 'UTC';
+
+                // Load stats
+                loadProfileStats();
+
+                // Load mood history
+                loadMoodHistory();
+
+                // Load achievements
+                loadAchievements();
+
+                // Load settings
+                loadSettings();
+
+            } catch (error) {
+                console.error('Error loading profile data:', error);
+            }
+        }
+
+        async function loadProfileStats() {
+            try {
+                const stats = await apiCall('/api/accounts/stats/');
+                document.getElementById('moodEntries').textContent = stats.mood_entries || 0;
+                document.getElementById('achievements').textContent = stats.achievements || 0;
+            } catch (error) {
+                console.error('Error loading profile stats:', error);
+            }
+        }
+
+        async function loadMoodHistory() {
+            try {
+                const moodEntries = await apiCall('/api/accounts/mood-history/?limit=10');
+
+                const container = document.getElementById('moodHistory');
+                if (moodEntries.length > 0) {
+                    container.innerHTML = moodEntries.map(entry => `
+                        <div class="mood-entry">
+                            <div class="mood-emoji">${getMoodEmoji(entry.mood)}</div>
+                            <div class="mood-info">
+                                <div class="mood-date">${new Date(entry.date).toLocaleDateString()}</div>
+                                <div class="mood-note">${entry.note || 'No note provided'}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 2rem;">No mood entries yet. Start tracking your mood!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading mood history:', error);
+            }
+        }
+
+        function getMoodEmoji(mood) {
+            const emojis = {
+                1: '😢', 2: '😞', 3: '😐', 4: '🙂', 5: '😊'
+            };
+            return emojis[mood] || '😐';
+        }
+
+        async function loadAchievements() {
+            try {
+                const achievements = await apiCall('/api/accounts/achievements/');
+
+                const container = document.getElementById('achievementsGrid');
+                if (achievements.length > 0) {
+                    container.innerHTML = achievements.map(achievement => `
+                        <div class="achievement-card ${achievement.unlocked ? 'unlocked' : ''}">
+                            <div class="achievement-icon">${achievement.icon || '🏆'}</div>
+                            <div class="achievement-title">${achievement.title}</div>
+                            <div class="achievement-description">${achievement.description}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 2rem;">No achievements yet. Keep using SafeTalk to unlock achievements!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading achievements:', error);
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                const settings = await apiCall('/api/accounts/settings/');
+
+                // Update toggle switches
+                document.getElementById('emailNotifications').checked = settings.email_notifications || false;
+                document.getElementById('pushNotifications').checked = settings.push_notifications || false;
+                document.getElementById('appointmentReminders').checked = settings.appointment_reminders !== false;
+                document.getElementById('profileVisibility').checked = settings.profile_visibility || false;
+                document.getElementById('dataSharing').checked = settings.data_sharing || false;
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            currentTab = tabName;
+        }
+
+        async function saveProfile() {
+            const formData = {
+                first_name: document.getElementById('firstName').value,
+                last_name: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                bio: document.getElementById('bio').value,
+                timezone: document.getElementById('timezone').value
+            };
+
+            try {
+                await apiCall('/api/accounts/profile/', {
+                    method: 'PUT',
+                    body: JSON.stringify(formData)
+                });
+
+                alert('Profile updated successfully!');
+                loadProfileData(); // Refresh data
+                switchTab('overview'); // Switch back to overview
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('Failed to update profile. Please try again.');
+            }
+        }
+
+        async function updateSetting(settingId, value) {
+            try {
+                const settingMap = {
+                    'emailNotifications': 'email_notifications',
+                    'pushNotifications': 'push_notifications',
+                    'appointmentReminders': 'appointment_reminders',
+                    'profileVisibility': 'profile_visibility',
+                    'dataSharing': 'data_sharing'
+                };
+
+                await apiCall('/api/accounts/settings/', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        [settingMap[settingId]]: value
+                    })
+                });
+            } catch (error) {
+                console.error('Error updating setting:', error);
+                // Revert the toggle
+                event.target.checked = !value;
+            }
+        }
+
+        function editProfile() {
+            switchTab('edit');
+        }
+
+        function viewMoodHistory() {
+            switchTab('mood');
+        }
+
+        function viewAchievements() {
+            switchTab('achievements');
+        }
+
+        async function exportData() {
+            try {
+                const response = await fetch('/api/accounts/export-data/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'safetalk_data_export.json';
+                    a.click();
+                } else {
+                    alert('Failed to export data. Please try again.');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export data. Please try again.');
+            }
+        }
+
+        function changePassword() {
+            const newPassword = prompt('Enter your new password:');
+            if (newPassword && newPassword.length >= 8) {
+                // This would call an API to change password
+                alert('Password change functionality would be implemented here');
+            } else if (newPassword) {
+                alert('Password must be at least 8 characters long.');
+            }
+        }
+
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                // This would call an API to delete account
+                alert('Account deletion functionality would be implemented here');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+    </script>
+{% endblock %}

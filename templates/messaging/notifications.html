@@ -1,0 +1,714 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - SafeTalk{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Notifications</h1>
+    <p class="page-subtitle">Stay updated with your messages and activities</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Notification Stats Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Notification Overview</h3>
+            <div class="card-icon">📊</div>
+        </div>
+        <div class="card-content">
+            <div class="notification-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Notifications</span>
+                    <span class="stat-value">{{ notifications|length }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Unread</span>
+                    <span class="stat-value">{{ notifications|length }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Week</span>
+                    <span class="stat-value">{{ notifications|length }}</span>
+                </div>
+            </div>
+            <button class="action-btn mark-all-btn" onclick="markAllNotificationsRead()">
+                <i class="btn-icon">✅</i>
+                <span>Mark All as Read</span>
+                <div class="btn-effect"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Quick Actions</h3>
+            <div class="card-icon">⚡</div>
+        </div>
+        <div class="card-content">
+            <div class="quick-actions-grid">
+                <button class="action-btn messages-btn" onclick="window.location.href='/messaging/'">
+                    <i class="btn-icon">💬</i>
+                    <span>Open Messages</span>
+                    <div class="btn-ripple"></div>
+                </button>
+                <button class="action-btn dashboard-btn" onclick="window.location.href='/dashboard/'">
+                    <i class="btn-icon">🏠</i>
+                    <span>Dashboard</span>
+                    <div class="btn-ripple"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications List -->
+<div class="notifications-section">
+    <h3>Recent Notifications</h3>
+    <div class="notifications-list">
+        {% if notifications %}
+            {% for notification in notifications %}
+            <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                <div class="notification-avatar">
+                    {{ notification.sender.first_name.0|default:notification.sender.username.0|upper }}
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">{{ notification.title }}</div>
+                    <div class="notification-message">{{ notification.message }}</div>
+                    <div class="notification-time">
+                        {{ notification.created_at|date:"M d, Y g:i A" }}
+                        {% if notification.conversation %}
+                            • <a href="{% url 'messaging:conversation_detail' notification.conversation.id %}">View Conversation</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    {% if not notification.is_read %}
+                        <button class="mark-read-btn individual-btn" onclick="markNotificationRead({{ notification.id }})">
+                            <i class="btn-icon">✓</i>
+                            <span>Read</span>
+                            <div class="btn-pulse"></div>
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-notifications-card">
+                <div class="empty-state">
+                    <div class="empty-icon">🔔</div>
+                    <h3>No notifications yet</h3>
+                    <p>You're all caught up! We'll notify you when there's something new.</p>
+                    <button class="action-btn start-chat-btn" onclick="window.location.href='/messaging/'">
+                        <i class="btn-icon">🚀</i>
+                        <span>Start a Conversation</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+/* Notifications Page Custom Styles */
+.notifications-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(10px);
+    margin-top: 1.5rem;
+}
+
+.notifications-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.notification-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.3s ease;
+    margin-bottom: 0.75rem;
+}
+
+.notification-item:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: rgba(79, 70, 229, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.notification-item.unread {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+}
+
+.notification-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.notification-message {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+}
+
+.notification-time {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.notification-time a {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.notification-time a:hover {
+    color: #7c3aed;
+}
+
+.notification-actions {
+    margin-left: 1rem;
+}
+
+.mark-read-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.mark-read-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.no-notifications-card {
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.empty-state p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .notifications-section {
+        margin: 1rem 0.5rem 0.5rem;
+        padding: 1.25rem;
+    }
+
+    .notification-item {
+        padding: 0.875rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .notification-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .notification-actions {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification-title {
+        font-size: 0.9rem;
+    }
+
+    .notification-message {
+        font-size: 0.8rem;
+    }
+
+    .mark-read-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Animation for notifications */
+@keyframes notificationSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.notification-item {
+    animation: notificationSlideIn 0.4s ease-out;
+}
+
+.notification-item:nth-child(1) { animation-delay: 0.1s; }
+.notification-item:nth-child(2) { animation-delay: 0.2s; }
+.notification-item:nth-child(3) { animation-delay: 0.3s; }
+.notification-item:nth-child(4) { animation-delay: 0.4s; }
+.notification-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Dark theme support */
+body.dark-theme .notifications-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .notifications-section h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .notification-item {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: rgba(71, 85, 105, 0.6);
+}
+
+body.dark-theme .notification-item.unread {
+    background: linear-gradient(135deg, #451a03 0%, #7c2d12 100%);
+    border-left-color: #f59e0b;
+}
+
+body.dark-theme .notification-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .notification-message {
+    color: #94a3b8;
+}
+
+body.dark-theme .notification-time {
+    color: #64748b;
+}
+
+body.dark-theme .empty-state h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .empty-state p {
+    color: #94a3b8;
+}
+
+/* Enhanced Button Designs */
+.action-btn {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    min-height: 48px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn .btn-icon {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.action-btn:hover .btn-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Mark All Button */
+.mark-all-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.mark-all-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.mark-all-btn:active {
+    transform: translateY(0);
+}
+
+.mark-all-btn .btn-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.mark-all-btn:active .btn-effect {
+    width: 300px;
+    height: 300px;
+}
+
+/* Messages Button */
+.messages-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.messages-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+.messages-btn .btn-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: none;
+    transition: transform 0.5s, opacity 1s;
+}
+
+.messages-btn:active .btn-ripple {
+    transform: scale(4);
+    opacity: 0;
+}
+
+/* Dashboard Button */
+.dashboard-btn {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.dashboard-btn:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}
+
+.dashboard-btn .btn-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: none;
+    transition: transform 0.5s, opacity 1s;
+}
+
+.dashboard-btn:active .btn-ripple {
+    transform: scale(4);
+    opacity: 0;
+}
+
+/* Start Chat Button */
+.start-chat-btn {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.start-chat-btn:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+}
+
+.start-chat-btn .btn-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.8s ease;
+    opacity: 0;
+}
+
+.start-chat-btn:hover .btn-glow {
+    opacity: 1;
+    animation: glow 2s infinite;
+}
+
+@keyframes glow {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+}
+
+/* Individual Mark Read Button */
+.individual-btn {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    box-shadow: 0 3px 10px rgba(6, 182, 212, 0.3);
+}
+
+.individual-btn:hover {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+}
+
+.individual-btn .btn-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.individual-btn:active .btn-pulse {
+    width: 200px;
+    height: 200px;
+}
+
+/* Button Animations */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* Loading state for buttons */
+.action-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.action-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Enhanced hover effects */
+.action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.action-btn:hover::before {
+    left: 100%;
+}
+
+/* Responsive button adjustments */
+@media (max-width: 768px) {
+    .action-btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.8rem;
+        min-height: 44px;
+    }
+
+    .quick-actions-grid {
+        gap: 0.5rem;
+    }
+
+    .mark-all-btn,
+    .messages-btn,
+    .dashboard-btn,
+    .start-chat-btn {
+        padding: 0.625rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .action-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        min-height: 40px;
+    }
+
+    .btn-icon {
+        font-size: 1rem;
+    }
+}
+</style>
+
+<script>
+async function markNotificationRead(notificationId) {
+    try {
+        const response = await fetch(`/messaging/notification/${notificationId}/mark-read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (response.ok) {
+            // Update the notification item visually
+            const notificationItem = document.querySelector(`[onclick*="markNotificationRead(${notificationId})"]`).closest('.notification-item');
+            notificationItem.classList.remove('unread');
+            notificationItem.querySelector('.mark-read-btn').remove();
+
+            // Update notification count in navbar
+            await loadNotificationCounts();
+        }
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+    }
+}
+
+async function markAllNotificationsRead() {
+    try {
+        await fetch('/messaging/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        // Update all notification items visually
+        document.querySelectorAll('.notification-item.unread').forEach(item => {
+            item.classList.remove('unread');
+            const markReadBtn = item.querySelector('.mark-read-btn');
+            if (markReadBtn) markReadBtn.remove();
+        });
+
+        // Update notification count in navbar
+        await loadNotificationCounts();
+    } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+    }
+}
+
+// Load notification counts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadNotificationCounts();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}Calendar Settings - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .calendar-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.06);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calendar-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+        }
+
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .calendar-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1f2937 0%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.025em;
+        }
+
+        .calendar-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .connection-status {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .status-connected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+
+        .status-disconnected {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .status-connected .status-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .status-disconnected .status-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .status-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-connected .status-title {
+            color: #047857;
+        }
+
+        .status-disconnected .status-title {
+            color: #92400e;
+        }
+
+        .status-text {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .settings-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .setting-description {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .setting-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 0.025em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #5b21b6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-color: #d1d5db;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .sync-info {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .sync-title {
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-bottom: 0.5rem;
+        }
+
+        .sync-text {
+            color: #0369a1;
+            font-size: 0.9rem;
+        }
+
+        .last-sync {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+                border-radius: 12px;
+            }
+
+            .calendar-title {
+                font-size: 1.8rem;
+            }
+
+            .settings-grid {
+                gap: 0.75rem;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .setting-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h1 class="calendar-title">Calendar Integration</h1>
+            <p class="calendar-subtitle">Connect your Google Calendar to sync appointments automatically</p>
+        </div>
+
+        <!-- Connection Status -->
+        <div class="connection-status {% if calendar_integration.is_connected %}status-connected{% else %}status-disconnected{% endif %}">
+            <div class="status-icon">
+                {% if calendar_integration.is_connected %}📅{% else %}⚠️{% endif %}
+            </div>
+            <h3 class="status-title">
+                {% if calendar_integration.is_connected %}Connected to Google Calendar{% else %}Not Connected{% endif %}
+            </h3>
+            <p class="status-text">
+                {% if calendar_integration.is_connected %}
+                    Your appointments are being synced with Google Calendar automatically.
+                {% else %}
+                    Connect your Google Calendar to automatically sync appointments and events.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Connection Settings -->
+        <div class="settings-section">
+            <h4 class="section-title">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 010 2h3a1 1 0 011 1v3h1a1 1 0 110 2h-1v3a1 1 0 01-1 1h-3a1 1 0 110-2h3v-3h-1a1 1 0 110-2h1V5a1 1 0 01-1-1h-3z" clip-rule="evenodd"></path>
+                </svg>
+                Connection Settings
+            </h4>
+
+            <div class="settings-grid">
+                {% if not calendar_integration.is_connected %}
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-name">Connect Google Calendar</div>
+                            <div class="setting-description">Grant access to sync your appointments with Google Calendar</div>
+                        </div>
+                        <div class="setting-actions">
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="connect">
+                                <button type="submit" class="btn btn-primary">
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Connect
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-name">Disconnect Google Calendar</div>
+                            <div class="setting-description">Remove the connection and stop syncing appointments</div>
+                        </div>
+                        <div class="setting-actions">
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="disconnect">
+                                <button type="submit" class="btn btn-danger">
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Disconnect
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sync Settings -->
+        {% if calendar_integration.is_connected %}
+            <div class="settings-section">
+                <h4 class="section-title">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    Synchronization Settings
+                </h4>
+
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-name">Auto Sync</div>
+                            <div class="setting-description">Automatically sync appointments with Google Calendar</div>
+                        </div>
+                        <div class="setting-actions">
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle_sync">
+                                <button type="submit" class="btn {% if calendar_integration.sync_enabled %}btn-warning{% else %}btn-success{% endif %}">
+                                    {% if calendar_integration.sync_enabled %}Disable{% else %}Enable{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-name">Manual Sync</div>
+                            <div class="setting-description">Sync appointments with Google Calendar right now</div>
+                        </div>
+                        <div class="setting-actions">
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="sync">
+                                <button type="submit" class="btn btn-primary">
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Sync Now
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {% if calendar_integration.last_sync %}
+                    <div class="sync-info">
+                        <div class="sync-title">Last Sync Information</div>
+                        <div class="sync-text">
+                            Appointments were last synchronized on {{ calendar_integration.last_sync|date:"M j, Y \a\t g:i A" }}.
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Help Section -->
+        <div class="settings-section">
+            <h4 class="section-title">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                How It Works
+            </h4>
+
+            <div style="color: #6b7280; line-height: 1.6;">
+                <p style="margin-bottom: 1rem;">
+                    <strong>Google Calendar Integration</strong> allows you to automatically sync your SafeTalk appointments with your Google Calendar.
+                    This ensures you never miss an important counseling session.
+                </p>
+
+                <ul style="padding-left: 1.5rem; margin-bottom: 1rem;">
+                    <li style="margin-bottom: 0.5rem;">• Appointments created in SafeTalk appear in your Google Calendar</li>
+                    <li style="margin-bottom: 0.5rem;">• Changes to appointment times are automatically reflected</li>
+                    <li style="margin-bottom: 0.5rem;">• Cancelled appointments are removed from your calendar</li>
+                    <li>• You can set reminders and notifications through Google Calendar</li>
+                </ul>
+
+                <p style="font-size: 0.9rem; color: #9ca3af;">
+                    <em>Note: This integration requires you to grant SafeTalk access to your Google Calendar.
+                    Your data remains secure and is only used for appointment synchronization.</em>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

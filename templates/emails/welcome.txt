@@ -1,0 +1,33 @@
+WELCOME TO SAFETALK!
+
+Dear {{ user.get_full_name|default:user.username }},
+
+Welcome to SafeTalk! We're thrilled to have you join our community dedicated to mental health and wellness.
+
+YOUR ACCOUNT DETAILS:
+- Username: {{ user.username }}
+- Email: {{ user.email }}
+- Role: {{ user.get_role_display }}
+- Member Since: {{ user.date_joined|date:"F j, Y" }}
+
+GETTING STARTED:
+- Complete your profile to personalize your experience
+- Start logging your daily moods to track your emotional journey
+- Explore our resources and connect with our AI assistant
+- Join support groups and connect with others
+- Schedule appointments with counselors
+
+Click here to get started: {{ login_url }}
+
+Remember, your mental health matters, and SafeTalk is here to support you every step of the way. Don't hesitate to reach out if you need help or have questions.
+
+PRO TIP: Start your journey by logging your first mood entry. This helps establish a baseline and allows our AI to provide personalized insights.
+
+We're here for you!
+
+Best regards,
+The SafeTalk Team
+
+---
+SafeTalk - Your Mental Health Companion
+support@safetalk.com

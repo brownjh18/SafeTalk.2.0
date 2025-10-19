@@ -1,0 +1,616 @@
+{% extends "base.html" %}
+
+{% block title %}Create Subscription Plan - SafeTalk{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Create Subscription Plan</h1>
+    <p class="page-subtitle">Set up a new subscription plan for your users</p>
+</div>
+
+<div class="settings-container">
+    <!-- Plan Creation Form -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3>📋 Plan Details</h3>
+            <p>Configure the basic information for your subscription plan</p>
+        </div>
+
+        <form method="post" class="plan-form">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="id_name" class="form-label">Plan Name</label>
+                    <input type="text" name="name" id="id_name" class="form-input" placeholder="e.g., premium_monthly" required>
+                    <small>Internal identifier for the plan (lowercase, no spaces)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_display_name" class="form-label">Display Name</label>
+                    <input type="text" name="display_name" id="id_display_name" class="form-input" placeholder="e.g., Premium Monthly" required>
+                    <small>User-friendly name shown to customers</small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_description" class="form-label">Description</label>
+                <textarea name="description" id="id_description" class="form-input" rows="3" placeholder="Describe what this plan includes..." required></textarea>
+                <small>Brief description of the plan benefits</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Monthly Price</label>
+                <div class="price-input-group">
+                    <span class="currency-symbol">$</span>
+                    <input type="number" name="price_monthly" id="id_price_monthly" class="form-input price-input" placeholder="29.99" step="0.01" min="0" required>
+                    <span class="price-period">/month</span>
+                </div>
+                <small>Set the monthly subscription price</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Plan Features</label>
+                <div class="features-builder">
+                    <div class="features-input-group">
+                        <input type="text" id="feature-input" class="form-input" placeholder="Add a feature...">
+                        <button type="button" class="btn btn-secondary" onclick="addFeature()">Add Feature</button>
+                    </div>
+                    <div id="features-list" class="features-list">
+                        <!-- Features will be added here -->
+                    </div>
+                </div>
+                <small>List the key features included in this plan</small>
+                <!-- Hidden inputs for features will be added here -->
+                <div id="features-hidden-inputs"></div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i>✅</i> Create Plan
+                </button>
+                <a href="{% url 'admin_plan_management' %}" class="btn btn-secondary">
+                    <i>⬅️</i> Back to Plans
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Plan Preview -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3>👁️ Plan Preview</h3>
+            <p>See how your plan will appear to users</p>
+        </div>
+
+        <div class="plan-preview">
+            <div class="plan-card">
+                <div class="plan-header">
+                    <h4 id="preview-name">Premium Monthly</h4>
+                    <div class="plan-price" id="preview-price">$29.99/month</div>
+                </div>
+                <div class="plan-description" id="preview-description">
+                    Access to all premium features including unlimited sessions, priority support, and advanced analytics.
+                </div>
+                <ul class="plan-features" id="preview-features">
+                    <li>Unlimited counseling sessions</li>
+                    <li>24/7 priority support</li>
+                    <li>Advanced mood analytics</li>
+                    <li>Custom report generation</li>
+                </ul>
+                <div class="plan-status">
+                    <span class="status-badge status-active">Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.settings-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.settings-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.section-header h3 {
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.section-header p {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.plan-form {
+    margin-top: 1.5rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-input {
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    background: white;
+    color: #1f2937;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-input::placeholder {
+    color: #9ca3af;
+}
+
+.form-input[rows] {
+    resize: vertical;
+    min-height: 100px;
+}
+
+small {
+    color: #6b7280;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.price-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.currency-symbol,
+.price-period {
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.price-input {
+    flex: 1;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.features-builder {
+    margin-top: 0.5rem;
+}
+
+.features-input-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.features-input-group .form-input {
+    flex: 1;
+}
+
+.features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 100px;
+    padding: 1rem;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.feature-text {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.remove-feature {
+    color: #dc2626;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.remove-feature:hover {
+    background: #fef2f2;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    min-height: 48px;
+}
+
+.btn-primary {
+    background: #4f46e5;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3730a3;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.plan-preview {
+    margin-top: 1.5rem;
+}
+
+.plan-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 2rem;
+    background: white;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.plan-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.plan-header h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.plan-price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #4f46e5;
+    margin-bottom: 1rem;
+}
+
+.plan-description {
+    color: #6b7280;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.plan-features li {
+    padding: 0.5rem 0;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.plan-features li:last-child {
+    border-bottom: none;
+}
+
+.plan-features li::before {
+    content: '✓';
+    color: #059669;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.plan-status {
+    text-align: center;
+}
+
+.status-badge {
+    padding: 0.375rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #d1fae5;
+    color: #059669;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 0 1rem;
+    }
+
+    .settings-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .features-input-group {
+        flex-direction: column;
+    }
+
+    .features-input-group .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 48px;
+    }
+
+    .plan-card {
+        padding: 1.5rem;
+    }
+
+    .plan-header h4 {
+        font-size: 1.25rem;
+    }
+
+    .plan-price {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-section {
+        padding: 1rem;
+    }
+
+    .section-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .form-input {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+
+    .price-input {
+        font-size: 1.1rem;
+    }
+
+    .features-list {
+        padding: 0.75rem;
+    }
+
+    .feature-item {
+        padding: 0.625rem;
+    }
+
+    .plan-card {
+        padding: 1.25rem;
+    }
+
+    .plan-header h4 {
+        font-size: 1.1rem;
+    }
+
+    .plan-price {
+        font-size: 1.25rem;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .form-input {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .btn {
+        min-height: 48px;
+        transition: transform 0.1s ease;
+    }
+
+    .btn:active {
+        transform: scale(0.98);
+    }
+
+    .feature-item {
+        transition: transform 0.2s ease;
+    }
+
+    .feature-item:active {
+        transform: scale(0.98);
+    }
+
+    .remove-feature {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+let features = [];
+
+function addFeature() {
+    const input = document.getElementById('feature-input');
+    const featureText = input.value.trim();
+
+    if (featureText) {
+        features.push(featureText);
+        updateFeaturesList();
+        updateFeaturesPreview();
+        input.value = '';
+        input.focus();
+    }
+}
+
+function removeFeature(index) {
+    features.splice(index, 1);
+    updateFeaturesList();
+    updateFeaturesPreview();
+}
+
+function updateFeaturesList() {
+    const featuresList = document.getElementById('features-list');
+    featuresList.innerHTML = '';
+
+    features.forEach((feature, index) => {
+        const featureItem = document.createElement('div');
+        featureItem.className = 'feature-item';
+        featureItem.innerHTML = `
+            <span class="feature-text">${feature}</span>
+            <button type="button" class="remove-feature" onclick="removeFeature(${index})" aria-label="Remove feature">
+                ✕
+            </button>
+        `;
+        featuresList.appendChild(featureItem);
+    });
+
+    // Update hidden inputs
+    const hiddenInputs = document.getElementById('features-hidden-inputs');
+    hiddenInputs.innerHTML = '';
+    features.forEach(feature => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'features';
+        input.value = feature;
+        hiddenInputs.appendChild(input);
+    });
+}
+
+function updateFeaturesPreview() {
+    const previewFeatures = document.getElementById('preview-features');
+    previewFeatures.innerHTML = '';
+
+    if (features.length > 0) {
+        features.forEach(feature => {
+            const li = document.createElement('li');
+            li.textContent = feature;
+            previewFeatures.appendChild(li);
+        });
+    } else {
+        // Default features for preview
+        const defaultFeatures = ['Unlimited counseling sessions', '24/7 priority support', 'Advanced mood analytics', 'Custom report generation'];
+        defaultFeatures.forEach(feature => {
+            const li = document.createElement('li');
+            li.textContent = feature;
+            previewFeatures.appendChild(li);
+        });
+    }
+}
+
+// Live preview updates
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('id_display_name');
+    const descriptionInput = document.getElementById('id_description');
+    const priceInput = document.getElementById('id_price_monthly');
+
+    const previewName = document.getElementById('preview-name');
+    const previewDescription = document.getElementById('preview-description');
+    const previewPrice = document.getElementById('preview-price');
+
+    function updatePreview() {
+        previewName.textContent = nameInput.value || 'Premium Monthly';
+        previewDescription.textContent = descriptionInput.value || 'Access to all premium features including unlimited sessions, priority support, and advanced analytics.';
+        previewPrice.textContent = priceInput.value ? `$${parseFloat(priceInput.value).toFixed(2)}/month` : '$29.99/month';
+    }
+
+    nameInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    priceInput.addEventListener('input', updatePreview);
+
+    // Handle Enter key in feature input
+    document.getElementById('feature-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addFeature();
+        }
+    });
+
+    // Initialize preview
+    updatePreview();
+    updateFeaturesPreview();
+});
+</script>
+{% endblock %}

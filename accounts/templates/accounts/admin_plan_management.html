@@ -1,0 +1,655 @@
+{% extends "base.html" %}
+
+{% block title %}Plan Management - SafeTalk{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Subscription Plan Management</h1>
+    <p class="page-subtitle">Manage and monitor all subscription plans</p>
+</div>
+
+<div class="settings-container">
+    <!-- Statistics Overview -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3>📊 Overview</h3>
+            <p>Key metrics for plan management</p>
+        </div>
+
+        <div class="stats-overview">
+            <div class="stat-item">
+                <div class="stat-number">{{ plans|length }}</div>
+                <div class="stat-label">Total Plans</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ plans|length }}</div>
+                <div class="stat-label">Active Plans</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ plans|length }}</div>
+                <div class="stat-label">Plan Types</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Total Subscribers</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plans Management -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3>📋 Subscription Plans</h3>
+            <p>View and manage all available plans</p>
+        </div>
+
+        <div class="plans-management">
+            <div class="section-actions">
+                <a href="{% url 'admin_create_plan' %}" class="btn btn-primary">
+                    <i>➕</i> Create New Plan
+                </a>
+                <button onclick="exportPlans()" class="btn btn-secondary">
+                    <i>📊</i> Export Plans
+                </button>
+                <button onclick="refreshPlans()" class="btn btn-secondary">
+                    <i>🔄</i> Refresh
+                </button>
+            </div>
+
+            {% if plans %}
+                <!-- Active Plans -->
+                {% for plan in plans %}
+                    {% if plan.is_active %}
+                        {% if forloop.first %}
+                            <div class="plans-subsection">
+                                <h4 class="subsection-title">✅ Active Plans</h4>
+                                <div class="plans-list">
+                        {% endif %}
+                        <div class="plan-item">
+                            <div class="plan-info">
+                                <h4>{{ plan.display_name }}</h4>
+                                <div class="plan-price">${{ plan.price_monthly }}/month</div>
+                                <div class="plan-description">{{ plan.description|truncatechars:100 }}</div>
+                                <div class="plan-meta">
+                                    <small>Created: {{ plan.created_at|date:"M d, Y" }}</small>
+                                    {% if plan.updated_at %}
+                                        <small>Last updated: {{ plan.updated_at|date:"M d, Y" }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="plan-status">
+                                <span class="status-badge status-active">Active</span>
+                            </div>
+                            <div class="plan-actions">
+                                <a href="{% url 'admin_edit_plan' plan.id %}" class="btn btn-secondary btn-small">
+                                    <i>✏️</i> Edit
+                                </a>
+                                <button onclick="togglePlanStatus({{ plan.id }})" class="btn btn-secondary btn-small" style="color: #dc2626;">
+                                    <i>🚫</i> Deactivate
+                                </button>
+                            </div>
+                        </div>
+                        {% if forloop.last %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Deactivated Plans -->
+                {% for plan in plans %}
+                    {% if not plan.is_active %}
+                        {% if forloop.first %}
+                            <div class="plans-subsection">
+                                <h4 class="subsection-title">🚫 Deactivated Plans</h4>
+                                <div class="plans-list">
+                        {% endif %}
+                        <div class="plan-item deactivated">
+                            <div class="plan-info">
+                                <h4>{{ plan.display_name }}</h4>
+                                <div class="plan-price">${{ plan.price_monthly }}/month</div>
+                                <div class="plan-description">{{ plan.description|truncatechars:100 }}</div>
+                                <div class="plan-meta">
+                                    <small>Created: {{ plan.created_at|date:"M d, Y" }}</small>
+                                    {% if plan.updated_at %}
+                                        <small>Last updated: {{ plan.updated_at|date:"M d, Y" }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="plan-status">
+                                <span class="status-badge status-inactive">Inactive</span>
+                            </div>
+                            <div class="plan-actions">
+                                <a href="{% url 'admin_edit_plan' plan.id %}" class="btn btn-secondary btn-small">
+                                    <i>✏️</i> Edit
+                                </a>
+                                <button onclick="togglePlanStatus({{ plan.id }})" class="btn btn-primary btn-small">
+                                    <i>✅</i> Activate
+                                </button>
+                            </div>
+                        </div>
+                        {% if forloop.last %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>No Subscription Plans</h3>
+                    <p>Get started by creating your first subscription plan.</p>
+                    <a href="{% url 'admin_create_plan' %}" class="btn btn-primary">
+                        <i>➕</i> Create First Plan
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3>⚡ Quick Actions</h3>
+            <p>Common plan management tasks</p>
+        </div>
+
+        <div class="quick-actions">
+            <div class="action-item">
+                <div class="action-info">
+                    <h4>Bulk Plan Updates</h4>
+                    <p>Update multiple plans at once</p>
+                </div>
+                <button onclick="bulkUpdatePlans()" class="btn btn-secondary">
+                    <i>📝</i> Bulk Update
+                </button>
+            </div>
+
+            <div class="action-item">
+                <div class="action-info">
+                    <h4>Plan Analytics</h4>
+                    <p>View detailed plan performance metrics</p>
+                </div>
+                <button onclick="viewPlanAnalytics()" class="btn btn-secondary">
+                    <i>📈</i> View Analytics
+                </button>
+            </div>
+
+            <div class="action-item">
+                <div class="action-info">
+                    <h4>Plan Templates</h4>
+                    <p>Use pre-built plan templates</p>
+                </div>
+                <button onclick="usePlanTemplates()" class="btn btn-secondary">
+                    <i>📋</i> Use Templates
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.settings-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.settings-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.section-header h3 {
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.section-header p {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #4f46e5;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.plans-management {
+    margin-top: 1.5rem;
+}
+
+.section-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #4f46e5;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3730a3;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+.plans-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.plans-subsection {
+    margin-bottom: 2rem;
+}
+
+.subsection-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.plan-item.deactivated {
+    opacity: 0.8;
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.plan-item.deactivated:hover {
+    border-color: #ef4444;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+.plan-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.plan-item:hover {
+    border-color: #4f46e5;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+}
+
+.plan-info {
+    flex: 1;
+}
+
+.plan-info h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.plan-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #4f46e5;
+    margin-bottom: 0.5rem;
+}
+
+.plan-description {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.plan-meta {
+    display: flex;
+    gap: 1rem;
+}
+
+.plan-meta small {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.plan-status {
+    margin-right: 1rem;
+}
+
+.status-badge {
+    padding: 0.375rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.plan-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6b7280;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.action-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.action-item:hover {
+    border-color: #4f46e5;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+}
+
+.action-info h4 {
+    margin: 0 0 0.25rem 0;
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.action-info p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 0 1rem;
+    }
+
+    .settings-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stats-overview {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .stat-item {
+        padding: 1rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .section-actions {
+        flex-direction: column;
+    }
+
+    .section-actions .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    .plan-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.25rem;
+    }
+
+    .plan-status {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .plan-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .plan-actions .btn-small {
+        flex: 1;
+        justify-content: center;
+        min-height: 40px;
+    }
+
+    .plan-meta {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .action-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-section {
+        padding: 1rem;
+    }
+
+    .section-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .stat-item {
+        padding: 0.875rem;
+    }
+
+    .stat-number {
+        font-size: 1.25rem;
+    }
+
+    .plan-item {
+        padding: 1rem;
+    }
+
+    .plan-info h4 {
+        font-size: 1rem;
+    }
+
+    .plan-price {
+        font-size: 1.1rem;
+    }
+
+    .plan-description {
+        font-size: 0.85rem;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.8rem;
+    }
+
+    .action-item {
+        padding: 1rem;
+    }
+
+    .action-info h4 {
+        font-size: 0.95rem;
+    }
+
+    .action-info p {
+        font-size: 0.8rem;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .btn-small {
+        min-height: 44px;
+        transition: transform 0.1s ease;
+    }
+
+    .btn:active,
+    .btn-small:active {
+        transform: scale(0.98);
+    }
+
+    .plan-item,
+    .action-item {
+        transition: transform 0.2s ease;
+    }
+
+    .plan-item:active,
+    .action-item:active {
+        transform: scale(0.98);
+    }
+}
+</style>
+
+<script>
+function togglePlanStatus(planId) {
+    if (confirm('Are you sure you want to change this plan\'s status?')) {
+        fetch(`/dashboard/management/plans/${planId}/toggle/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating the plan status.');
+        });
+    }
+}
+
+function exportPlans() {
+    window.location.href = '/dashboard/management/plans/export/';
+}
+
+function refreshPlans() {
+    location.reload();
+}
+
+function bulkUpdatePlans() {
+    alert('Bulk plan updates feature is not yet implemented.');
+}
+
+function viewPlanAnalytics() {
+    alert('Plan analytics feature is not yet implemented.');
+}
+
+function usePlanTemplates() {
+    alert('Plan templates feature is not yet implemented.');
+}
+</script>
+{% endblock %}

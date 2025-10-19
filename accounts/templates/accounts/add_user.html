@@ -1,0 +1,660 @@
+{% extends "base.html" %}
+
+{% block title %}Add New User - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .add-user-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            color: #1f2937;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-control.error {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .form-help {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .role-option {
+            position: relative;
+        }
+
+        .role-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .role-label {
+            display: block;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .role-input:checked + .role-label {
+            border-color: #4f46e5;
+            background: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .role-icon {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-name {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .role-desc {
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            min-height: 48px;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #059669;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #a7f3d0;
+            display: none;
+        }
+
+        /* Enhanced Mobile-First Responsive Design */
+        @media (max-width: 768px) {
+            .add-user-container {
+                padding: 1rem 0.75rem;
+            }
+
+            .page-header {
+                margin-bottom: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+                border-radius: 10px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .role-selector {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            .role-label {
+                padding: 0.875rem;
+                border-radius: 6px;
+            }
+
+            .role-icon {
+                font-size: 1.25rem;
+                margin-bottom: 0.375rem;
+            }
+
+            .role-name {
+                font-size: 0.8rem;
+            }
+
+            .role-desc {
+                font-size: 0.7rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                min-height: 48px;
+                font-size: 1rem;
+                border-radius: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .add-user-container {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .page-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .form-section {
+                padding: 1rem;
+                border-radius: 8px;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+
+            .form-label {
+                font-size: 0.85rem;
+            }
+
+            .form-control {
+                padding: 1rem;
+                font-size: 1rem;
+                border-radius: 6px;
+            }
+
+            .role-selector {
+                grid-template-columns: 1fr;
+                gap: 0.375rem;
+            }
+
+            .role-label {
+                padding: 0.75rem;
+            }
+
+            .role-icon {
+                font-size: 1.1rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .role-name {
+                font-size: 0.75rem;
+            }
+
+            .role-desc {
+                font-size: 0.65rem;
+            }
+
+            .form-actions {
+                margin-top: 1.25rem;
+                padding-top: 1.25rem;
+            }
+
+            .btn {
+                min-height: 44px;
+                font-size: 0.95rem;
+            }
+
+            .success-message,
+            .error-message {
+                font-size: 0.85rem;
+                padding: 0.75rem;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .btn {
+                min-height: 48px;
+                transition: transform 0.1s ease;
+            }
+
+            .btn:active {
+                transform: scale(0.98);
+            }
+
+            .role-label {
+                min-height: 80px;
+                transition: transform 0.2s ease;
+            }
+
+            .role-label:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            .add-user-container {
+                padding: 0.5rem;
+            }
+
+            .page-header {
+                margin-bottom: 1rem;
+            }
+
+            .form-section {
+                padding: 1rem;
+            }
+
+            .btn {
+                min-height: 44px;
+                font-size: 0.9rem;
+                padding: 0.75rem 1.5rem;
+            }
+
+            .role-label {
+                min-height: 70px;
+                padding: 0.625rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="add-user-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Add New User</h1>
+            <p class="page-subtitle">Create a new user account for the SafeTalk platform</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div id="successMessage" class="success-message">
+            User created successfully! Redirecting...
+        </div>
+
+        <!-- Add User Form -->
+        <form id="addUserForm" method="post" class="form-section">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_first_name" class="form-label">First Name</label>
+                    <input type="text" name="first_name" id="id_first_name" class="form-control" required>
+                    <div class="error-message" id="firstNameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_last_name" class="form-label">Last Name</label>
+                    <input type="text" name="last_name" id="id_last_name" class="form-control" required>
+                    <div class="error-message" id="lastNameError"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_username" class="form-label">Username</label>
+                <input type="text" name="username" id="id_username" class="form-control" required>
+                <div class="form-help">Choose a unique username for the user</div>
+                <div class="error-message" id="usernameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_email" class="form-label">Email Address</label>
+                <input type="email" name="email" id="id_email" class="form-control" required>
+                <div class="form-help">User will receive login credentials at this email</div>
+                <div class="error-message" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">User Role</label>
+                <div class="role-selector">
+                    <div class="role-option">
+                        <input type="radio" name="role" value="client" id="role_client" class="role-input" checked>
+                        <label for="role_client" class="role-label">
+                            <span class="role-icon">👤</span>
+                            <div class="role-name">Client</div>
+                            <div class="role-desc">Access to personal dashboard and counseling sessions</div>
+                        </label>
+                    </div>
+
+                    <div class="role-option">
+                        <input type="radio" name="role" value="counselor" id="role_counselor" class="role-input">
+                        <label for="role_counselor" class="role-label">
+                            <span class="role-icon">🩺</span>
+                            <div class="role-name">Counselor</div>
+                            <div class="role-desc">Manage clients and conduct counseling sessions</div>
+                        </label>
+                    </div>
+
+                    <div class="role-option">
+                        <input type="radio" name="role" value="admin" id="role_admin" class="role-input">
+                        <label for="role_admin" class="role-label">
+                            <span class="role-icon">⚙️</span>
+                            <div class="role-name">Admin</div>
+                            <div class="role-desc">Full platform management and configuration</div>
+                        </label>
+                    </div>
+                </div>
+                <div class="error-message" id="roleError"></div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i>➕</i> Create User
+                </button>
+                <a href="{% url 'manage_users' %}" class="btn btn-secondary">
+                    <i>⬅️</i> Back to Users
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Form validation and submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('addUserForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+
+            // Real-time validation
+            const inputs = form.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
+
+                input.addEventListener('input', function() {
+                    clearFieldError(this);
+                });
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (validateForm()) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i>⏳</i> Creating User...';
+
+                    // Submit form
+                    const formData = new FormData(form);
+
+                    fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            successMessage.style.display = 'block';
+                            successMessage.textContent = data.message || 'User created successfully!';
+
+                            // Redirect after success
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url || '{% url "manage_users" %}';
+                            }, 2000);
+                        } else {
+                            // Handle field errors
+                            if (data.errors) {
+                                Object.keys(data.errors).forEach(field => {
+                                    showFieldError(field, data.errors[field][0]);
+                                });
+                            }
+
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i>➕</i> Create User';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while creating the user. Please try again.');
+
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i>➕</i> Create User';
+                    });
+                }
+            });
+        });
+
+        function validateField(field) {
+            const value = field.value.trim();
+            let isValid = true;
+            let errorMessage = '';
+
+            switch(field.name) {
+                case 'first_name':
+                    if (!value) {
+                        isValid = false;
+                        errorMessage = 'First name is required';
+                    } else if (value.length < 2) {
+                        isValid = false;
+                        errorMessage = 'First name must be at least 2 characters';
+                    }
+                    break;
+
+                case 'last_name':
+                    if (!value) {
+                        isValid = false;
+                        errorMessage = 'Last name is required';
+                    } else if (value.length < 2) {
+                        isValid = false;
+                        errorMessage = 'Last name must be at least 2 characters';
+                    }
+                    break;
+
+                case 'username':
+                    if (!value) {
+                        isValid = false;
+                        errorMessage = 'Username is required';
+                    } else if (value.length < 3) {
+                        isValid = false;
+                        errorMessage = 'Username must be at least 3 characters';
+                    } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Username can only contain letters, numbers, and underscores';
+                    }
+                    break;
+
+                case 'email':
+                    if (!value) {
+                        isValid = false;
+                        errorMessage = 'Email is required';
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Please enter a valid email address';
+                    }
+                    break;
+            }
+
+            if (!isValid) {
+                showFieldError(field.name, errorMessage);
+            } else {
+                clearFieldError(field);
+            }
+
+            return isValid;
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const inputs = document.querySelectorAll('.form-control');
+
+            inputs.forEach(input => {
+                if (!validateField(input)) {
+                    isValid = false;
+                }
+            });
+
+            // Check role selection
+            const roleSelected = document.querySelector('input[name="role"]:checked');
+            if (!roleSelected) {
+                showFieldError('role', 'Please select a user role');
+                isValid = false;
+            } else {
+                clearFieldError(document.getElementById('roleError').previousElementSibling);
+            }
+
+            return isValid;
+        }
+
+        function showFieldError(fieldName, message) {
+            const errorElement = document.getElementById(fieldName + 'Error');
+            const fieldElement = document.getElementById('id_' + fieldName);
+
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+
+            if (fieldElement) {
+                fieldElement.classList.add('error');
+            }
+        }
+
+        function clearFieldError(field) {
+            const fieldName = field.name;
+            const errorElement = document.getElementById(fieldName + 'Error');
+
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+
+            field.classList.remove('error');
+        }
+    </script>
+{% endblock %}

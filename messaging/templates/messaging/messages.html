@@ -1,0 +1,2750 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Messages - SafeTalk{% endblock %}
+
+{% block content %}
+<style>
+/* =============================
+   WHATSAPP-LIKE CHAT STYLES
+   ============================= */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+.chaat-app {
+  display: flex;
+  height: 80vh;
+  width: 90%;
+  margin: 1rem auto;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 4px 4px rgba(0,0,0,0.1);
+}
+
+/* Sidebar */
+.chat-sidebaar {
+  width: 30%;
+  background: #f0f2f5;
+  border-right: 1px solid #ababab;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+}
+
+.sidebaar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #ededed;
+}
+
+.sidebaar-header h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.new-chat-btn {
+  border: none;
+  background: #2531d3;
+  color: white;
+  font-size: 18px;
+  border-radius: 50%;
+  height: 32px;
+  width: 32px;
+  cursor: pointer;
+}
+
+.search-box {
+  padding: 10px;
+  background: #fff;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+
+.chat-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+.chat-item:hover, .chat-item.active {
+  background: #dcf8c6;
+}
+
+.chat-item .avatar {
+  background: #2531d3;
+  color: white;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.chat-info h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.chat-info p {
+  margin: 2px 0 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.unread-badge {
+  background: #25d366;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.chat-item {
+  position: relative;
+}
+
+/* Chat Window */
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ece5dd;
+  position: relative;
+  transition: width 0.3s ease;
+}
+
+.chat-header {
+  background: #ededed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.chat-user {
+  display: flex;
+  align-items: center;
+}
+
+.chat-user .avatar {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  background: #2531d3;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.presence-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.presence-indicator.online {
+  background: #25d366;
+}
+
+.presence-indicator.offline {
+  background: #ccc;
+}
+
+.presence-indicator.away {
+  background: #ffc107;
+}
+
+.chat-actions button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.chat-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  max-width: 60%;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.message.sent {
+  background: #dcf8c6;
+  align-self: flex-end;
+  position: relative;
+}
+
+.message.received {
+  background: #fff;
+  align-self: flex-start;
+  position: relative;
+}
+
+.message.sent .delivery-status {
+  position: absolute;
+  bottom: 2px;
+  right: 8px;
+  font-size: 10px;
+  color: #999;
+}
+
+.message.sent.delivered .delivery-status::after {
+  content: "✓";
+  color: #25d366;
+}
+
+.message.sent.read .delivery-status::after {
+  content: "✓✓";
+  color: #25d366;
+}
+
+.time {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: #999;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+.message.received .time {
+  text-align: left;
+}
+
+/* Message Attachments */
+.message-attachment {
+  margin-bottom: 8px;
+}
+
+.image-attachment img {
+  border-radius: 8px;
+  max-width: 200px;
+  max-height: 200px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.image-attachment img:hover {
+  transform: scale(1.02);
+}
+
+.file-attachment {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.file-attachment .file-icon {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.attachment-info {
+  flex: 1;
+}
+
+.attachment-name {
+  display: block;
+  color: #2531d3;
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.attachment-name:hover {
+  text-decoration: underline;
+}
+
+.attachment-size {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Image Modal */
+.image-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-modal.show {
+  display: flex;
+}
+
+.image-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+.image-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Message Search Modal */
+.search-options {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.search-options label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.search-options input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+.search-results {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.search-placeholder {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px;
+}
+
+.search-result-item {
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: #f8f9fa;
+}
+
+.search-result-item.highlight {
+  background: #fff3cd;
+  border-color: #ffeaa7;
+}
+
+.search-result-sender {
+  font-weight: bold;
+  color: #333;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.search-result-content {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.search-result-timestamp {
+  color: #999;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.search-result-match {
+  background: #ffeb3b;
+  padding: 1px 2px;
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+.search-stats {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Conversation Menu */
+.conversation-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 1000;
+  margin-top: 5px;
+  min-width: 200px;
+}
+
+.conversation-menu.show {
+  display: block;
+}
+
+.conversation-menu-content {
+  padding: 8px 0;
+}
+
+.conversation-menu-item {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.conversation-menu-item:hover {
+  background: #f8f9fa;
+}
+
+.conversation-menu-item.delete:hover {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.menu-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* Confirmation Modal */
+.confirmation-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.confirmation-modal.show {
+  display: flex;
+}
+
+.confirmation-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.confirmation-header {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.confirmation-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.confirmation-body {
+  padding: 20px;
+}
+
+.confirmation-body p {
+  margin: 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.confirmation-footer {
+  padding: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirmation-footer button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-confirm {
+  background: #d32f2f;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background: #b71c1c;
+}
+
+.chat-footer {
+  background: #f0f0f0;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.chat-footer input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
+
+.chat-footer button {
+  background: #2531d3;
+  border: none;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.chat-footer button:hover {
+  background: #2531d3;
+}
+
+.chat-footer #fileBtn,
+.chat-footer #emojiBtn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 20px;
+  transition: background 0.2s;
+}
+
+.chat-footer #fileBtn:hover,
+.chat-footer #emojiBtn:hover {
+  background: #f0f0f0;
+}
+
+/* Notifications */
+.notification-btn {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin: 0 5px;
+}
+
+.notification-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 18px;
+  text-align: center;
+  display: none;
+}
+
+.notification-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 350px;
+  max-height: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 1000;
+  margin-top: 5px;
+}
+
+.notification-dropdown.show {
+  display: block;
+}
+
+.notification-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.mark-all-read {
+  background: none;
+  border: 1px solid #2531d3;
+  color: #2531d3;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.mark-all-read:hover {
+  background: #2531d3;
+  color: white;
+}
+
+.notifications-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 15px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: #f8f9fa;
+}
+
+.notification-item.unread {
+  background: #f0f8ff;
+  border-left: 3px solid #2531d3;
+}
+
+.notification-item.read {
+  opacity: 0.7;
+}
+
+.notification-content h4 {
+  margin: 0 0 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+.notification-content p {
+  margin: 0 0 5px;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.no-notifications {
+  padding: 30px;
+  text-align: center;
+  color: #666;
+}
+
+.notification-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: #ff4444;
+  border-radius: 50%;
+  display: none;
+  z-index: 1001;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 3px;
+  margin-left: 8px;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  background: #25d366;
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+/* Emoji Picker Modal */
+.emoji-modal {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.emoji-modal.show {
+  display: block;
+}
+
+.emoji-modal-content {
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.emoji-modal-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.emoji-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.emoji-categories {
+  display: flex;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  overflow-x: auto;
+}
+
+.emoji-category {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  margin: 0 2px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.emoji-category:hover,
+.emoji-category.active {
+  background: #f0f0f0;
+}
+
+.emoji-grid {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.emoji-item {
+  display: inline-block;
+  font-size: 24px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.emoji-item:hover {
+  background: #f0f0f0;
+}
+
+/* File Upload Modal */
+.file-modal {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 500px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.file-modal.show {
+  display: block;
+}
+
+.file-modal-content {
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.file-modal-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.file-upload-area {
+  padding: 20px;
+  min-height: 200px;
+}
+
+.file-drop-zone {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.drag-over {
+  border-color: #2531d3;
+  background: #f8f9fa;
+}
+
+.file-drop-zone input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.file-preview {
+  margin-top: 20px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  background: #f8f9fa;
+}
+
+.file-icon {
+  font-size: 24px;
+  margin-right: 10px;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-name {
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #666;
+}
+
+.file-remove {
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.file-modal-footer {
+  padding: 15px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.file-modal-footer button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-send-file {
+  background: #2531d3;
+  color: white;
+}
+
+.btn-send-file:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.back-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+/* Scrollbar */
+.chat-body::-webkit-scrollbar,
+.chat-list::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-body::-webkit-scrollbar-thumb,
+.chat-list::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 3px;
+}
+
+/* User Search Modal */
+.search-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-modal-content {
+  background: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.search-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.search-input-container {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.search-input-container input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 16px;
+}
+
+.user-results {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.user-result-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.user-result-item:hover {
+  background: #f8f9fa;
+}
+
+.user-result-item.selected {
+  background: #e3f2fd;
+}
+
+.user-result-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2531d3;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  font-weight: bold;
+}
+
+.user-result-info h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.user-result-info p {
+  margin: 2px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.search-modal-footer {
+  padding: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.search-modal-footer button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.btn-start-chat {
+  background: #2531d3;
+  color: white;
+}
+
+/* =========================
+   Mobile Responsive Design
+   ========================= */
+@media (max-width: 768px) {
+  .chaat-app {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  /* Sidebar minimizes to icons */
+  .chat-sidebaar {
+    width: 60px;
+    overflow: hidden;
+    align-items: center;
+  }
+
+  .sidebaar-header, .search-box {
+    display: none;
+  }
+
+  .chat-item {
+    flex-direction: column;
+    justify-content: center;
+    border-bottom: none;
+    margin: 10px 0;
+  }
+
+  .chat-item .avatar {
+    margin: 0;
+  }
+
+  .chat-info {
+    display: none;
+  }
+
+  /* Chat window expands */
+  .chat-window {
+    width: calc(100% - 60px);
+  }
+
+  .back-btn {
+    display: none;
+  }
+}
+</style>
+
+<div class="chaat-app">
+  <!-- Sidebar -->
+  <div class="chat-sidebaar" id="chatSidebar">
+    <div class="sidebaar-header">
+      <h2>SafeTalk</h2>
+      <button class="new-chat-btn" title="New Chat">+</button>
+    </div>
+
+    <div class="search-box">
+      <input type="text" placeholder="Search or start new chat...">
+    </div>
+
+    <div class="chat-list" id="chatList">
+      {% for conversation in conversations %}
+      <div class="chat-item{% if forloop.first %} active{% endif %}" data-chat="{{ conversation.id }}">
+        <div class="avatar">
+          {% if conversation.other_participants %}
+            {{ conversation.other_participants.0.get_full_name|slice:":1"|default:conversation.other_participants.0.username|slice:":1" }}
+          {% else %}
+            ?
+          {% endif %}
+        </div>
+        <div class="chat-info">
+          <h4>
+            {% if conversation.other_participants %}
+              {% if is_admin %}
+                {% for participant in conversation.other_participants %}
+                  {{ participant.get_full_name|default:participant.username }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              {% else %}
+                {{ conversation.other_participants.0.get_full_name|default:conversation.other_participants.0.username }}
+              {% endif %}
+            {% else %}
+              Unknown
+            {% endif %}
+          </h4>
+          <p>
+            {% if conversation.last_message %}
+              {{ conversation.last_message.content|truncatechars:30 }}
+            {% else %}
+              No messages yet
+            {% endif %}
+          </p>
+          {% if conversation.unread_count %}
+          <span class="unread-badge">{{ conversation.unread_count }}</span>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="no-conversations">
+        <p>No conversations yet. Start a new chat!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Chat Window -->
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <button id="backBtn" class="back-btn">&#8592;</button>
+      <div class="chat-user">
+        <div class="avatar" id="chatAvatar">
+          {% if conversations %}
+            {% if conversations.0.other_participants %}
+              {{ conversations.0.other_participants.0.get_full_name|slice:":1"|default:conversations.0.other_participants.0.username|slice:":1" }}
+            {% else %}
+              ?
+            {% endif %}
+          {% else %}
+            ?
+          {% endif %}
+          <div id="chatPresenceIndicator" class="presence-indicator offline"></div>
+        </div>
+        <div>
+          <h3 id="chatName">
+            {% if conversations %}
+              {% if conversations.0.other_participants %}
+                {% if is_admin %}
+                  {% for participant in conversations.0.other_participants %}
+                    {{ participant.get_full_name|default:participant.username }}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                {% else %}
+                  {{ conversations.0.other_participants.0.get_full_name|default:conversations.0.other_participants.0.username }}
+                {% endif %}
+              {% else %}
+                Select a conversation
+              {% endif %}
+            {% else %}
+              No conversations
+            {% endif %}
+          </h3>
+          <span id="chatStatus">Loading...</span>
+        </div>
+      </div>
+      <div class="chat-actions">
+        <button title="Search in conversation" id="searchInChatBtn" class="search-in-chat-btn">
+          &#128269;
+        </button>
+        <button title="Notifications" id="notificationBtn" class="notification-btn">
+          &#128276;
+          <span id="notification-count" class="notification-count"></span>
+        </button>
+        <button title="Conversation options" id="conversationMenuBtn" class="conversation-menu-btn">
+          &#8942;
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+      {% if conversations %}
+        {% for message in conversations.0.messages.all %}
+        <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+          <p>{{ message.content }}</p>
+          <span class="time">{{ message.timestamp|date:"H:i" }}</span>
+        </div>
+        {% empty %}
+        <div class="no-messages">
+          <p>No messages in this conversation yet.</p>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="no-conversation-selected">
+        <p>Select a conversation to start chatting.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="typing-indicator" class="typing-indicator" style="display: none;">
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="chat-footer">
+      <button id="fileBtn" type="button" title="Attach file">📎</button>
+      <button id="emojiBtn" type="button" title="Add emoji">😊</button>
+      <input type="text" id="messageInput" placeholder="Type a message" autocomplete="off">
+      <button id="sendBtn" type="button">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications Dropdown -->
+<div class="notification-dropdown" id="notificationDropdown">
+  <div class="notification-header">
+    <h3>Notifications</h3>
+    <button id="markAllRead" class="mark-all-read">Mark all read</button>
+  </div>
+  <div class="notifications-list" id="notificationsList">
+    <!-- Notifications will be populated here -->
+  </div>
+</div>
+
+<!-- Notification Indicator -->
+<div id="notificationIndicator" class="notification-indicator"></div>
+
+<!-- Image Modal -->
+<div class="image-modal" id="imageModal">
+  <img id="modalImage" src="" alt="Full size image">
+  <button class="image-modal-close" id="closeImageModal">&times;</button>
+</div>
+
+<!-- Conversation Options Menu -->
+<div class="conversation-menu" id="conversationMenu">
+  <div class="conversation-menu-content">
+    <button class="conversation-menu-item" id="archiveConversationBtn">
+      <span class="menu-icon">📁</span>
+      Archive Conversation
+    </button>
+    <button class="conversation-menu-item" id="muteConversationBtn">
+      <span class="menu-icon">🔕</span>
+      Mute Notifications
+    </button>
+    <button class="conversation-menu-item delete" id="deleteConversationBtn">
+      <span class="menu-icon">🗑️</span>
+      Delete Conversation
+    </button>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="confirmation-modal" id="confirmationModal">
+  <div class="confirmation-modal-content">
+    <div class="confirmation-header">
+      <h3 id="confirmationTitle">Confirm Action</h3>
+      <button class="close-modal" id="closeConfirmation">&times;</button>
+    </div>
+    <div class="confirmation-body">
+      <p id="confirmationMessage">Are you sure you want to perform this action?</p>
+    </div>
+    <div class="confirmation-footer">
+      <button class="btn-cancel" id="cancelConfirmation">Cancel</button>
+      <button class="btn-confirm" id="confirmAction">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Message Search Modal -->
+<div class="search-modal" id="messageSearchModal">
+  <div class="search-modal-content">
+    <div class="search-modal-header">
+      <h3>Search in Conversation</h3>
+      <button class="close-modal" id="closeMessageSearch">&times;</button>
+    </div>
+    <div class="search-input-container">
+      <input type="text" id="messageSearchInput" placeholder="Search messages..." autocomplete="off">
+      <div class="search-options">
+        <label>
+          <input type="checkbox" id="searchSender" checked> Search by sender
+        </label>
+        <label>
+          <input type="checkbox" id="searchContent" checked> Search in content
+        </label>
+      </div>
+    </div>
+    <div class="search-results" id="searchResults">
+      <p class="search-placeholder">Type to search messages...</p>
+    </div>
+    <div class="search-modal-footer">
+      <button class="btn-cancel" id="cancelMessageSearch">Cancel</button>
+      <div class="search-stats">
+        <span id="searchResultCount">0 results</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- File Upload Modal -->
+<div class="file-modal" id="fileModal">
+  <div class="file-modal-content">
+    <div class="file-modal-header">
+      <h3>Share a file</h3>
+      <button class="close-modal" id="closeFileModal">&times;</button>
+    </div>
+    <div class="file-upload-area">
+      <div class="file-drop-zone" id="fileDropZone">
+        <div class="upload-icon">📁</div>
+        <p>Drag and drop files here or click to browse</p>
+        <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.zip">
+      </div>
+      <div class="file-preview" id="filePreview"></div>
+    </div>
+    <div class="file-modal-footer">
+      <button class="btn-cancel" id="cancelFileUpload">Cancel</button>
+      <button class="btn-send-file" id="sendFileBtn" disabled>Send File</button>
+    </div>
+  </div>
+</div>
+
+<!-- Emoji Picker Modal -->
+<div class="emoji-modal" id="emojiModal">
+  <div class="emoji-modal-content">
+    <div class="emoji-modal-header">
+      <h3>Choose an emoji</h3>
+      <button class="close-modal" id="closeEmojiModal">&times;</button>
+    </div>
+    <div class="emoji-categories">
+      <button class="emoji-category active" data-category="recent">Recent</button>
+      <button class="emoji-category" data-category="smileys">😀 Smileys</button>
+      <button class="emoji-category" data-category="gestures">👍 Gestures</button>
+      <button class="emoji-category" data-category="hearts">❤️ Hearts</button>
+      <button class="emoji-category" data-category="activity">⚽ Activity</button>
+    </div>
+    <div class="emoji-grid" id="emojiGrid">
+      <!-- Emojis will be populated here -->
+    </div>
+  </div>
+</div>
+
+<!-- User Search Modal -->
+<div class="search-modal" id="searchModal">
+  <div class="search-modal-content">
+    <div class="search-modal-header">
+      <h3>Start New Conversation</h3>
+      <button class="close-modal" id="closeModal">&times;</button>
+    </div>
+    <div class="search-input-container">
+      <input type="text" id="userSearchInput" placeholder="Search for users...">
+    </div>
+    <div class="user-results" id="userResults">
+      <!-- User results will be populated here -->
+    </div>
+    <div class="search-modal-footer">
+      <button class="btn-cancel" id="cancelSearch">Cancel</button>
+      <button class="btn-start-chat" id="startChatBtn" disabled>Start Chat</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const chatItems = document.querySelectorAll('.chat-item');
+  const chatName = document.getElementById('chatName');
+  const chatAvatar = document.getElementById('chatAvatar');
+  const chatBody = document.getElementById('chatBody');
+  const sendBtn = document.getElementById('sendBtn');
+  const messageInput = document.getElementById('messageInput');
+  const newChatBtn = document.querySelector('.new-chat-btn');
+  const searchInput = document.querySelector('.search-box input');
+
+  // Modal elements
+  const searchModal = document.getElementById('searchModal');
+  const closeModal = document.getElementById('closeModal');
+  const cancelSearch = document.getElementById('cancelSearch');
+  const userSearchInput = document.getElementById('userSearchInput');
+  const userResults = document.getElementById('userResults');
+  const startChatBtn = document.getElementById('startChatBtn');
+
+  // Notification elements
+  const notificationBtn = document.getElementById('notificationBtn');
+  const notificationDropdown = document.getElementById('notificationDropdown');
+  const notificationsList = document.getElementById('notificationsList');
+  const markAllRead = document.getElementById('markAllRead');
+  const notificationIndicator = document.getElementById('notificationIndicator');
+
+  // Emoji elements
+  const emojiBtn = document.getElementById('emojiBtn');
+  const emojiModal = document.getElementById('emojiModal');
+  const closeEmojiModal = document.getElementById('closeEmojiModal');
+  const emojiGrid = document.getElementById('emojiGrid');
+
+  // File upload elements
+  const fileBtn = document.getElementById('fileBtn');
+  const fileModal = document.getElementById('fileModal');
+  const closeFileModal = document.getElementById('closeFileModal');
+  const fileDropZone = document.getElementById('fileDropZone');
+  const fileInput = document.getElementById('fileInput');
+  const filePreview = document.getElementById('filePreview');
+  const sendFileBtn = document.getElementById('sendFileBtn');
+  const cancelFileUpload = document.getElementById('cancelFileUpload');
+
+  // Image modal elements
+  const imageModal = document.getElementById('imageModal');
+  const modalImage = document.getElementById('modalImage');
+  const closeImageModal = document.getElementById('closeImageModal');
+
+  // Message search elements
+  const searchInChatBtn = document.getElementById('searchInChatBtn');
+  const messageSearchModal = document.getElementById('messageSearchModal');
+  const closeMessageSearch = document.getElementById('closeMessageSearch');
+  const messageSearchInput = document.getElementById('messageSearchInput');
+  const searchResults = document.getElementById('searchResults');
+  const searchResultCount = document.getElementById('searchResultCount');
+  const cancelMessageSearch = document.getElementById('cancelMessageSearch');
+  const searchSender = document.getElementById('searchSender');
+  const searchContent = document.getElementById('searchContent');
+
+  // Conversation menu elements
+  const conversationMenuBtn = document.getElementById('conversationMenuBtn');
+  const conversationMenu = document.getElementById('conversationMenu');
+  const archiveConversationBtn = document.getElementById('archiveConversationBtn');
+  const deleteConversationBtn = document.getElementById('deleteConversationBtn');
+  const muteConversationBtn = document.getElementById('muteConversationBtn');
+
+  // Confirmation modal elements
+  const confirmationModal = document.getElementById('confirmationModal');
+  const confirmationTitle = document.getElementById('confirmationTitle');
+  const confirmationMessage = document.getElementById('confirmationMessage');
+  const closeConfirmation = document.getElementById('closeConfirmation');
+  const cancelConfirmation = document.getElementById('cancelConfirmation');
+  const confirmAction = document.getElementById('confirmAction');
+
+  let currentConversationId = null;
+  let selectedUsers = [];
+  let selectedFiles = [];
+
+  // Load conversations on page load
+  loadConversations();
+
+  // Remove auto-refresh to prevent rate limiting - users can manually refresh if needed
+  // setInterval(loadConversations, 300000);
+
+  // Load initial conversation if available
+  if (document.querySelector('.chat-item')) {
+    const firstConversation = document.querySelector('.chat-item');
+    if (firstConversation) {
+      selectConversation(firstConversation.dataset.chat);
+    }
+  }
+
+  // Handle conversation selection - only trigger if not already active
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.chat-item')) {
+      const item = e.target.closest('.chat-item');
+      const conversationId = item.dataset.chat;
+      if (conversationId != currentConversationId) {
+        selectConversation(conversationId);
+      }
+    }
+  });
+
+  // Re-attach click handlers after conversation list updates
+  function attachConversationClickHandlers() {
+    document.querySelectorAll('.chat-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const conversationId = this.dataset.chat;
+        if (conversationId != currentConversationId) {
+          selectConversation(conversationId);
+        }
+      });
+    });
+  }
+
+  // Handle new chat button
+  newChatBtn.addEventListener('click', () => {
+    openUserSearchModal();
+  });
+
+  // Modal event listeners
+  closeModal.addEventListener('click', closeUserSearchModal);
+  cancelSearch.addEventListener('click', closeUserSearchModal);
+  userSearchInput.addEventListener('input', searchUsers);
+  startChatBtn.addEventListener('click', startNewConversation);
+
+  // Notification event listeners
+  notificationBtn.addEventListener('click', toggleNotificationDropdown);
+  markAllRead.addEventListener('click', markAllNotificationsRead);
+
+  // Emoji event listeners
+  emojiBtn.addEventListener('click', toggleEmojiModal);
+  closeEmojiModal.addEventListener('click', closeEmojiPicker);
+  document.querySelectorAll('.emoji-category').forEach(btn => {
+    btn.addEventListener('click', (e) => switchEmojiCategory(e.target.dataset.category));
+  });
+
+  // File upload event listeners
+  fileBtn.addEventListener('click', openFileModal);
+  closeFileModal.addEventListener('click', closeFileModalFunc);
+  cancelFileUpload.addEventListener('click', closeFileModalFunc);
+  fileInput.addEventListener('change', handleFileSelection);
+  fileDropZone.addEventListener('click', () => fileInput.click());
+  fileDropZone.addEventListener('dragover', handleDragOver);
+  fileDropZone.addEventListener('dragleave', handleDragLeave);
+  fileDropZone.addEventListener('drop', handleFileDrop);
+  sendFileBtn.addEventListener('click', sendFiles);
+
+  // Image modal event listeners
+  closeImageModal.addEventListener('click', closeImageModalFunc);
+  imageModal.addEventListener('click', (e) => {
+    if (e.target === imageModal) closeImageModalFunc();
+  });
+
+  // Message search event listeners
+  searchInChatBtn.addEventListener('click', openMessageSearch);
+  closeMessageSearch.addEventListener('click', closeMessageSearchModal);
+  cancelMessageSearch.addEventListener('click', closeMessageSearchModal);
+  messageSearchInput.addEventListener('input', debounce(handleMessageSearch, 300));
+
+  // Conversation menu event listeners
+  conversationMenuBtn.addEventListener('click', toggleConversationMenu);
+  archiveConversationBtn.addEventListener('click', () => showConfirmation('archive'));
+  deleteConversationBtn.addEventListener('click', () => showConfirmation('delete'));
+  muteConversationBtn.addEventListener('click', () => showConfirmation('mute'));
+
+  // Confirmation modal event listeners
+  closeConfirmation.addEventListener('click', closeConfirmationModal);
+  cancelConfirmation.addEventListener('click', closeConfirmationModal);
+  confirmAction.addEventListener('click', executeConfirmationAction);
+
+  // Close modal when clicking outside
+  searchModal.addEventListener('click', (e) => {
+    if (e.target === searchModal) {
+      closeUserSearchModal();
+    }
+  });
+
+  // Handle search
+  searchInput.addEventListener('input', (e) => {
+    filterConversations(e.target.value);
+  });
+
+  // Handle send message
+  sendBtn.addEventListener('click', () => sendMessage());
+  messageInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  // Handle typing indicators
+  let typingTimer;
+  messageInput.addEventListener('input', () => {
+    if (currentConversationId) {
+      // Send typing indicator
+      if (typeof chatSocket !== 'undefined') {
+        chatSocket.sendTyping(true);
+      }
+
+      // Clear existing timer
+      clearTimeout(typingTimer);
+
+      // Set new timer to stop typing indicator after 2 seconds of inactivity
+      typingTimer = setTimeout(() => {
+        if (typeof chatSocket !== 'undefined') {
+          chatSocket.sendTyping(false);
+        }
+      }, 2000);
+    }
+  });
+
+  function loadConversations() {
+    fetch('/messaging/api/conversations/')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        updateConversationList(data.conversations);
+        if (data.conversations.length > 0 && !currentConversationId) {
+          selectConversation(data.conversations[0].id);
+        }
+      })
+      .catch(error => {
+        console.error('Error loading conversations:', error);
+        // Don't show alert for background loads, only for explicit user actions
+      });
+  }
+
+  function updateConversationList(conversations) {
+    const chatList = document.getElementById('chatList');
+    const currentActiveId = document.querySelector('.chat-item.active')?.dataset.chat;
+
+    chatList.innerHTML = conversations.map(conv => {
+      const otherParticipant = conv.other_participants[0];
+      const avatar = otherParticipant ? (otherParticipant.full_name ? otherParticipant.full_name[0].toUpperCase() : otherParticipant.username[0].toUpperCase()) : '?';
+      const name = otherParticipant ? (otherParticipant.full_name || otherParticipant.username) : 'Unknown';
+      const lastMessage = conv.last_message ? conv.last_message.content.substring(0, 30) + (conv.last_message.content.length > 30 ? '...' : '') : 'No messages yet';
+      const unreadBadge = conv.unread_count ? `<span class="unread-badge">${conv.unread_count}</span>` : '';
+      const isActive = currentActiveId == conv.id ? ' active' : '';
+
+      return `
+        <div class="chat-item${isActive}" data-chat="${conv.id}">
+          <div class="avatar">${avatar}</div>
+          <div class="chat-info">
+            <h4>${name}</h4>
+            <p>${lastMessage}</p>
+            ${unreadBadge}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (conversations.length === 0) {
+      chatList.innerHTML = '<div class="no-conversations"><p>No conversations yet. Start a new chat!</p></div>';
+    }
+
+    // Re-attach click handlers after updating the list
+    attachConversationClickHandlers();
+  }
+
+  function selectConversation(conversationId) {
+    currentConversationId = conversationId;
+    document.querySelectorAll('.chat-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.chat == conversationId);
+    });
+
+    // Update user presence to online and in this conversation
+    updatePresence(true, conversationId);
+
+    // Load messages for this conversation
+    fetch(`/messaging/conversation/${conversationId}/messages/`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        updateChatWindow(data);
+        // Load presence status for conversation participants
+        loadConversationPresence(conversationId);
+        // Mark conversation as read
+        markConversationAsRead(conversationId);
+        // Refresh the conversation list to update unread counts
+        loadConversations();
+      })
+      .catch(error => {
+        console.error('Error loading messages:', error);
+        alert('Error loading conversation. Please try again.');
+      });
+  }
+
+  function updateChatWindow(data) {
+    chatName.textContent = data.title;
+    const otherParticipant = data.participants[0];
+    chatAvatar.textContent = otherParticipant ? (otherParticipant.full_name ? otherParticipant.full_name[0].toUpperCase() : otherParticipant.username[0].toUpperCase()) : '?';
+
+    chatBody.innerHTML = data.messages.map(msg => {
+      const isSent = msg.sender_username === '{{ request.user.username }}';
+      const timestamp = new Date(msg.timestamp);
+      const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dateString = timestamp.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      const fullTimeString = timestamp.toLocaleDateString() === new Date().toLocaleDateString() ?
+        timeString : `${dateString} ${timeString}`;
+
+      // Generate attachments HTML
+      let attachmentsHtml = '';
+      if (msg.attachments && msg.attachments.length > 0) {
+        attachmentsHtml = msg.attachments.map(attachment => {
+          if (attachment.is_image) {
+            return `<div class="message-attachment image-attachment">
+              <img src="${attachment.download_url}" alt="${attachment.filename}" onclick="openImageModal('${attachment.download_url}')" style="max-width: 200px; max-height: 200px; cursor: pointer;">
+              <div class="attachment-info">
+                <span class="attachment-name">${attachment.filename}</span>
+                <span class="attachment-size">(${formatFileSize(attachment.file_size)})</span>
+              </div>
+            </div>`;
+          } else {
+            return `<div class="message-attachment file-attachment">
+              <div class="file-icon">${getFileIcon(attachment.content_type)}</div>
+              <div class="attachment-info">
+                <a href="${attachment.download_url}" download class="attachment-name">${attachment.filename}</a>
+                <span class="attachment-size">(${formatFileSize(attachment.file_size)})</span>
+              </div>
+            </div>`;
+          }
+        }).join('');
+      }
+
+      return `
+        <div class="message ${isSent ? 'sent' : 'received'} ${isSent ? (msg.is_read ? 'read' : 'delivered') : ''}" data-message-id="${msg.id}">
+          ${attachmentsHtml}
+          <p>${msg.content}</p>
+          <span class="time">${fullTimeString}</span>
+          ${isSent ? '<div class="delivery-status"></div>' : ''}
+        </div>
+      `;
+    }).join('');
+
+    if (data.messages.length === 0) {
+      chatBody.innerHTML = '<div class="no-messages"><p>No messages in this conversation yet.</p></div>';
+    }
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function sendMessage() {
+    if (!currentConversationId) {
+      alert('Please select a conversation first');
+      return;
+    }
+
+    const text = messageInput.value.trim();
+    if (!text) {
+      alert('Please enter a message');
+      return;
+    }
+
+    // Disable input while sending
+    messageInput.disabled = true;
+    const sendBtn = document.querySelector('#sendBtn');
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Sending...';
+    sendBtn.style.opacity = '0.6';
+
+    const formData = new FormData();
+    formData.append('content', text);
+
+    fetch(`/messaging/conversation/${currentConversationId}/send/`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success || data.message_id) {
+        // Add message to chat immediately
+        const msg = document.createElement('div');
+        msg.classList.add('message', 'sent');
+        msg.setAttribute('data-message-id', data.message_id);
+        const timestamp = new Date();
+        const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        msg.innerHTML = `
+          <p>${text}</p>
+          <span class="time">${timeString}</span>
+          <div class="delivery-status"></div>
+        `;
+        chatBody.appendChild(msg);
+        messageInput.value = '';
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        // Refresh conversation list to update last message
+        loadConversations();
+
+        // Show success feedback
+        console.log('Message sent successfully');
+      } else {
+        throw new Error(data.error || 'Failed to send message');
+      }
+    })
+    .catch(error => {
+      console.error('Error sending message:', error);
+      alert('Error sending message: ' + (error.message || 'Please check your connection and try again.'));
+    })
+    .finally(() => {
+      // Re-enable input
+      messageInput.disabled = false;
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Send';
+      sendBtn.style.opacity = '1';
+      messageInput.focus();
+    });
+  }
+
+  function filterConversations(query) {
+    const items = document.querySelectorAll('.chat-item');
+    items.forEach(item => {
+      const name = item.querySelector('h4').textContent.toLowerCase();
+      item.style.display = name.includes(query.toLowerCase()) ? 'flex' : 'none';
+    });
+  }
+
+  function openUserSearchModal() {
+    selectedUsers = [];
+    userSearchInput.value = '';
+    userResults.innerHTML = '<p>Type to search for users...</p>';
+    startChatBtn.disabled = true;
+    searchModal.style.display = 'flex';
+    userSearchInput.focus();
+  }
+
+  function closeUserSearchModal() {
+    searchModal.style.display = 'none';
+    selectedUsers = [];
+  }
+
+  function searchUsers() {
+    const query = userSearchInput.value.trim();
+    if (query.length < 2) {
+      userResults.innerHTML = '<p>Type at least 2 characters to search...</p>';
+      return;
+    }
+
+    fetch(`/messaging/search-users/?q=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(data => {
+        displayUserResults(data.users);
+      })
+      .catch(error => {
+        console.error('Error searching users:', error);
+        userResults.innerHTML = '<p>Error searching users. Please try again.</p>';
+      });
+  }
+
+  function displayUserResults(users) {
+    if (users.length === 0) {
+      userResults.innerHTML = '<p>No users found matching your search.</p>';
+      return;
+    }
+
+    userResults.innerHTML = users.map(user => `
+      <div class="user-result-item" data-user-id="${user.id}">
+        <div class="user-result-avatar">
+          ${user.full_name ? user.full_name[0].toUpperCase() : user.username[0].toUpperCase()}
+        </div>
+        <div class="user-result-info">
+          <h4>${user.full_name || user.username}</h4>
+          <p>@${user.username} • ${user.role || 'User'}</p>
+        </div>
+      </div>
+    `).join('');
+
+    // Add click handlers for user selection
+    document.querySelectorAll('.user-result-item').forEach(item => {
+      item.addEventListener('click', () => selectUser(item));
+    });
+  }
+
+  function selectUser(userItem) {
+    const userId = parseInt(userItem.dataset.userId);
+    const isSelected = selectedUsers.includes(userId);
+
+    if (isSelected) {
+      selectedUsers = selectedUsers.filter(id => id !== userId);
+      userItem.classList.remove('selected');
+    } else {
+      selectedUsers = [userId]; // For now, only allow single selection
+      document.querySelectorAll('.user-result-item').forEach(item => item.classList.remove('selected'));
+      userItem.classList.add('selected');
+    }
+
+    startChatBtn.disabled = selectedUsers.length === 0;
+  }
+
+  function startNewConversation() {
+    if (selectedUsers.length === 0) return;
+
+    createConversation(selectedUsers);
+    closeUserSearchModal();
+  }
+
+  function createConversation(participantIds) {
+    const formData = new FormData();
+    participantIds.forEach(id => formData.append('participants', id));
+
+    fetch('/messaging/create-conversation/', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.conversation_id) {
+        loadConversations();
+        selectConversation(data.conversation_id);
+      } else if (data.message && data.message.includes('already exists')) {
+        // Conversation already exists, load it
+        loadConversations();
+        if (data.conversation_id) {
+          selectConversation(data.conversation_id);
+        }
+      } else {
+        alert('Failed to create conversation. Please try again.');
+      }
+    })
+    .catch(error => {
+      console.error('Error creating conversation:', error);
+      alert('Error creating conversation. Please check your connection and try again.');
+    });
+  }
+
+  // File upload functions
+  function openFileModal() {
+    selectedFiles = [];
+    filePreview.innerHTML = '';
+    sendFileBtn.disabled = true;
+    fileModal.classList.add('show');
+  }
+
+  function closeFileModalFunc() {
+    fileModal.classList.remove('show');
+    selectedFiles = [];
+    fileInput.value = '';
+  }
+
+  function handleFileSelection(event) {
+    const files = Array.from(event.target.files);
+    processFiles(files);
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault();
+    fileDropZone.classList.add('drag-over');
+  }
+
+  function handleDragLeave(event) {
+    event.preventDefault();
+    fileDropZone.classList.remove('drag-over');
+  }
+
+  function handleFileDrop(event) {
+    event.preventDefault();
+    fileDropZone.classList.remove('drag-over');
+
+    const files = Array.from(event.dataTransfer.files);
+    processFiles(files);
+  }
+
+  function processFiles(files) {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+      'application/pdf', 'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain', 'application/zip'
+    ];
+
+    const validFiles = files.filter(file => {
+      if (file.size > maxSize) {
+        alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+        return false;
+      }
+      if (!allowedTypes.includes(file.type)) {
+        alert(`File ${file.name} has an unsupported type.`);
+        return false;
+      }
+      return true;
+    });
+
+    selectedFiles = validFiles;
+    displayFilePreview();
+    sendFileBtn.disabled = selectedFiles.length === 0;
+  }
+
+  function displayFilePreview() {
+    filePreview.innerHTML = selectedFiles.map(file => {
+      const fileIcon = getFileIcon(file.type);
+      const fileSize = formatFileSize(file.size);
+
+      return `
+        <div class="file-item" data-file="${file.name}">
+          <div class="file-icon">${fileIcon}</div>
+          <div class="file-info">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${fileSize}</div>
+          </div>
+          <button class="file-remove" onclick="removeFile('${file.name}')">×</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function getFileIcon(fileType) {
+    if (fileType.startsWith('image/')) return '🖼️';
+    if (fileType === 'application/pdf') return '📄';
+    if (fileType.includes('word')) return '📝';
+    if (fileType === 'text/plain') return '📃';
+    if (fileType === 'application/zip') return '📦';
+    return '📁';
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function removeFile(fileName) {
+    selectedFiles = selectedFiles.filter(file => file.name !== fileName);
+    displayFilePreview();
+    sendFileBtn.disabled = selectedFiles.length === 0;
+  }
+
+  async function sendFiles() {
+    if (selectedFiles.length === 0 || !currentConversationId) return;
+
+    sendFileBtn.disabled = true;
+    sendFileBtn.textContent = 'Sending...';
+
+    try {
+      const uploadPromises = selectedFiles.map(file => uploadFile(file));
+      const uploadResults = await Promise.all(uploadPromises);
+
+      // Create message with attachments
+      const formData = new FormData();
+      formData.append('content', `Shared ${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''}`);
+      formData.append('attachments', uploadResults.map(result => result.attachment_id).join(','));
+
+      const response = await fetch(`/messaging/conversation/${currentConversationId}/send/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      });
+
+      if (response.ok) {
+        closeFileModalFunc();
+        loadConversations();
+        // Show success message
+        console.log('Files sent successfully');
+      } else {
+        throw new Error('Failed to send files');
+      }
+    } catch (error) {
+      console.error('Error sending files:', error);
+      alert('Error sending files. Please try again.');
+    } finally {
+      sendFileBtn.disabled = false;
+      sendFileBtn.textContent = 'Send Files';
+    }
+  }
+
+  async function uploadFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('conversation_id', currentConversationId);
+
+    const response = await fetch('/messaging/upload-attachment/', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to upload ${file.name}`);
+    }
+
+    return await response.json();
+  }
+
+  // Emoji data
+  const emojiData = {
+    recent: ['😊', '👍', '❤️', '😂', '😍', '🔥', '💯', '🎉', '👏', '🙌', '🤔', '😎'],
+    smileys: ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'],
+    gestures: ['👍', '👎', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👋', '🤚', '🖐️', '✋', '🖖', '👏', '🙌', '🤲', '🤝', '🙏', '✍️', '💅', '🤳'],
+    hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥️', '💌', '💋', '💍', '💎', '💒', '💐'],
+    activity: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🪃', '🥅', '⛳', '🪁', '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛷', '⛸️', '🥌', '🎿', '⛷️', '🏂', '🪂', '🏋️', '🤸', '🤼', '🤽', '🤾', '🧘', '🏃', '🚶']
+  };
+
+  // Presence functions
+  function updatePresence(isOnline, conversationId = null) {
+    const formData = new FormData();
+    formData.append('is_online', isOnline);
+    if (conversationId) {
+      formData.append('conversation_id', conversationId);
+    }
+
+    fetch('/messaging/presence/update/', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Presence updated:', data.is_online ? 'Online' : 'Offline');
+      }
+    })
+    .catch(error => {
+      console.error('Error updating presence:', error);
+    });
+  }
+
+  function loadConversationPresence(conversationId) {
+    fetch(`/messaging/presence/conversation/${conversationId}/`)
+      .then(response => response.json())
+      .then(data => {
+        updateChatPresence(data.participants_presence);
+      })
+      .catch(error => {
+        console.error('Error loading conversation presence:', error);
+      });
+  }
+
+  function updateChatPresence(participantsPresence) {
+    if (participantsPresence.length === 0) return;
+
+    const participant = participantsPresence[0]; // For 1-on-1 chats
+    const statusElement = document.getElementById('chatStatus');
+    const indicatorElement = document.getElementById('chatPresenceIndicator');
+
+    if (statusElement) {
+      statusElement.textContent = participant.status_display;
+    }
+
+    if (indicatorElement) {
+      indicatorElement.className = `presence-indicator ${participant.is_online ? 'online' : 'offline'}`;
+    }
+  }
+
+  // Set user as offline when leaving the page
+  window.addEventListener('beforeunload', () => {
+    updatePresence(false);
+  });
+
+  // Set user as online when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    updatePresence(true);
+  });
+
+  // Notification functions
+  function toggleNotificationDropdown() {
+    const isVisible = notificationDropdown.classList.contains('show');
+
+    if (isVisible) {
+      notificationDropdown.classList.remove('show');
+    } else {
+      loadNotifications();
+      notificationDropdown.classList.add('show');
+    }
+  }
+
+  function loadNotifications() {
+    fetch('/messaging/api/notifications/')
+      .then(response => response.json())
+      .then(data => {
+        displayNotifications(data.notifications);
+      })
+      .catch(error => {
+        console.error('Error loading notifications:', error);
+      });
+  }
+
+  function displayNotifications(notifications) {
+    if (notifications.length === 0) {
+      notificationsList.innerHTML = '<div class="no-notifications"><p>No notifications yet</p></div>';
+      return;
+    }
+
+    notificationsList.innerHTML = notifications.map(notification => `
+      <div class="notification-item ${notification.is_read ? 'read' : 'unread'}"
+           data-notification-id="${notification.id}"
+           data-conversation-id="${notification.conversation_id}">
+        <div class="notification-content">
+          <h4>${notification.title}</h4>
+          <p>${notification.message}</p>
+          <span class="notification-time">${new Date(notification.created_at).toLocaleString()}</span>
+        </div>
+      </div>
+    `).join('');
+
+    // Add click handlers for notification items
+    document.querySelectorAll('.notification-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const notificationId = this.dataset.notificationId;
+        const conversationId = this.dataset.conversationId;
+
+        if (conversationId) {
+          selectConversation(conversationId);
+        }
+
+        markNotificationAsRead(notificationId);
+        notificationDropdown.classList.remove('show');
+      });
+    });
+  }
+
+  function markNotificationAsRead(notificationId) {
+    fetch(`/messaging/notification/${notificationId}/mark-read/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Update UI to show notification as read
+        const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (notificationElement) {
+          notificationElement.classList.remove('unread');
+          notificationElement.classList.add('read');
+        }
+        updateNotificationCount();
+      }
+    })
+    .catch(error => {
+      console.error('Error marking notification as read:', error);
+    });
+  }
+
+  function markAllNotificationsRead() {
+    fetch('/messaging/notifications/mark-all-read/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Update all notifications to read
+        document.querySelectorAll('.notification-item').forEach(item => {
+          item.classList.remove('unread');
+          item.classList.add('read');
+        });
+        updateNotificationCount();
+      }
+    })
+    .catch(error => {
+      console.error('Error marking all notifications as read:', error);
+    });
+  }
+
+  function updateNotificationCount() {
+    fetch('/messaging/api/notifications/')
+      .then(response => response.json())
+      .then(data => {
+        const count = data.unread_count;
+        const badge = document.getElementById('notification-count');
+        if (badge) {
+          if (count > 0) {
+            badge.textContent = count;
+            badge.style.display = 'block';
+          } else {
+            badge.style.display = 'none';
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error updating notification count:', error);
+      });
+  }
+
+  // Close notification dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+      notificationDropdown.classList.remove('show');
+    }
+  });
+
+  // Notification functions
+  function markConversationAsRead(conversationId) {
+    fetch(`/messaging/conversation/${conversationId}/mark-read/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Update delivery status for all sent messages in this conversation
+        updateMessageDeliveryStatus(conversationId, 'read');
+        console.log('Conversation marked as read');
+      }
+    })
+    .catch(error => {
+      console.error('Error marking conversation as read:', error);
+    });
+  }
+
+  function updateMessageDeliveryStatus(conversationId, status) {
+    // Update the visual delivery status of sent messages
+    const sentMessages = document.querySelectorAll(`.message.sent[data-message-id]`);
+    sentMessages.forEach(msg => {
+      const statusDiv = msg.querySelector('.delivery-status');
+      if (statusDiv) {
+        if (status === 'read') {
+          msg.classList.add('read');
+        } else if (status === 'delivered') {
+          msg.classList.add('delivered');
+        }
+      }
+    });
+  }
+
+  // Emoji functions
+  function toggleEmojiModal() {
+    const isVisible = emojiModal.classList.contains('show');
+
+    if (isVisible) {
+      emojiModal.classList.remove('show');
+    } else {
+      loadEmojis('recent');
+      emojiModal.classList.add('show');
+    }
+  }
+
+  function closeEmojiPicker() {
+    emojiModal.classList.remove('show');
+  }
+
+  function loadEmojis(category) {
+    const emojis = emojiData[category] || emojiData.recent;
+    emojiGrid.innerHTML = emojis.map(emoji => `
+      <div class="emoji-item" data-emoji="${emoji}">${emoji}</div>
+    `).join('');
+
+    // Add click handlers for emoji items
+    document.querySelectorAll('.emoji-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const emoji = this.dataset.emoji;
+        insertEmoji(emoji);
+        closeEmojiPicker();
+      });
+    });
+
+    // Update active category button
+    document.querySelectorAll('.emoji-category').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.category === category);
+    });
+  }
+
+  function switchEmojiCategory(category) {
+    loadEmojis(category);
+  }
+
+  function insertEmoji(emoji) {
+    const input = messageInput;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const text = input.value;
+    const before = text.substring(0, start);
+    const after = text.substring(end, text.length);
+    input.value = before + emoji + after;
+    input.focus();
+    input.setSelectionRange(start + emoji.length, start + emoji.length);
+  }
+
+  // Close emoji modal when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!emojiBtn.contains(e.target) && !emojiModal.contains(e.target)) {
+      emojiModal.classList.remove('show');
+    }
+  });
+
+  // Message search functions
+  function openMessageSearch() {
+    if (!currentConversationId) {
+      alert('Please select a conversation first');
+      return;
+    }
+
+    messageSearchInput.value = '';
+    searchResults.innerHTML = '<p class="search-placeholder">Type to search messages...</p>';
+    searchResultCount.textContent = '0 results';
+    messageSearchModal.classList.add('show');
+    messageSearchInput.focus();
+  }
+
+  function closeMessageSearchModal() {
+    messageSearchModal.classList.remove('show');
+    // Clear search highlighting
+    document.querySelectorAll('.search-result-item.highlight').forEach(item => {
+      item.classList.remove('highlight');
+    });
+  }
+
+  function handleMessageSearch() {
+    const query = messageSearchInput.value.trim();
+
+    if (query.length < 2) {
+      searchResults.innerHTML = '<p class="search-placeholder">Type at least 2 characters to search...</p>';
+      searchResultCount.textContent = '0 results';
+      return;
+    }
+
+    // Build search parameters
+    const params = new URLSearchParams({
+      q: query,
+      content: searchContent.checked,
+      sender: searchSender.checked
+    });
+
+    fetch(`/messaging/conversation/${currentConversationId}/search/?${params}`)
+      .then(response => response.json())
+      .then(data => {
+        displaySearchResults(data.messages, query);
+        searchResultCount.textContent = `${data.total_results} result${data.total_results !== 1 ? 's' : ''}`;
+      })
+      .catch(error => {
+        console.error('Error searching messages:', error);
+        searchResults.innerHTML = '<p class="search-placeholder">Error searching messages. Please try again.</p>';
+      });
+  }
+
+  function displaySearchResults(messages, query) {
+    if (messages.length === 0) {
+      searchResults.innerHTML = '<p class="search-placeholder">No messages found matching your search.</p>';
+      return;
+    }
+
+    searchResults.innerHTML = messages.map(msg => {
+      const timestamp = new Date(msg.timestamp);
+      const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dateString = timestamp.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      const fullTimeString = timestamp.toLocaleDateString() === new Date().toLocaleDateString() ?
+        timeString : `${dateString} ${timeString}`;
+
+      // Highlight search terms in content
+      let highlightedContent = msg.content;
+      if (query) {
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        highlightedContent = highlightedContent.replace(regex, '<span class="search-result-match">$1</span>');
+      }
+
+      return `
+        <div class="search-result-item" onclick="scrollToMessage(${msg.id})" data-message-id="${msg.id}">
+          <div class="search-result-sender">${msg.sender_full_name || msg.sender_username} ${msg.is_sent ? '(You)' : ''}</div>
+          <div class="search-result-content">${highlightedContent}</div>
+          <div class="search-result-timestamp">${fullTimeString}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function scrollToMessage(messageId) {
+    // Close search modal
+    closeMessageSearchModal();
+
+    // Find and highlight the message
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageElement) {
+      // Scroll to message
+      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Highlight message temporarily
+      messageElement.style.background = '#fff3cd';
+      messageElement.style.border = '2px solid #ffeaa7';
+      messageElement.style.borderRadius = '8px';
+      messageElement.style.margin = '2px 0';
+
+      // Remove highlight after 3 seconds
+      setTimeout(() => {
+        messageElement.style.background = '';
+        messageElement.style.border = '';
+        messageElement.style.borderRadius = '';
+        messageElement.style.margin = '';
+      }, 3000);
+    }
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Image modal functions
+  function openImageModal(imageSrc) {
+    modalImage.src = imageSrc;
+    imageModal.classList.add('show');
+  }
+
+  function closeImageModalFunc() {
+    imageModal.classList.remove('show');
+    modalImage.src = '';
+  }
+
+  // Conversation menu functions
+  function toggleConversationMenu() {
+    if (!currentConversationId) {
+      alert('Please select a conversation first');
+      return;
+    }
+
+    const isVisible = conversationMenu.classList.contains('show');
+
+    if (isVisible) {
+      conversationMenu.classList.remove('show');
+    } else {
+      conversationMenu.classList.add('show');
+    }
+  }
+
+  // Confirmation modal functions
+  let pendingAction = null;
+  let pendingActionType = null;
+
+  function showConfirmation(actionType) {
+    conversationMenu.classList.remove('show');
+
+    pendingActionType = actionType;
+
+    switch (actionType) {
+      case 'archive':
+        confirmationTitle.textContent = 'Archive Conversation';
+        confirmationMessage.textContent = 'Are you sure you want to archive this conversation? You can restore it later from archived conversations.';
+        break;
+      case 'delete':
+        confirmationTitle.textContent = 'Delete Conversation';
+        confirmationMessage.textContent = 'Are you sure you want to delete this conversation? This action cannot be undone and all messages will be permanently lost.';
+        break;
+      case 'mute':
+        confirmationTitle.textContent = 'Mute Notifications';
+        confirmationMessage.textContent = 'Are you sure you want to mute notifications for this conversation? You won\'t receive new message notifications.';
+        break;
+    }
+
+    confirmationModal.classList.add('show');
+  }
+
+  function closeConfirmationModal() {
+    confirmationModal.classList.remove('show');
+    pendingAction = null;
+    pendingActionType = null;
+  }
+
+  async function executeConfirmationAction() {
+    if (!pendingActionType || !currentConversationId) return;
+
+    try {
+      let endpoint, method = 'POST';
+
+      switch (pendingActionType) {
+        case 'archive':
+          endpoint = `/messaging/conversation/${currentConversationId}/archive/`;
+          break;
+        case 'delete':
+          endpoint = `/messaging/conversation/${currentConversationId}/delete/`;
+          break;
+        case 'mute':
+          endpoint = `/messaging/conversation/${currentConversationId}/mute/`;
+          break;
+      }
+
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        closeConfirmationModal();
+
+        if (pendingActionType === 'delete') {
+          // Redirect to main messaging page after deletion
+          window.location.href = '/messaging/';
+        } else {
+          // Refresh conversations list
+          loadConversations();
+          alert(data.message);
+        }
+      } else {
+        throw new Error(data.error || 'Action failed');
+      }
+    } catch (error) {
+      console.error('Error executing action:', error);
+      alert('Error: ' + (error.message || 'Please try again.'));
+    }
+  }
+
+  // Close modals when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!conversationMenuBtn.contains(e.target) && !conversationMenu.contains(e.target)) {
+      conversationMenu.classList.remove('show');
+    }
+    if (e.target === confirmationModal) {
+      closeConfirmationModal();
+    }
+  });
+
+  // Initialize notifications on page load
+  updateNotificationCount();
+});
+</script>
+{% endblock %}

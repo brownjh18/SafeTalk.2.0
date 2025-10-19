@@ -1,0 +1,975 @@
+{% extends "base.html" %}
+
+{% block title %}Resources - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        /* Search and Filter Section */
+        .search-section {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .search-controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            transform: scale(1.02);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .search-input:focus + .search-icon {
+            color: #4f46e5;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Resources</h1>
+    <p class="page-subtitle">Discover helpful resources for your mental health journey</p>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="search-section">
+    <div class="search-controls">
+        <div class="search-input-wrapper">
+            <input
+                type="text"
+                class="search-input"
+                placeholder="Search resources..."
+                id="searchInput"
+            >
+            <div class="search-icon">🔍</div>
+        </div>
+
+        <select class="filter-select" id="categoryFilter">
+            <option value="">All Categories</option>
+            <option value="anxiety">Anxiety</option>
+            <option value="depression">Depression</option>
+            <option value="stress">Stress Management</option>
+            <option value="relationships">Relationships</option>
+            <option value="self-care">Self Care</option>
+            <option value="mindfulness">Mindfulness</option>
+        </select>
+
+        <select class="filter-select" id="typeFilter">
+            <option value="">All Types</option>
+            <option value="article">Article</option>
+            <option value="video">Video</option>
+            <option value="audio">Audio</option>
+            <option value="exercise">Exercise</option>
+            <option value="tool">Tool</option>
+        </select>
+
+        <button class="action-btn filter-btn" onclick="applyFilters()">
+            <i class="btn-icon">🔧</i>
+            <span>Apply Filters</span>
+            <div class="btn-effect"></div>
+        </button>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Resource Stats Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Resource Overview</h3>
+            <div class="card-icon">📊</div>
+        </div>
+        <div class="card-content">
+            <div class="resource-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Resources</span>
+                    <span class="stat-value" id="totalResources">Loading...</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Categories</span>
+                    <span class="stat-value" id="totalCategories">6</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Most Popular</span>
+                    <span class="stat-value" id="popularResource">Articles</span>
+                </div>
+            </div>
+            <button class="action-btn browse-btn" onclick="window.location.href='/resources/'">
+                <i class="btn-icon">📚</i>
+                <span>Browse All</span>
+                <div class="btn-ripple"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Access Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Quick Access</h3>
+            <div class="card-icon">⚡</div>
+        </div>
+        <div class="card-content">
+            <div class="quick-access-grid">
+                <button class="action-btn anxiety-btn" onclick="filterByCategory('anxiety')">
+                    <i class="btn-icon">😰</i>
+                    <span>Anxiety</span>
+                </button>
+                <button class="action-btn mindfulness-btn" onclick="filterByCategory('mindfulness')">
+                    <i class="btn-icon">🧘</i>
+                    <span>Mindfulness</span>
+                </button>
+                <button class="action-btn exercise-btn" onclick="filterByCategory('exercise')">
+                    <i class="btn-icon">🏃</i>
+                    <span>Exercises</span>
+                </button>
+                <button class="action-btn tools-btn" onclick="filterByCategory('tool')">
+                    <i class="btn-icon">🛠️</i>
+                    <span>Tools</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resources List -->
+<div class="resources-section">
+    <h3>Featured Resources</h3>
+    <div class="resources-grid" id="resourcesGrid">
+        <!-- Resources will be loaded here -->
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading resources...</p>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination">
+        <!-- Pagination will be loaded here -->
+    </div>
+</div>
+
+    <!-- Resource Detail Modal -->
+    <div class="resource-modal" id="resourceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title" id="modalTitle">Resource Title</h2>
+                    <div class="modal-meta">
+                        <span class="modal-category" id="modalCategory">Category</span>
+                        <span class="modal-views" id="modalViews">0 views</span>
+                        <span class="modal-rating" id="modalRating">★★★★☆</span>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="resource-full-description" id="modalDescription">
+                    Resource description will appear here...
+                </div>
+
+                <div class="modal-actions">
+                    <button class="action-btn primary view-btn" onclick="viewResource()">
+                        <i class="btn-icon">👁️</i>
+                        <span>View Resource</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                    <button class="action-btn secondary bookmark-btn" onclick="bookmarkResource()">
+                        <i class="btn-icon">⭐</i>
+                        <span>Bookmark</span>
+                        <div class="btn-effect"></div>
+                    </button>
+                    <button class="action-btn secondary share-btn" onclick="shareResource()">
+                        <i class="btn-icon">📤</i>
+                        <span>Share</span>
+                        <div class="btn-pulse"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+/* Resources Page Enhanced Styles */
+.resources-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.resources-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.resource-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.resource-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.resource-image {
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    transition: all 0.3s ease;
+}
+
+.resource-card:hover .resource-image {
+    transform: scale(1.05);
+}
+
+.resource-content {
+    padding: 1.5rem;
+}
+
+.resource-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    letter-spacing: -0.025em;
+}
+
+.resource-description {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+}
+
+.resource-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.resource-category {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.resource-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.resource-stats i {
+    margin-right: 0.25rem;
+}
+
+/* Quick Access Grid */
+.quick-access-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    padding: 0.625rem 1rem;
+    border: 2px solid #e2e8f0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-height: 40px;
+}
+
+.page-btn:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    border-color: #4f46e5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.page-btn.active {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    border-color: #4f46e5;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+/* Modal Styles */
+.resource-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+}
+
+.resource-modal.show {
+    display: flex;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+}
+
+.modal-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    flex-wrap: wrap;
+}
+
+.modal-category {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.modal-views, .modal-rating {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.resource-full-description {
+    line-height: 1.7;
+    color: #374151;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Loading State */
+.loading-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #4f46e5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+}
+
+.empty-state h3 {
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search-controls {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .resources-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .resources-section {
+        margin: 1rem 0.5rem 0.5rem;
+        padding: 1.25rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+        border-radius: 16px;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .resource-title {
+        font-size: 1rem;
+    }
+
+    .resource-description {
+        font-size: 0.8rem;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+    }
+
+    .resource-full-description {
+        font-size: 0.9rem;
+    }
+}
+
+/* Animation for cards */
+@keyframes resourceSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.resource-card {
+    animation: resourceSlideIn 0.6s ease-out;
+}
+
+.resource-card:nth-child(1) { animation-delay: 0.1s; }
+.resource-card:nth-child(2) { animation-delay: 0.2s; }
+.resource-card:nth-child(3) { animation-delay: 0.3s; }
+.resource-card:nth-child(4) { animation-delay: 0.4s; }
+.resource-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Dark theme support */
+body.dark-theme .resources-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .resources-section h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .resource-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .resource-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .resource-description {
+    color: #94a3b8;
+}
+
+body.dark-theme .modal-content {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .modal-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .modal-category {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+}
+
+body.dark-theme .modal-views, .modal-rating {
+    color: #94a3b8;
+}
+
+body.dark-theme .resource-full-description {
+    color: #cbd5e1;
+}
+
+body.dark-theme .empty-state h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .empty-state p {
+    color: #94a3b8;
+}
+</style>
+
+<script>
+let currentUser = null;
+let accessToken = null;
+let currentFilters = {
+    category: '',
+    type: '',
+    sort: 'newest',
+    featured: false,
+    search: '',
+    page: 1
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    accessToken = localStorage.getItem('access_token');
+    const userData = localStorage.getItem('user');
+
+    if (!accessToken || !userData) {
+        window.location.href = '/login/';
+        return;
+    }
+
+    currentUser = JSON.parse(userData);
+    initializeResources();
+});
+
+function initializeResources() {
+    setupEventListeners();
+    loadResources();
+    updateResourceStats();
+}
+
+function setupEventListeners() {
+    // Search input with debounce
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentFilters.search = e.target.value;
+            currentFilters.page = 1;
+            loadResources();
+        }, 500);
+    });
+
+    // Filter changes
+    document.getElementById('categoryFilter').addEventListener('change', function(e) {
+        currentFilters.category = e.target.value;
+        currentFilters.page = 1;
+        loadResources();
+    });
+
+    document.getElementById('typeFilter').addEventListener('change', function(e) {
+        currentFilters.type = e.target.value;
+        currentFilters.page = 1;
+        loadResources();
+    });
+}
+
+function applyFilters() {
+    loadResources();
+}
+
+function filterByCategory(category) {
+    document.getElementById('categoryFilter').value = category;
+    currentFilters.category = category;
+    currentFilters.page = 1;
+    loadResources();
+}
+
+async function apiCall(endpoint, options = {}) {
+    const defaultOptions = {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+        },
+    };
+
+    const response = await fetch(endpoint, { ...defaultOptions, ...options });
+    if (response.status === 401) {
+        logout();
+        return;
+    }
+    return response.json();
+}
+
+async function loadResources() {
+    try {
+        const loadingState = document.querySelector('.loading-state');
+        if (loadingState) {
+            loadingState.style.display = 'block';
+        }
+
+        const params = new URLSearchParams({
+            page: currentFilters.page,
+            search: currentFilters.search,
+            category: currentFilters.category,
+            type: currentFilters.type,
+            sort: currentFilters.sort,
+            featured: currentFilters.featured
+        });
+
+        const data = await apiCall(`/api/resources/?${params}`);
+        displayResources(data.results || data);
+        displayPagination(data);
+        updateResourceStats();
+    } catch (error) {
+        console.error('Error loading resources:', error);
+        showEmptyState('Failed to load resources. Please try again.');
+    }
+}
+
+function displayResources(resources) {
+    const container = document.getElementById('resourcesGrid');
+    const loadingState = document.querySelector('.loading-state');
+
+    if (loadingState) {
+        loadingState.style.display = 'none';
+    }
+
+    if (!resources || resources.length === 0) {
+        showEmptyState('No resources found matching your criteria.');
+        return;
+    }
+
+    container.innerHTML = resources.map(resource => `
+        <div class="resource-card" onclick="openResourceModal(${resource.id})">
+            <div class="resource-image">
+                ${getResourceIcon(resource.type)}
+            </div>
+            <div class="resource-content">
+                <h3 class="resource-title">${resource.title}</h3>
+                <p class="resource-description">${resource.description || 'No description available'}</p>
+                <div class="resource-meta">
+                    <span class="resource-category">${resource.category_name || 'General'}</span>
+                    <div class="resource-stats">
+                        <span><i>👁</i>${resource.view_count || 0}</span>
+                        <span><i>⭐</i>${resource.average_rating ? resource.average_rating.toFixed(1) : 'N/A'}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getResourceIcon(type) {
+    const icons = {
+        'article': '📄',
+        'video': '🎥',
+        'audio': '🎧',
+        'exercise': '🏃',
+        'tool': '🛠️'
+    };
+    return icons[type] || '📚';
+}
+
+function displayPagination(data) {
+    const container = document.getElementById('pagination');
+    const totalPages = Math.ceil((data.count || 0) / 12);
+
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    let paginationHTML = '';
+
+    // Previous button
+    if (currentFilters.page > 1) {
+        paginationHTML += `<button class="page-btn" onclick="changePage(${currentFilters.page - 1})">Previous</button>`;
+    }
+
+    // Page numbers
+    for (let i = Math.max(1, currentFilters.page - 2); i <= Math.min(totalPages, currentFilters.page + 2); i++) {
+        paginationHTML += `<button class="page-btn ${i === currentFilters.page ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+    }
+
+    // Next button
+    if (currentFilters.page < totalPages) {
+        paginationHTML += `<button class="page-btn" onclick="changePage(${currentFilters.page + 1})">Next</button>`;
+    }
+
+    container.innerHTML = paginationHTML;
+}
+
+function changePage(page) {
+    currentFilters.page = page;
+    loadResources();
+    window.scrollTo(0, 0);
+}
+
+function showEmptyState(message) {
+    const container = document.getElementById('resourcesGrid');
+    container.innerHTML = `
+        <div class="empty-state">
+            <h3>No Resources Found</h3>
+            <p>${message}</p>
+        </div>
+    `;
+}
+
+async function updateResourceStats() {
+    try {
+        // Update stats in the overview card
+        document.getElementById('totalResources').textContent = 'Loading...';
+        document.getElementById('totalCategories').textContent = '6';
+        document.getElementById('popularResource').textContent = 'Articles';
+
+        // You could add API calls here to get actual stats
+        // const stats = await apiCall('/api/resources/stats/');
+        // document.getElementById('totalResources').textContent = stats.total || 0;
+    } catch (error) {
+        console.error('Error updating resource stats:', error);
+    }
+}
+
+async function openResourceModal(resourceId) {
+    try {
+        const resource = await apiCall(`/api/resources/${resourceId}/`);
+
+        document.getElementById('modalTitle').textContent = resource.title;
+        document.getElementById('modalCategory').textContent = resource.category_name || 'General';
+        document.getElementById('modalViews').textContent = `${resource.view_count || 0} views`;
+        document.getElementById('modalRating').textContent = `⭐ ${resource.average_rating ? resource.average_rating.toFixed(1) : 'N/A'}`;
+        document.getElementById('modalDescription').innerHTML = resource.content || resource.description || 'No content available';
+
+        document.getElementById('resourceModal').classList.add('show');
+    } catch (error) {
+        console.error('Error loading resource details:', error);
+        alert('Failed to load resource details. Please try again.');
+    }
+}
+
+function closeModal() {
+    document.getElementById('resourceModal').classList.remove('show');
+}
+
+async function viewResource() {
+    // This would typically redirect to the full resource or open in a new tab
+    alert('Resource viewing functionality would be implemented here');
+}
+
+async function bookmarkResource() {
+    // This would call an API to bookmark the resource
+    alert('Bookmark functionality would be implemented here');
+}
+
+async function shareResource() {
+    // This would open a share dialog
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: document.getElementById('modalTitle').textContent,
+                text: 'Check out this resource',
+                url: window.location.href
+            });
+        } catch (error) {
+            console.log('Share cancelled');
+        }
+    } else {
+        // Fallback for browsers that don't support Web Share API
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Link copied to clipboard!');
+        });
+    }
+}
+
+function logout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    window.location.href = '/';
+}
+
+// Close modal when clicking outside
+document.getElementById('resourceModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+// Keyboard navigation for modal
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}

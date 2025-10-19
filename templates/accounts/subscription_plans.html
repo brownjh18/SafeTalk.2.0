@@ -1,0 +1,575 @@
+{% extends "base.html" %}
+
+{% block title %}Subscription Plans - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .plans-layout {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .plans-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .plans-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .plans-subtitle {
+            font-size: 1.125rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .plan-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .plan-card.popular {
+            border: 2px solid #4f46e5;
+            transform: scale(1.05);
+        }
+
+        .plan-card.popular::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4f46e5;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0 0 8px 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .plan-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .plan-card.popular .plan-header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-period {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .plan-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .plan-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .plan-features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            color: #10b981;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .feature-text {
+            flex: 1;
+            color: #374151;
+        }
+
+        .plan-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .plan-button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .plan-button.primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .plan-button.primary:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+        }
+
+        .plan-button.secondary {
+            background: white;
+            color: #4f46e5;
+            border: 2px solid #4f46e5;
+        }
+
+        .plan-button.secondary:hover {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .current-plan {
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .current-plan:hover {
+            background: #f3f4f6;
+            transform: none;
+        }
+
+        .plan-card.deactivated {
+            opacity: 0.7;
+            border: 2px solid #ef4444;
+        }
+
+        .plan-card.deactivated .plan-header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .plan-status {
+            text-align: center;
+            color: #6b7280;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .comparison-section {
+            margin-top: 4rem;
+            padding: 2rem;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .comparison-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .feature-yes {
+            color: #10b981;
+            font-size: 1.2rem;
+        }
+
+        .feature-no {
+            color: #ef4444;
+            font-size: 1.2rem;
+        }
+
+        .faq-section {
+            margin-top: 4rem;
+        }
+
+        .faq-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .faq-grid {
+            display: grid;
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+
+        .faq-question:hover {
+            background: #f8fafc;
+        }
+
+        .faq-toggle {
+            font-size: 1.2rem;
+            color: #6b7280;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            color: #6b7280;
+            display: none;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .plan-card.popular {
+                transform: none;
+            }
+
+            .comparison-table {
+                font-size: 0.9rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="plans-layout">
+        <div class="plans-header">
+            <h1 class="plans-title">Choose Your Plan</h1>
+            <p class="plans-subtitle">
+                Select the perfect plan for your mental health journey. All plans include our core features with additional premium benefits.
+            </p>
+        </div>
+
+        <div class="plans-grid">
+            {% for plan in plans %}
+                <div class="plan-card {% if plan.name == 'Classic' %}popular{% endif %}">
+                    <div class="plan-header">
+                        <h3 class="plan-name">{{ plan.display_name }}</h3>
+                        <div class="plan-price">${{ plan.price_monthly }}</div>
+                        <div class="plan-period">per month</div>
+                        <p class="plan-description">{{ plan.description }}</p>
+                    </div>
+
+                    <div class="plan-body">
+                        <ul class="plan-features">
+                            {% for feature in plan.features %}
+                                <li>
+                                    <span class="feature-icon">✓</span>
+                                    <span class="feature-text">{{ feature }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="plan-footer">
+                        {% if user.is_authenticated %}
+                            {% if user.subscription and user.subscription.plan == plan %}
+                                <button class="plan-button current-plan" disabled>Current Plan</button>
+                            {% else %}
+                                <button class="plan-button primary" onclick="subscribeToPlan('{{ plan.name }}')">
+                                    {% if user.subscription %}Switch Plan{% else %}Get Started{% endif %}
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <button class="plan-button primary" onclick="window.location.href='/register/'">
+                                Get Started
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if deactivated_plans %}
+                {% for plan in deactivated_plans %}
+                    <div class="plan-card deactivated">
+                        <div class="plan-header">
+                            <h3 class="plan-name">{{ plan.display_name }} (Deactivated)</h3>
+                            <div class="plan-price">${{ plan.price_monthly }}</div>
+                            <div class="plan-period">per month</div>
+                            <p class="plan-description">{{ plan.description }}</p>
+                        </div>
+
+                        <div class="plan-body">
+                            <ul class="plan-features">
+                                {% for feature in plan.features %}
+                                    <li>
+                                        <span class="feature-icon">✓</span>
+                                        <span class="feature-text">{{ feature }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="plan-footer">
+                            {% if user.is_authenticated and user.role == 'admin' %}
+                                <button class="plan-button secondary" onclick="reactivatePlan('{{ plan.name }}')">
+                                    Reactivate Plan
+                                </button>
+                            {% else %}
+                                <div class="plan-status">Plan Unavailable</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="comparison-section">
+            <h2 class="comparison-title">Plan Comparison</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Basic</th>
+                        <th>Classic</th>
+                        <th>Premium</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Chat with AI Companion</td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Mood Tracking</td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Resource Library</td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Community Support</td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Video Counseling</td>
+                        <td><span class="feature-no">✗</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Priority Support</td>
+                        <td><span class="feature-no">✗</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Advanced Analytics</td>
+                        <td><span class="feature-no">✗</span></td>
+                        <td><span class="feature-no">✗</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Custom Integrations</td>
+                        <td><span class="feature-no">✗</span></td>
+                        <td><span class="feature-no">✗</span></td>
+                        <td><span class="feature-yes">✓</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-title">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Can I change my plan anytime?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate the billing accordingly.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Is my data secure?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutely. We use end-to-end encryption for all communications and comply with HIPAA standards for health data privacy.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Do you offer refunds?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        We offer a 30-day money-back guarantee for all plans. If you're not satisfied, contact our support team for a full refund.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Can I cancel anytime?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes, you can cancel your subscription at any time. You'll continue to have access to premium features until the end of your billing period.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        function subscribeToPlan(planName) {
+            // Redirect to subscription URL
+            window.location.href = `/subscribe/${planName}/`;
+        }
+
+        function reactivatePlan(planName) {
+            if (confirm('Are you sure you want to reactivate this plan?')) {
+                // Send POST request to reactivate the plan
+                fetch(`/dashboard/management/plans/${planName}/toggle/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while reactivating the plan.');
+                });
+            }
+        }
+
+        function toggleFAQ(element) {
+            const faqItem = element.parentElement;
+            faqItem.classList.toggle('active');
+        }
+
+        // Auto-expand popular plan slightly on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const popularCard = document.querySelector('.plan-card.popular');
+            if (popularCard) {
+                setTimeout(() => {
+                    popularCard.style.transform = 'scale(1.02)';
+                }, 500);
+            }
+        });
+    </script>
+{% endblock %}

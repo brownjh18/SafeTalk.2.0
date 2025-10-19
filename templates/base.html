@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#4f46e5">
+    <title>{% block title %}SafeTalk{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1f2937 0%, #374151 100%);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #4b5563;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar.minimized {
+            width: 70px;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem 1rem;
+            border-bottom: 1px solid #4b5563;
+            position: sticky;
+            top: 0;
+            background: linear-gradient(180deg, #1f2937 0%, #374151 100%);
+            z-index: 101;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .sidebar-logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            transition: justify-content 0.3s ease;
+        }
+
+        .sidebar.minimized .sidebar-logo-section {
+            justify-content: center;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f9fafb;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 0.5px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.minimized .sidebar-logo {
+            position: relative;
+        }
+
+        .sidebar.minimized .sidebar-logo::after {
+            content: "SafeTalk";
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            margin-left: 0.5rem;
+        }
+
+        .sidebar.minimized .sidebar-logo:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-logo i {
+            font-size: 1.8rem;
+            color: #4f46e5;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.minimized .sidebar-logo i {
+            font-size: 2rem;
+        }
+
+        .sidebar-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .sidebar-user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(79, 70, 229, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.minimized .sidebar-user-info {
+            padding: 0.5rem;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sidebar-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.minimized .sidebar-user-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .sidebar-user-details {
+            flex: 1;
+            min-width: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.minimized .sidebar-user-details {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .sidebar-user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #f9fafb;
+            margin-bottom: 0.125rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-user-role {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-transform: capitalize;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+            transition: padding 0.3s ease;
+        }
+
+        .sidebar.minimized .sidebar-nav {
+            padding: 1rem 0.5rem;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.minimized .nav-section-title {
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+            font-size: 0.6rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0.5rem;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: #f9fafb;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: #4f46e5;
+            color: #f9fafb;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+        }
+
+        .nav-item i {
+            margin-right: 0.75rem;
+            width: 18px;
+            text-align: center;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.minimized .nav-item i {
+            margin-right: 0;
+            font-size: 1.3rem;
+        }
+
+        .sidebar.minimized .nav-item {
+            justify-content: center;
+            padding: 0.75rem 0.5rem;
+        }
+
+        .sidebar.minimized .nav-item {
+            position: relative;
+        }
+
+        .sidebar.minimized .nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            margin-left: 0.5rem;
+        }
+
+        .sidebar.minimized .nav-item:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar.minimized .nav-item span {
+            display: none;
+        }
+
+        .sidebar.minimized .sidebar-logo span {
+            display: none;
+        }
+
+        .sidebar.minimized .sidebar-logo-section .sidebar-status {
+            display: none;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid #4b5563;
+            transition: padding 0.3s ease;
+        }
+
+        .sidebar.minimized .sidebar-footer {
+            padding: 1rem 0.5rem;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .quick-action-btn {
+            padding: 0.75rem 0.5rem;
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid #4f46e5;
+            border-radius: 8px;
+            color: #c7d2fe;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .quick-action-btn:hover {
+            background: #4f46e5;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.minimized ~ .main-content {
+            margin-left: 70px;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            padding: 0.5rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            height: 56px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 280px;
+            margin-left: 1rem;
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-section {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .search-section:last-child {
+            border-bottom: none;
+        }
+
+        .search-section-title {
+            padding: 0.5rem 1rem 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .search-result {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .search-avatar,
+        .search-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .search-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.85rem;
+            margin-bottom: 0.125rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            background: #f9fafb;
+            color: #374151;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            transform: scale(1.02);
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.625rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .search-input:focus + .search-icon {
+            color: #4f46e5;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-icon {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #64748b;
+            font-size: 1.2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-icon:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-color: #4f46e5;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .nav-icon:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .nav-icon.badge {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 2px solid white;
+            box-shadow: 0 3px 6px rgba(239, 68, 68, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 3px 6px rgba(239, 68, 68, 0.3);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 6px 12px rgba(239, 68, 68, 0.4);
+            }
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+            min-width: 220px;
+            z-index: 1000;
+            display: none;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .messages-menu,
+        .notifications-menu {
+            min-width: 320px;
+            max-height: 400px;
+            overflow: hidden;
+        }
+
+        .dropdown-header {
+            padding: 0.8rem 1rem 0.6rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dropdown-header h4 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .mark-all-read-btn {
+            background: none;
+            border: none;
+            color: #4f46e5;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .mark-all-read-btn:hover {
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .dropdown-items {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+            font-weight: 500;
+            position: relative;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #4f46e5;
+        }
+
+        .dropdown-item.unread {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 3px solid #f59e0b;
+        }
+
+        .dropdown-item.unread:hover {
+            background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+        }
+
+        .dropdown-footer {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #e2e8f0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            text-align: center;
+        }
+
+        .view-all-link {
+            color: #4f46e5;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .view-all-link:hover {
+            color: #7c3aed;
+        }
+
+        .dropdown-item.loading {
+            justify-content: center;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .dropdown-item.empty {
+            justify-content: center;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .notification-preview {
+            flex: 1;
+            margin-left: 0.75rem;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .notification-message {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: block;
+        }
+
+        .notification-time {
+            font-size: 0.7rem;
+            color: #9ca3af;
+            margin-left: auto;
+        }
+
+        .message-preview {
+            flex: 1;
+            margin-left: 0.75rem;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .message-content {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: block;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #9ca3af;
+            margin-left: auto;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: dropdownSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes dropdownSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .dropdown-header {
+            padding: 0.8rem 1rem 0.6rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .dropdown-user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .dropdown-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        .dropdown-user-details {
+            flex: 1;
+        }
+
+        .dropdown-user-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.8rem;
+            margin-bottom: 0.1rem;
+            line-height: 1.2;
+        }
+
+        .dropdown-user-role {
+            font-size: 0.7rem;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #4f46e5;
+            padding-left: 1.5rem;
+        }
+
+        .dropdown-item:hover::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .dropdown-item:last-child {
+            border-top: 1px solid #e5e7eb;
+            color: #dc2626;
+            margin-top: 0.4rem;
+            padding-top: 0.8rem;
+        }
+
+        .dropdown-item:last-child:hover {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            color: #dc2626;
+        }
+
+        .dropdown-item:last-child:hover::before {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .dropdown-item i {
+            margin-right: 0.875rem;
+            width: 18px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* Page Content */
+        .page-content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+        }
+
+        .upgrade-text {
+                flex: auto;
+                font-size: 0.78rem;
+                font-weight: 600;
+                text-align: center;
+            }
+
+        /* Enhanced Mobile-First Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-content {
+                margin-left: 220px;
+            }
+
+            .search-bar {
+                width: 280px;
+            }
+
+            .upgrade-text {
+                flex: auto;
+                font-size: 0.78rem;
+                font-weight: 600;
+                text-align: center;
+            }
+
+            /* Improve card layouts on tablets */
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Mobile Navigation */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 1000;
+                box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .sidebar::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: -1;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+
+            .sidebar.show::before {
+                opacity: 1;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            /* Mobile Navbar */
+            .navbar {
+                padding: 0.75rem 1rem;
+                height: 60px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .navbar-left {
+                gap: 0.75rem;
+            }
+
+            .search-bar {
+                display: none;
+            }
+
+            .upgrade-text {
+                flex: auto;
+                font-size: 0.78rem;
+                font-weight: 600;
+            }
+
+            /* Mobile page content */
+            .page-content {
+                padding: 1rem 0.75rem;
+            }
+
+            .page-header {
+                margin-bottom: 1.5rem;
+                text-align: center;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            /* Mobile dashboard grid */
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .dashboard-card {
+                padding: 1.25rem;
+                border-radius: 12px;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            /* Mobile stats */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                text-align: center;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            /* Mobile buttons */
+            .action-btn {
+                padding: 0.625rem 1rem;
+                font-size: 0.9rem;
+                border-radius: 6px;
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            /* Mobile forms */
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .input-wrapper .form-control {
+                padding: 0.875rem 1rem;
+                font-size: 1rem;
+            }
+
+            /* Mobile navigation items */
+            .nav-item {
+                padding: 0.875rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            .nav-item i {
+                margin-right: 0.875rem;
+            }
+
+            /* Mobile dropdowns */
+            .dropdown-menu {
+                min-width: 200px;
+                border-radius: 12px;
+            }
+
+            .dropdown-item {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Extra small screens */
+            .navbar {
+                padding: 0.5rem 0.75rem;
+                height: 56px;
+            }
+
+            .navbar-right {
+                gap: 0.25rem;
+            }
+
+            .nav-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+            }
+
+            .nav-icon.badge {
+                position: relative;
+            }
+    
+            .upgrade-btn {
+                padding: 0.4rem 0.8rem;
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                color: white;
+                border-radius: 20px;
+                font-size: 0.5rem;
+                font-weight: 400;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+                border: none;
+                white-space: nowrap;
+                text-transform: uppercase;
+                letter-spacing: 0.025em;
+            }
+    
+            .upgrade-btn:hover {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                transform: translateY(-2px) scale(1.05);
+                box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+            }
+    
+            .upgrade-btn:active {
+                transform: translateY(0) scale(0.98);
+            }
+
+            .upgrade-text {
+                transition: all 0.3s ease;
+            }
+
+            .sidebar.minimized .upgrade-text {
+                font-size: 0.7rem;
+            }
+
+            .upgrade-btn {
+                position: relative;
+            }
+
+            .sidebar.minimized .upgrade-btn::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                left: 100%;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                font-size: 0.75rem;
+                white-space: nowrap;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 1000;
+                margin-left: 0.5rem;
+            }
+
+            .sidebar.minimized .upgrade-btn:hover::after {
+                opacity: 1;
+                visibility: visible;
+            }
+    
+            @media (max-width: 768px) {
+                .upgrade-btn {
+                    padding: 0.3rem 0.6rem;
+                    font-size: 0.5rem;
+                }
+            }
+
+            .notification-badge {
+                width: 18px;
+                height: 18px;
+                font-size: 0.7rem;
+                top: -2px;
+                right: -2px;
+            }
+
+            .page-content {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-card {
+                padding: 1rem;
+            }
+
+            .stat-card {
+                padding: 0.875rem;
+            }
+
+            .stat-number {
+                font-size: 1.25rem;
+            }
+
+            /* Touch-friendly buttons */
+            .action-btn {
+                min-height: 44px;
+                font-size: 0.95rem;
+            }
+
+            .quick-action-btn {
+                min-height: 40px;
+                font-size: 0.85rem;
+            }
+
+            /* Mobile sidebar */
+            .sidebar {
+                width: 260px;
+            }
+
+            .sidebar-header {
+                padding: 1rem;
+            }
+
+            .sidebar-logo {
+                font-size: 1.25rem;
+            }
+
+            .nav-section-title {
+                font-size: 0.7rem;
+                padding: 0.375rem 1rem;
+            }
+
+            .nav-item {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            /* Mobile forms enhanced */
+            .input-wrapper .form-control {
+                padding: 1rem;
+                font-size: 1rem;
+                border-radius: 8px;
+            }
+
+            .input-wrapper .form-control:focus {
+                transform: translateY(-1px);
+            }
+
+            /* Mobile tables and lists */
+            .recent-list .recent-item {
+                padding: 0.875rem 0;
+            }
+
+            .activity-item {
+                padding: 0.875rem;
+            }
+
+            /* Mobile modal/dialog adjustments */
+            .dropdown-menu {
+                min-width: 180px;
+                margin: 0.5rem;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Touch devices */
+            .nav-item:hover {
+                background: rgba(79, 70, 229, 0.1);
+            }
+
+            .action-btn:hover {
+                transform: none;
+            }
+
+            .nav-icon:hover {
+                transform: none;
+            }
+
+            /* Improve touch targets */
+            .nav-item,
+            .action-btn,
+            .quick-action-btn,
+            .nav-icon {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+
+            /* Better spacing for touch */
+            .page-content {
+                padding-bottom: 2rem;
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .navbar {
+                height: 48px;
+                padding: 0.25rem 0.75rem;
+            }
+
+            .page-content {
+                padding: 0.5rem;
+            }
+
+            .dashboard-card {
+                padding: 0.875rem;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex !important;
+        }
+
+        .items-center {
+            align-items: center !important;
+        }
+
+        .justify-between {
+            justify-content: space-between !important;
+        }
+
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        .gap-4 {
+            gap: 1rem !important;
+        }
+
+        /* Theme Toggle Button */
+        .nav-theme-toggle {
+            margin-left: 0.5rem;
+        }
+
+        .theme-toggle-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #64748b;
+            font-size: 1.2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-toggle-btn:hover {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            border-color: #f59e0b;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .theme-toggle-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Menu Dropdown */
+        .menu-dropdown {
+            position: relative;
+        }
+
+        .menu-trigger {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #64748b;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-trigger:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-color: #4f46e5;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .menu-trigger:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .menu-dots {
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        /* Dark theme styles */
+        body.dark-theme {
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .navbar {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-bottom-color: #334155;
+        }
+
+        body.dark-theme .search-input {
+            background: #334155;
+            border-color: #475569;
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .search-input::placeholder {
+            color: #94a3b8;
+        }
+
+        body.dark-theme .nav-icon {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #475569;
+            color: #cbd5e1;
+        }
+
+        body.dark-theme .nav-icon:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        body.dark-theme .profile-trigger {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #475569;
+        }
+
+        body.dark-theme .profile-name,
+        body.dark-theme .profile-role {
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .dropdown-menu {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-color: #475569;
+        }
+
+        body.dark-theme .dropdown-item:hover {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo-section">
+                    <a href="/" class="sidebar-logo">
+                        <i>🛡️</i> <span>SafeTalk</span>
+                    </a>
+                    <div class="sidebar-status">
+                        <div class="status-indicator"></div>
+                        <span>Online</span>
+                    </div>
+                </div>
+                {% if user.is_authenticated %}
+                <div class="sidebar-user-info" id="sidebarUserInfo">
+                    <div class="sidebar-user-avatar" id="sidebarUserAvatar">
+                        {{ user.first_name.0|default:user.username.0|upper }}
+                    </div>
+                    <div class="sidebar-user-details">
+                        <div class="sidebar-user-name" id="sidebarUserName">
+                            {{ user.first_name }} {{ user.last_name }}
+                        </div>
+                        <div class="sidebar-user-role" id="sidebarUserRole">
+                            {{ user.get_role_display }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- Main Navigation -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="/dashboard/" class="nav-item" id="nav-home" data-tooltip="Dashboard">
+                        <i>🏠</i> <span>Dashboard</span>
+                    </a>
+                    <a href="/messaging/" class="nav-item" id="nav-messaging" data-tooltip="Messages">
+                        <i>💬</i> <span>Messages</span>
+                    </a>
+                    <a href="/resources/" class="nav-item" id="nav-resources" data-tooltip="Resources">
+                        <i>📚</i> <span>Resources</span>
+                    </a>
+                    <a href="/profile/" class="nav-item" id="nav-profile" data-tooltip="Profile">
+                        <i>👤</i> <span>Profile</span>
+                    </a>
+                    <a href="/settings/" class="nav-item" id="nav-settings" data-tooltip="Settings">
+                        <i>⚙️</i> <span>Settings</span>
+                    </a>
+                </div>
+
+                <!-- Client Tools -->
+                <div class="nav-section client-only" id="client-section">
+                    <div class="nav-section-title">My Tools</div>
+                    <a href="/accounts/appointments/" class="nav-item" id="nav-book-appointment" data-tooltip="Sessions">
+                        <i>📅</i> <span>Sessions</span>
+                    </a>
+                    <a href="/chat/ai/" class="nav-item" id="nav-ai-chat" data-tooltip="AI Support">
+                        <i>🤖</i> <span>AI Support</span>
+                    </a>
+                </div>
+
+                <!-- Management (Admin Only) -->
+                <div class="nav-section admin-only" id="admin-section">
+                    <div class="nav-section-title">Management</div>
+                    <a href="/dashboard/manage-users/" class="nav-item" id="nav-users" data-tooltip="Users">
+                        <i>👥</i> <span>Users</span>
+                    </a>
+                    <a href="/dashboard/content/" class="nav-item" id="nav-manage-resources" data-tooltip="Content">
+                        <i>📝</i> <span>Content</span>
+                    </a>
+                    <a href="/dashboard/manage-appointments/" class="nav-item" id="nav-appointments" data-tooltip="Appointments">
+                        <i>📅</i> <span>Appointments</span>
+                    </a>
+                    <a href="/dashboard/analytics/" class="nav-item" id="nav-analytics" data-tooltip="Analytics">
+                        <i>📊</i> <span>Analytics</span>
+                    </a>
+                </div>
+
+                <!-- Counselor Tools -->
+                <div class="nav-section counselor-only" id="counselor-section">
+                    <div class="nav-section-title">Tools</div>
+                    <a href="/dashboard/manage-appointments/" class="nav-item" id="nav-my-appointments" data-tooltip="My Sessions">
+                        <i>📅</i> <span>My Sessions</span>
+                    </a>
+                    <a href="/counselor-clients/" class="nav-item" id="nav-clients" data-tooltip="My Clients">
+                        <i>👥</i> <span>My Clients</span>
+                    </a>
+                    <a href="/dashboard/calendar/" class="nav-item" id="nav-calendar" data-tooltip="Calendar">
+                        <i>📅</i> <span>Calendar</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="quick-actions" id="quick-actions">
+                    <!-- Quick actions will be populated based on user role -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="navbar-left">
+                    <button class="nav-icon" id="sidebarToggle" onclick="toggleSidebar()">
+                        ☰
+                    </button>
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Search resources, users, appointments..." id="globalSearch">
+                        <div class="search-dropdown" id="searchDropdown">
+                            <!-- Search results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="navbar-right">
+                    <div class="nav-icon badge messages-dropdown" onclick="toggleMessagesDropdown()" title="Messages">
+                        <i>💬</i>
+                        <span class="notification-badge" id="messagesBadge" style="display: none;">0</span>
+                        <div class="dropdown-menu messages-menu" id="messagesDropdown">
+                            <div class="dropdown-header">
+                                <h4>Messages</h4>
+                                <button class="mark-all-read-btn" onclick="markAllMessagesRead()">Mark all read</button>
+                            </div>
+                            <div id="messagesList" class="dropdown-items">
+                                <!-- Messages will be loaded here -->
+                                <div class="dropdown-item loading">Loading messages...</div>
+                            </div>
+                            <div class="dropdown-footer">
+                                <a href="/messaging/" class="view-all-link">View all messages</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-icon badge notifications-dropdown" onclick="toggleNotificationsDropdown()" title="Notifications">
+                        <i>🔔</i>
+                        <span class="notification-badge" id="notificationsBadge" style="display: none;">0</span>
+                        <div class="dropdown-menu notifications-menu" id="notificationsDropdown">
+                            <div class="dropdown-header">
+                                <h4>Notifications</h4>
+                                <button class="mark-all-read-btn" onclick="markAllNotificationsRead()">Mark all read</button>
+                            </div>
+                            <div id="notificationsList" class="dropdown-items">
+                                <!-- Notifications will be loaded here -->
+                                <div class="dropdown-item loading">Loading notifications...</div>
+                            </div>
+                            <div class="dropdown-footer">
+                                <a href="/messaging/notifications/" class="view-all-link">View all notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-icon" onclick="showSettings()" title="Settings">
+                        <i>⚙️</i>
+                    </div>
+                    <div class="nav-theme-toggle">
+                        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">
+                            <i id="themeIcon">🌙</i>
+                        </button>
+                    </div>
+                    {% if user.is_authenticated and user.role == 'client' %}
+                    <div class="nav-icon upgrade-btn" style="width: auto; min-width: 50px; padding: 0.4rem 0.8rem;" onclick="window.location.href='/accounts/subscription-plans/'" title="Upgrade Plan" data-tooltip="Upgrade Plan">
+                        <span class="upgrade-text">Upgrade Now</span>
+                    </div>
+                    {% endif %}
+                    <div class="menu-dropdown">
+                        <button class="menu-trigger" onclick="toggleMenuDropdown()" title="Menu">
+                            <span class="menu-dots">⋮</span>
+                        </button>
+                        <div class="dropdown-menu" id="menuDropdown">
+                            <div class="dropdown-header">
+                                <div class="dropdown-user-info">
+                                    <div class="dropdown-avatar" id="dropdownAvatar">{{ user.first_name.0|default:user.username.0|upper }}</div>
+                                    <div class="dropdown-user-details">
+                                        <div class="dropdown-user-name" id="dropdownName">{{ user.first_name }} {{ user.last_name }}</div>
+                                        <div class="dropdown-user-role" id="dropdownRole">{{ user.get_role_display }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="/profile/" class="dropdown-item">
+                                <i>👤</i> View Profile
+                            </a>
+                            <a href="/profile/edit/" class="dropdown-item">
+                                <i>✏️</i> Edit Profile
+                            </a>
+                            <a href="/settings/" class="dropdown-item">
+                                <i>⚙️</i> Settings
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="logout()">
+                                <i>🚪</i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Page Content -->
+            <main class="page-content">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    {% csrf_token %}
+
+    <script>
+        let currentUser = null;
+        let accessToken = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            accessToken = localStorage.getItem('access_token');
+            const userData = localStorage.getItem('user');
+        
+            if (!accessToken || !userData) {
+                window.location.href = '/login/';
+                return;
+            }
+        
+            currentUser = JSON.parse(userData);
+            initializeApp();
+            setupEventListeners();
+        
+            // Load notifications and messages for all pages
+            if (currentUser) {
+                loadNotificationCounts();
+            }
+        });
+
+        function initializeApp() {
+            // Set active navigation
+            setActiveNav();
+
+            // Setup role-based UI
+            setupRoleBasedUI();
+
+            // Load user profile info
+            loadUserProfile();
+
+            // Load notification counts
+            loadNotificationCounts();
+
+            // Restore sidebar state
+            restoreSidebarState();
+        }
+
+        function setActiveNav() {
+            const currentPath = window.location.pathname;
+            const navItems = document.querySelectorAll('.nav-item');
+
+            // First, remove active class from all items
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Define navigation mapping for better matching
+            const navMappings = {
+                '/dashboard/': 'nav-home',
+                '/messaging/': 'nav-messaging',
+                '/chat/conversations/': 'nav-conversations',
+                '/accounts/appointments/': 'nav-book-appointment',
+                '/progress/': 'nav-progress',
+                '/chat/ai/': 'nav-ai-chat',
+                '/resources/': 'nav-resources',
+                '/profile/': 'nav-profile',
+                '/settings/': 'nav-settings',
+                '/dashboard/manage-users/': 'nav-users',
+                '/dashboard/content/': 'nav-manage-resources',
+                '/dashboard/manage-appointments/': 'nav-appointments',
+                '/dashboard/analytics/': 'nav-analytics',
+                '/chat/conversations/': 'nav-counselor-conversations',
+                '/chat/conversations/': 'nav-admin-messages',
+                '/dashboard/manage-appointments/': 'nav-my-appointments',
+                '/counselor-clients/': 'nav-clients',
+                '/dashboard/calendar/': 'nav-calendar'
+            };
+
+            // Check for exact matches first
+            if (navMappings[currentPath]) {
+                const activeItem = document.getElementById(navMappings[currentPath]);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+                    return;
+                }
+            }
+
+            // Then check for prefix matches
+            for (const [path, navId] of Object.entries(navMappings)) {
+                if (path !== '/' && currentPath.startsWith(path)) {
+                    const activeItem = document.getElementById(navId);
+                    if (activeItem) {
+                        activeItem.classList.add('active');
+                        return;
+                    }
+                }
+            }
+
+            // Fallback: check href attributes directly
+            navItems.forEach(item => {
+                const itemHref = item.getAttribute('href');
+                if (itemHref === currentPath || (itemHref !== '/' && currentPath.startsWith(itemHref))) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function setupRoleBasedUI() {
+            const adminSection = document.getElementById('admin-section');
+            const counselorSection = document.getElementById('counselor-section');
+            const clientSection = document.getElementById('client-section');
+
+            // Hide all role-specific sections first
+            adminSection.style.display = 'none';
+            counselorSection.style.display = 'none';
+            clientSection.style.display = 'none';
+
+            // Show based on role
+            if (currentUser.role === 'admin') {
+                adminSection.style.display = 'block';
+            } else if (currentUser.role === 'counselor') {
+                counselorSection.style.display = 'block';
+            } else if (currentUser.role === 'client') {
+                clientSection.style.display = 'block';
+            }
+
+            // Setup quick actions based on role
+            setupQuickActions();
+        }
+
+        function loadUserProfile() {
+            const fullName = `${currentUser.first_name} ${currentUser.last_name}`;
+            const role = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+            const initial = currentUser.first_name.charAt(0).toUpperCase();
+
+            // Update navbar profile
+            document.getElementById('profileName').textContent = fullName;
+            document.getElementById('profileRole').textContent = role;
+            document.getElementById('profileAvatar').textContent = initial;
+
+            // Update dropdown profile
+            document.getElementById('dropdownName').textContent = fullName;
+            document.getElementById('dropdownRole').textContent = role;
+            document.getElementById('dropdownAvatar').textContent = initial;
+
+            // Update sidebar profile
+            document.getElementById('sidebarUserName').textContent = fullName;
+            document.getElementById('sidebarUserRole').textContent = role;
+            document.getElementById('sidebarUserAvatar').textContent = initial;
+        }
+
+        async function loadNotificationCounts() {
+            try {
+                // Load unread messages count - get conversations with unread status
+                const messagesResponse = await fetch('/messaging/api/conversations/', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const messagesData = await messagesResponse.json();
+                let unreadMessages = 0;
+
+                // Count unread messages from conversations
+                if (messagesData.conversations) {
+                    unreadMessages = messagesData.conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0);
+                }
+
+                updateMessagesBadge(unreadMessages);
+
+                // Load unread notifications count
+                const notificationsResponse = await fetch('/messaging/api/notifications/unread/count/', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const notificationsData = await notificationsResponse.json();
+                let unreadNotifications = notificationsData.count || 0;
+
+                updateNotificationsBadge(unreadNotifications);
+
+                // Load dropdown content
+                if (unreadMessages > 0) {
+                    loadMessagesDropdown();
+                }
+                if (unreadNotifications > 0) {
+                    loadNotificationsDropdown();
+                }
+
+            } catch (error) {
+                console.error('Error loading notification counts:', error);
+            }
+        }
+
+        function updateMessagesBadge(count) {
+            const badge = document.getElementById('messagesBadge');
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function updateNotificationsBadge(count) {
+            const badge = document.getElementById('notificationsBadge');
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        async function loadMessagesDropdown() {
+            try {
+                const response = await fetch('/messaging/api/conversations/', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+
+                const messagesList = document.getElementById('messagesList');
+
+                if (data.conversations && data.conversations.length > 0) {
+                    const recentConversations = data.conversations.slice(0, 5);
+                    messagesList.innerHTML = recentConversations.map(conv => {
+                        const otherParticipant = conv.other_participants[0];
+                        const participantName = otherParticipant ? (otherParticipant.full_name || otherParticipant.username) : 'Unknown';
+                        const lastMessage = conv.last_message ? conv.last_message.content : 'No messages yet';
+                        const hasUnread = conv.unread_count > 0;
+                        const time = conv.last_message ? new Date(conv.last_message.timestamp).toLocaleTimeString() : '';
+
+                        return `
+                            <a href="/messaging/conversation/${conv.id}/" class="dropdown-item ${hasUnread ? 'unread' : ''}">
+                                <div class="message-preview">
+                                    <span class="message-sender">${participantName}</span>
+                                    <span class="message-content">${lastMessage.substring(0, 40)}${lastMessage.length > 40 ? '...' : ''}</span>
+                                </div>
+                                <span class="message-time">${time}</span>
+                            </a>
+                        `;
+                    }).join('');
+                } else {
+                    messagesList.innerHTML = '<div class="dropdown-item empty">No messages</div>';
+                }
+            } catch (error) {
+                console.error('Error loading messages dropdown:', error);
+                document.getElementById('messagesList').innerHTML = '<div class="dropdown-item empty">Error loading messages</div>';
+            }
+        }
+
+        async function loadNotificationsDropdown() {
+            try {
+                const response = await fetch('/messaging/api/notifications/unread/', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+
+                const notificationsList = document.getElementById('notificationsList');
+                if (data.notifications && data.notifications.length > 0) {
+                    notificationsList.innerHTML = data.notifications.slice(0, 5).map(notification => `
+                        <div class="dropdown-item unread" onclick="markNotificationRead(${notification.id})">
+                            <div class="notification-preview">
+                                <span class="notification-title">${notification.title}</span>
+                                <span class="notification-message">${notification.message.substring(0, 60) + (notification.message.length > 60 ? '...' : '')}</span>
+                            </div>
+                            <span class="notification-time">${formatTime(notification.created_at)}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    notificationsList.innerHTML = '<div class="dropdown-item empty">No notifications</div>';
+                }
+            } catch (error) {
+                console.error('Error loading notifications dropdown:', error);
+                document.getElementById('notificationsList').innerHTML = '<div class="dropdown-item empty">Error loading notifications</div>';
+            }
+        }
+
+        function toggleMessagesDropdown() {
+            const dropdown = document.getElementById('messagesDropdown');
+            const isVisible = dropdown.style.display === 'block';
+
+            // Hide other dropdowns
+            document.getElementById('notificationsDropdown').style.display = 'none';
+            document.getElementById('menuDropdown').classList.remove('show');
+
+            // Toggle messages dropdown
+            dropdown.style.display = isVisible ? 'none' : 'block';
+
+            // Load content if showing
+            if (!isVisible) {
+                loadMessagesDropdown();
+            }
+        }
+
+        function toggleNotificationsDropdown() {
+            const dropdown = document.getElementById('notificationsDropdown');
+            const isVisible = dropdown.style.display === 'block';
+
+            // Hide other dropdowns
+            document.getElementById('messagesDropdown').style.display = 'none';
+            document.getElementById('menuDropdown').classList.remove('show');
+
+            // Toggle notifications dropdown
+            dropdown.style.display = isVisible ? 'none' : 'block';
+
+            // Load content if showing
+            if (!isVisible) {
+                loadNotificationsDropdown();
+            }
+        }
+
+        async function markAllMessagesRead() {
+            try {
+                // For now, just refresh the counts
+                await loadNotificationCounts();
+                document.getElementById('messagesDropdown').style.display = 'none';
+            } catch (error) {
+                console.error('Error marking messages read:', error);
+            }
+        }
+
+        async function markAllNotificationsRead() {
+            try {
+                await fetch('/messaging/notifications/mark-all-read/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                await loadNotificationCounts();
+                document.getElementById('notificationsDropdown').style.display = 'none';
+            } catch (error) {
+                console.error('Error marking notifications read:', error);
+            }
+        }
+
+        async function markNotificationRead(notificationId) {
+            try {
+                await fetch(`/messaging/notification/${notificationId}/mark-read/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                await loadNotificationCounts();
+            } catch (error) {
+                console.error('Error marking notification read:', error);
+            }
+        }
+
+        function setupEventListeners() {
+            // Global search with dropdown
+            const searchInput = document.getElementById('globalSearch');
+            const searchDropdown = document.getElementById('searchDropdown');
+
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                if (query.length >= 2) {
+                    performSearch(query);
+                    if (searchDropdown) searchDropdown.style.display = 'block';
+                } else {
+                    if (searchDropdown) searchDropdown.style.display = 'none';
+                }
+            });
+
+            searchInput.addEventListener('focus', function() {
+                const query = this.value.trim();
+                if (query.length >= 2 && searchDropdown) {
+                    searchDropdown.style.display = 'block';
+                }
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                // Close menu dropdown
+                if (!e.target.closest('.menu-dropdown')) {
+                    document.getElementById('menuDropdown').classList.remove('show');
+                }
+
+                // Close messages dropdown
+                if (!e.target.closest('.messages-dropdown')) {
+                    document.getElementById('messagesDropdown').style.display = 'none';
+                }
+
+                // Close notifications dropdown
+                if (!e.target.closest('.notifications-dropdown')) {
+                    document.getElementById('notificationsDropdown').style.display = 'none';
+                }
+
+                // Close search dropdown
+                if (!e.target.closest('.search-bar')) {
+                    const searchDropdown = document.getElementById('searchDropdown');
+                    if (searchDropdown) searchDropdown.style.display = 'none';
+                }
+            });
+        }
+
+        async function performSearch(query) {
+            try {
+                const searchDropdown = document.getElementById('searchDropdown');
+                if (!searchDropdown) return;
+
+                // Show loading state
+                searchDropdown.innerHTML = '<div class="dropdown-item loading">Searching...</div>';
+
+                // Perform search across different endpoints
+                const [usersResponse, resourcesResponse] = await Promise.all([
+                    fetch(`/chat/search-users/?q=${encodeURIComponent(query)}`),
+                    fetch(`/resources/search/?q=${encodeURIComponent(query)}`)
+                ]);
+
+                const usersData = await usersResponse.json();
+                const resourcesData = await resourcesResponse.json();
+
+                let resultsHtml = '';
+
+                // Add users results
+                if (usersData.results && usersData.results.length > 0) {
+                    resultsHtml += '<div class="search-section"><div class="search-section-title">Users</div>';
+                    usersData.results.slice(0, 3).forEach(user => {
+                        resultsHtml += `
+                            <a href="/chat/start-chat/${user.id}/" class="dropdown-item">
+                                <div class="search-result">
+                                    <div class="search-avatar">${user.username.charAt(0).toUpperCase()}</div>
+                                    <div class="search-info">
+                                        <div class="search-title">${user.username}</div>
+                                        <div class="search-subtitle">${user.role}</div>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    });
+                    resultsHtml += '</div>';
+                }
+
+                // Add resources results
+                if (resourcesData.results && resourcesData.results.length > 0) {
+                    resultsHtml += '<div class="search-section"><div class="search-section-title">Resources</div>';
+                    resourcesData.results.slice(0, 3).forEach(resource => {
+                        resultsHtml += `
+                            <a href="/resources/${resource.id}/" class="dropdown-item">
+                                <div class="search-result">
+                                    <div class="search-icon">📚</div>
+                                    <div class="search-info">
+                                        <div class="search-title">${resource.title}</div>
+                                        <div class="search-subtitle">${resource.category}</div>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    });
+                    resultsHtml += '</div>';
+                }
+
+                if (resultsHtml) {
+                    searchDropdown.innerHTML = resultsHtml;
+                } else {
+                    searchDropdown.innerHTML = '<div class="dropdown-item empty">No results found</div>';
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+                const searchDropdown = document.getElementById('searchDropdown');
+                if (searchDropdown) {
+                    searchDropdown.innerHTML = '<div class="dropdown-item empty">Search error</div>';
+                }
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+
+            // Check if we're on mobile
+            if (window.innerWidth <= 768) {
+                if (sidebar.classList.contains('show')) {
+                    // Closing sidebar
+                    sidebar.classList.remove('show');
+                    body.style.overflow = '';
+                    setTimeout(() => {
+                        sidebar.style.transform = '';
+                    }, 300);
+                } else {
+                    // Opening sidebar
+                    sidebar.classList.add('show');
+                    body.style.overflow = 'hidden';
+                }
+            } else {
+                // Desktop: toggle minimized state
+                sidebar.classList.toggle('minimized');
+                // Save state to localStorage
+                const isMinimized = sidebar.classList.contains('minimized');
+                localStorage.setItem('sidebarMinimized', isMinimized);
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            if (window.innerWidth <= 768 &&
+                sidebar.classList.contains('show') &&
+                !sidebar.contains(e.target) &&
+                e.target !== sidebarToggle &&
+                !sidebarToggle.contains(e.target)) {
+                toggleSidebar();
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('show');
+                document.body.style.overflow = '';
+            } else {
+                // On mobile, remove minimized state if present
+                sidebar.classList.remove('minimized');
+            }
+        });
+
+        function restoreSidebarState() {
+            const sidebar = document.getElementById('sidebar');
+            const isMinimized = localStorage.getItem('sidebarMinimized') === 'true';
+
+            if (isMinimized && window.innerWidth > 768) {
+                sidebar.classList.add('minimized');
+            }
+        }
+
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function toggleMenuDropdown() {
+            const dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function showMessages() {
+            window.location.href = '/messaging/';
+        }
+
+        function showAIChat() {
+            window.location.href = '/chat/ai/';
+        }
+
+        function showNotifications() {
+            window.location.href = '/chat/notifications/';
+        }
+
+        function showSettings() {
+            window.location.href = '/settings/';
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-theme');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.getElementById('themeIcon');
+
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeIcon.textContent = '☀️';
+            } else {
+                themeIcon.textContent = '🌙';
+            }
+        });
+
+        function quickAction(action) {
+            switch(action) {
+                case 'new-chat':
+                    window.location.href = '/messaging/';
+                    break;
+                case 'book-session':
+                    window.location.href = '/accounts/appointments/';
+                    break;
+                case 'view-schedule':
+                    window.location.href = '/appointments/';
+                    break;
+                case 'system-status':
+                    window.location.href = '/api/status/';
+                    break;
+                case 'view-reports':
+                    window.location.href = '/dashboard/content/';
+                    break;
+            }
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            const response = await fetch(endpoint, { ...defaultOptions, ...options });
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+            return response.json();
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        // Mobile-specific enhancements
+        function handleTouchStart(e) {
+            // Prevent double-tap zoom on buttons and interactive elements
+            if (e.target.closest('.nav-item, .action-btn, .nav-icon, .quick-action-btn, .mood-btn')) {
+                e.preventDefault();
+            }
+        }
+
+        function handleTouchEnd(e) {
+            // Add visual feedback for touch interactions
+            const target = e.target.closest('.nav-item, .action-btn, .nav-icon, .quick-action-btn, .mood-btn');
+            if (target) {
+                target.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    target.style.transform = '';
+                }, 150);
+            }
+        }
+
+        // Initialize mobile enhancements
+        if ('ontouchstart' in window) {
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: true });
+        }
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', function() {
+            // Small delay to allow orientation to complete
+            setTimeout(() => {
+                // Close sidebar on orientation change if open
+                if (window.innerWidth <= 768) {
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar.classList.contains('show')) {
+                        toggleSidebar();
+                    }
+                }
+                // Force viewport recalculation
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+
+        // Prevent pull-to-refresh on mobile
+        let startY = 0;
+        document.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].pageY;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function(e) {
+            const currentY = e.touches[0].pageY;
+            const isAtTop = window.scrollY === 0;
+            const isScrollingUp = currentY > startY;
+
+            // Prevent pull-to-refresh at top of page
+            if (isAtTop && isScrollingUp && window.innerWidth <= 768) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Make functions available globally for templates
+        window.toggleSidebar = toggleSidebar;
+        window.toggleProfileDropdown = toggleProfileDropdown;
+        window.toggleMenuDropdown = toggleMenuDropdown;
+        window.showMessages = showMessages;
+        window.showAIChat = showAIChat;
+        window.showNotifications = showNotifications;
+        window.showSettings = showSettings;
+        window.toggleTheme = toggleTheme;
+        window.quickAction = quickAction;
+        window.logout = logout;
+        window.apiCall = apiCall;
+        window.restoreSidebarState = restoreSidebarState;
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

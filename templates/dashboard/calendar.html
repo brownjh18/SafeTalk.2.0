@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calendar - SafeTalk{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Calendar</h1>
+    <p class="page-subtitle">Manage your appointments and schedule</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Calendar View -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Calendar</h3>
+            <div class="card-actions">
+                <button class="action-btn" onclick="createAppointment()">
+                    <i class="fas fa-plus"></i> New Appointment
+                </button>
+            </div>
+        </div>
+        <div class="card-content">
+            <div id="calendar" class="calendar-container"></div>
+        </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Upcoming Appointments</h3>
+        </div>
+        <div class="card-content">
+            <div id="upcoming-appointments" class="appointments-list">
+                <div class="loading">Loading appointments...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Settings -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Calendar Settings</h3>
+        </div>
+        <div class="card-content">
+            <div class="settings-section">
+                <h4>Google Calendar Integration</h4>
+                <p>Sync your appointments with Google Calendar for better organization.</p>
+                <div class="settings-actions">
+                    <a href="{% url 'calendar_settings' %}" class="action-btn">
+                        <i class="fas fa-cog"></i> Configure Calendar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Modal -->
+<div id="appointment-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Create Appointment</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="appointment-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="appointment-title">Title</label>
+                    <input type="text" id="appointment-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointment-description">Description</label>
+                    <textarea id="appointment-description" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="appointment-date">Date & Time</label>
+                    <input type="datetime-local" id="appointment-date" name="scheduled_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointment-duration">Duration (minutes)</label>
+                    <select id="appointment-duration" name="duration">
+                        <option value="30">30 minutes</option>
+                        <option value="60" selected>1 hour</option>
+                        <option value="90">1.5 hours</option>
+                        <option value="120">2 hours</option>
+                    </select>
+                </div>
+                {% if user.role == 'client' %}
+                <div class="form-group">
+                    <label for="appointment-counselor">Counselor</label>
+                    <select id="appointment-counselor" name="counselor" required>
+                        <option value="">Select a counselor</option>
+                        <!-- Counselors will be loaded via JavaScript -->
+                    </select>
+                </div>
+                {% endif %}
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="action-btn">Save Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.calendar-container {
+    min-height: 500px;
+}
+
+.appointments-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.appointment-item {
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    background: #f8fafc;
+}
+
+.appointment-item h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+}
+
+.appointment-item p {
+    margin: 0.25rem 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.appointment-item .appointment-time {
+    font-weight: 600;
+    color: #4f46e5;
+}
+
+.appointment-item .appointment-status {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.appointment-item .status-scheduled {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.appointment-item .status-confirmed {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.appointment-item .status-completed {
+    background: #e0e7ff;
+    color: #5b21b6;
+}
+
+.settings-section {
+    text-align: center;
+}
+
+.settings-section h4 {
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+}
+
+.settings-section p {
+    margin-bottom: 1rem;
+    color: #64748b;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #1f2937;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+}
+</style>
+
+<script>
+// Calendar functionality
+document.addEventListener('DOMContentLoaded', function() {
+    loadUpcomingAppointments();
+    initializeCalendar();
+});
+
+function initializeCalendar() {
+    // Simple calendar implementation - in production, use FullCalendar or similar
+    const calendarEl = document.getElementById('calendar');
+
+    // For now, just show a placeholder
+    calendarEl.innerHTML = `
+        <div style="text-align: center; padding: 2rem; color: #64748b;">
+            <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>Calendar integration coming soon...</p>
+            <p>Use the "New Appointment" button to schedule appointments.</p>
+        </div>
+    `;
+}
+
+function loadUpcomingAppointments() {
+    fetch('/accounts/appointments/')
+        .then(response => response.text())
+        .then(html => {
+            // Extract appointments from the rendered template
+            // This is a simplified approach - in production, use AJAX endpoints
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const appointments = doc.querySelectorAll('.appointment-item');
+
+            const container = document.getElementById('upcoming-appointments');
+            if (appointments.length > 0) {
+                container.innerHTML = '';
+                appointments.forEach(appointment => {
+                    container.appendChild(appointment.cloneNode(true));
+                });
+            } else {
+                container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 2rem;">No upcoming appointments</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading appointments:', error);
+            document.getElementById('upcoming-appointments').innerHTML =
+                '<p style="text-align: center; color: #dc2626; padding: 2rem;">Error loading appointments</p>';
+        });
+}
+
+function createAppointment() {
+    document.getElementById('modal-title').textContent = 'Create Appointment';
+    document.getElementById('appointment-form').reset();
+
+    // Load counselors if user is client
+    if ('{{ user.role }}' === 'client') {
+        loadCounselors();
+    }
+
+    document.getElementById('appointment-modal').style.display = 'flex';
+}
+
+function loadCounselors() {
+    fetch('/accounts/appointments/create/')
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const counselorSelect = doc.querySelector('#appointment-counselor');
+
+            if (counselorSelect) {
+                const modalCounselorSelect = document.getElementById('appointment-counselor');
+                modalCounselorSelect.innerHTML = counselorSelect.innerHTML;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading counselors:', error);
+        });
+}
+
+function closeModal() {
+    document.getElementById('appointment-modal').style.display = 'none';
+}
+
+// Handle form submission
+document.getElementById('appointment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch('/accounts/appointments/create/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            closeModal();
+            loadUpcomingAppointments();
+            // Show success message
+            showMessage('Appointment created successfully!', 'success');
+        } else {
+            throw new Error('Failed to create appointment');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating appointment:', error);
+        showMessage('Error creating appointment. Please try again.', 'error');
+    });
+});
+
+function showMessage(message, type) {
+    // Simple message display - in production, use a proper notification system
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem;
+        border-radius: 6px;
+        color: white;
+        font-weight: 500;
+        z-index: 1001;
+        max-width: 300px;
+    `;
+
+    if (type === 'success') {
+        notification.style.background = '#10b981';
+    } else {
+        notification.style.background = '#ef4444';
+    }
+
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

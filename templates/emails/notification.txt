@@ -1,0 +1,25 @@
+NOTIFICATION FROM SAFETALK
+
+{{ subject }}
+
+Dear {{ user.get_full_name|default:user.username }},
+
+You have received a new notification from SafeTalk.
+
+{{ message }}
+
+Notification Details:
+- Title: {{ notification.title }}
+- Message: {{ notification.message }}
+- Received: {{ notification.created_at|date:"F j, Y at g:i A" }}
+
+You can view all your notifications by logging into your SafeTalk account.
+
+If you have any questions, please contact our support team at support@safetalk.com.
+
+Best regards,
+The SafeTalk Team
+
+---
+SafeTalk - Your Mental Health Companion
+support@safetalk.com
