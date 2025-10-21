@@ -18415,3 +18415,36 @@ ERROR 2025-10-21 22:49:42,341 basehttp 21092 32232 You're accessing the developm
 ERROR 2025-10-21 22:49:42,342 basehttp 21092 26064 You're accessing the development server over HTTPS, but it only supports HTTP.
 ERROR 2025-10-21 22:49:42,344 basehttp 21092 28792 You're accessing the development server over HTTPS, but it only supports HTTP.
 ERROR 2025-10-21 22:49:42,345 basehttp 21092 31936 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 22:52:37,948 basehttp 21092 31592 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 22:52:37,949 basehttp 21092 27980 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 22:52:37,952 basehttp 21092 1180 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 22:52:37,953 basehttp 21092 25452 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 22:52:39,216 basehttp 21092 1728 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 22:52:39,219 basehttp 21092 31728 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 22:52:39,223 basehttp 21092 27652 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 22:52:39,225 basehttp 21092 24908 You're accessing the development server over HTTPS, but it only supports HTTP.
+WARNING 2025-10-21 22:53:06,454 basehttp 21092 27732 "GET /static/img/favicon.png HTTP/1.1" 404 1905
+WARNING 2025-10-21 22:53:27,441 middleware 21092 17068 Slow request: /accounts/login/ took 1.55s
+WARNING 2025-10-22 00:56:58,425 middleware 21092 21348 Slow request: /accounts/login/ took 1.72s
+WARNING 2025-10-22 00:59:20,274 log 21092 21108 Too Many Requests: /messaging/presence/update/
+WARNING 2025-10-22 00:59:20,275 basehttp 21092 21108 "POST /messaging/presence/update/ HTTP/1.1" 429 32
+ERROR 2025-10-22 00:59:23,519 log 21092 21108 Internal Server Error: /accounts/notifications/
+Traceback (most recent call last):
+  File "C:\Users\brown\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\brown\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\brown\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "c:\Users\brown\Desktop\SafeTalk.2.0\SafeTalk.2.0\accounts\views.py", line 2174, in notification_list
+    return render(request, 'accounts/notifications.html', context)
+  File "C:\Users\brown\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\brown\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\brown\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: accounts/notifications.html
+ERROR 2025-10-22 00:59:23,555 basehttp 21092 21108 "GET /accounts/notifications/ HTTP/1.1" 500 106322
+WARNING 2025-10-22 00:59:24,242 log 21092 21108 Not Found: /favicon.ico
+WARNING 2025-10-22 00:59:24,243 basehttp 21092 21108 "GET /favicon.ico HTTP/1.1" 404 6378
