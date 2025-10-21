@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1078,6 +1078,28 @@
                 margin-left: 0;
             }
 
+            /* Ensure mobile sidebar is touch-friendly */
+            .sidebar-nav {
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+            }
+
+            /* Improve mobile nav item touch targets */
+            .nav-item {
+                position: relative;
+                z-index: 10;
+            }
+
+            .nav-item::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: -1;
+            }
+
             /* Mobile Navbar */
             .navbar {
                 padding: 0.75rem 1rem;
@@ -1430,11 +1452,41 @@
                 min-height: 44px;
                 display: flex;
                 align-items: center;
+                cursor: pointer;
+                -webkit-tap-highlight-color: rgba(79, 70, 229, 0.1);
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
             }
 
             /* Better spacing for touch */
             .page-content {
                 padding-bottom: 2rem;
+            }
+
+            /* Ensure links are touchable */
+            a.nav-item {
+                text-decoration: none;
+                color: inherit;
+                display: flex;
+                align-items: center;
+                width: 100%;
+            }
+
+            /* Fix dropdown items on touch */
+            .dropdown-item {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+            }
+
+            /* Improve button responsiveness */
+            button, .btn, input[type="submit"], input[type="button"] {
+                -webkit-tap-highlight-color: rgba(79, 70, 229, 0.1);
+                touch-action: manipulation;
             }
         }
 
@@ -2378,6 +2430,23 @@
             }
         });
 
+        // Enhanced mobile click handling
+        document.addEventListener('click', function(e) {
+            // Handle mobile navigation clicks
+            if (window.innerWidth <= 768) {
+                const navItem = e.target.closest('.nav-item');
+                if (navItem && navItem.href) {
+                    e.preventDefault();
+                    // Add visual feedback
+                    navItem.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        navItem.style.transform = '';
+                        window.location.href = navItem.href;
+                    }, 100);
+                }
+            }
+        });
+
         // Handle window resize
         window.addEventListener('resize', function() {
             const sidebar = document.getElementById('sidebar');
@@ -2527,14 +2596,14 @@
         // Mobile-specific enhancements
         function handleTouchStart(e) {
             // Prevent double-tap zoom on buttons and interactive elements
-            if (e.target.closest('.nav-item, .action-btn, .nav-icon, .quick-action-btn, .mood-btn')) {
+            if (e.target.closest('.nav-item, .action-btn, .nav-icon, .quick-action-btn, .mood-btn, .dropdown-item, .btn')) {
                 e.preventDefault();
             }
         }
 
         function handleTouchEnd(e) {
             // Add visual feedback for touch interactions
-            const target = e.target.closest('.nav-item, .action-btn, .nav-icon, .quick-action-btn, .mood-btn');
+            const target = e.target.closest('.nav-item, .action-btn, .nav-icon, .quick-action-btn, .mood-btn, .dropdown-item, .btn');
             if (target) {
                 target.style.transform = 'scale(0.98)';
                 setTimeout(() => {
@@ -2543,10 +2612,32 @@
             }
         }
 
+        // Enhanced mobile navigation
+        function handleMobileNavClick(e) {
+            const navItem = e.target.closest('.nav-item');
+            if (navItem && navItem.href) {
+                // Add slight delay for visual feedback
+                setTimeout(() => {
+                    window.location.href = navItem.href;
+                }, 50);
+            }
+        }
+
         // Initialize mobile enhancements
         if ('ontouchstart' in window) {
             document.addEventListener('touchstart', handleTouchStart, { passive: false });
             document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+            // Add click handlers for mobile navigation
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    const navItem = e.target.closest('.nav-item');
+                    if (navItem && navItem.href) {
+                        e.preventDefault();
+                        handleMobileNavClick(e);
+                    }
+                }
+            });
         }
 
         // Handle orientation changes
@@ -2581,6 +2672,28 @@
                 e.preventDefault();
             }
         }, { passive: false });
+
+        // Fix for iOS Safari touch issues
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            document.addEventListener('touchstart', function() {}, { passive: true });
+        }
+
+        // Ensure all links work on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix for links inside nav items on mobile
+            const navLinks = document.querySelectorAll('.nav-item[href]');
+            navLinks.forEach(link => {
+                link.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                }, { passive: true });
+
+                link.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = this.href;
+                }, { passive: false });
+            });
+        });
 
 
         // Make functions available globally for templates
