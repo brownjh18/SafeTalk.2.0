@@ -67,7 +67,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    # 'safetalk.middleware.SecurityMiddleware',  # Commented out for initial deployment
+    # Custom middleware commented out for initial deployment
+    # 'safetalk.middleware.SecurityMiddleware',
     # 'safetalk.middleware.AuditMiddleware',
     # 'safetalk.middleware.ComplianceMiddleware',
     # 'safetalk.middleware.PerformanceMiddleware',
@@ -254,8 +255,12 @@ CACHES = {
 # }
 
 # Session configuration
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_DOMAIN = None  # Allow subdomains if needed
+SESSION_COOKIE_PATH = '/'
 
 # Logging configuration
 LOGGING = {
@@ -356,6 +361,15 @@ SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true
 SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
 CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
 SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
+
+# Additional session security settings
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# CSRF settings
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_HTTPONLY = False
 
 # Django Allauth settings
 AUTHENTICATION_BACKENDS = [
