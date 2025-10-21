@@ -62,7 +62,7 @@ pytest-django==4.11.1
 
 # GeoIP
 geoip2==4.8.0
-django-geoip==1.1.0
+django-geoip==0.5.2
 
 # Requests
 requests==2.32.3
