@@ -447,7 +447,7 @@ SafeTalk is a comprehensive mental health support platform that provides real-ti
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/safetalk.git
+   git clone https://github.com/brownjh18/SafeTalk.2.0.git
    cd safetalk
    ```
 
@@ -625,5 +625,6 @@ For support and questions:
 # SafeTalk.2.0
 #   S a f e T a l k . 2 . 0 
  
- #   S a f e T a l k . 2 . 0  
+ #   S a f e T a l k . 2 . 0 
+ 
  
