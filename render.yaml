@@ -6,11 +6,12 @@ services:
     env: python
     pythonVersion: 3.12.4
     buildCommand: |
+      export DJANGO_ENV=production
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-      DJANGO_ENV=production python manage.py collectstatic --noinput
-      DJANGO_ENV=production python manage.py migrate
-    startCommand: DJANGO_ENV=production daphne safetalk.asgi:application --port $PORT --bind 0.0.0.0
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: daphne safetalk.asgi:application --port $PORT --bind 0.0.0.0
     envVars:
       - key: DJANGO_ENV
         value: production
@@ -46,7 +47,7 @@ services:
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-    startCommand: celery -A safetalk worker --loglevel=info
+    startCommand: DJANGO_ENV=production celery -A safetalk worker --loglevel=info
     envVars:
       - key: DJANGO_ENV
         value: production
@@ -63,6 +64,36 @@ services:
           property: connectionString
       - key: SECRET_KEY
         sync: false
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: safetalk-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          name: safetalk-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: safetalk-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          name: safetalk-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: safetalk-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          name: safetalk-redis
+          type: redis
+          property: connectionString
 
   - type: worker
     name: safetalk-celery-beat
@@ -71,7 +102,7 @@ services:
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-    startCommand: celery -A safetalk beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    startCommand: DJANGO_ENV=production celery -A safetalk beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     envVars:
       - key: DJANGO_ENV
         value: production
