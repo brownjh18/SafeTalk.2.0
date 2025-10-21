@@ -30,7 +30,7 @@ def registration_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Registration successful! Welcome to SafeTalk.")
 
             # Send welcome email asynchronously
@@ -41,30 +41,13 @@ def registration_view(request):
                 from django.middleware.csrf import get_token
                 from safetalk.security import SecurityService
 
-                security_service = SecurityService()
-                access_token = security_service.generate_secure_token(32)
-                refresh_token = security_service.generate_secure_token(32)
-
-                # Store tokens in session for server-side validation
-                request.session['access_token'] = access_token
-                request.session['refresh_token'] = refresh_token
-
                 return JsonResponse({
                     'success': True,
                     'message': 'Registration successful!',
-                    'access_token': access_token,
-                    'refresh_token': refresh_token,
-                    'user': {
-                        'id': user.id,
-                        'username': user.username,
-                        'email': user.email,
-                        'first_name': user.first_name,
-                        'last_name': user.last_name,
-                        'role': user.role,
-                    }
+                    'redirect_url': '/dashboard/'
                 })
 
-            return redirect('client_dashboard')
+            return redirect('dashboard')
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -115,7 +98,7 @@ def login_view(request):
             elif user.role == 'counselor':
                 return redirect('counselor_dashboard')
             else:  # client
-                return redirect('client_dashboard')
+                return redirect('dashboard')
         else:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({

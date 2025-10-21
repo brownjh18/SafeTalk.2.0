@@ -11,6 +11,31 @@ class CustomUserCreationForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'role', 'password1', 'password2', 'agree_terms', 'newsletter')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add custom error messages
+        self.fields['username'].error_messages = {
+            'unique': "A user with this username already exists.",
+            'required': "Username is required.",
+        }
+        self.fields['email'].error_messages = {
+            'unique': "A user with this email already exists.",
+            'required': "Email is required.",
+            'invalid': "Enter a valid email address.",
+        }
+        self.fields['first_name'].error_messages = {
+            'required': "First name is required.",
+        }
+        self.fields['last_name'].error_messages = {
+            'required': "Last name is required.",
+        }
+        self.fields['role'].error_messages = {
+            'required': "Please select your role.",
+        }
+        self.fields['agree_terms'].error_messages = {
+            'required': "You must agree to the terms and conditions.",
+        }
+
 class ClientRegistrationForm(UserCreationForm):
     class Meta:
         model = User

@@ -479,7 +479,7 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+                <button type="submit" class="btn btn-primary btn-full" id="submitBtn">Create Account</button>
             </form>
 
             <div class="auth-footer">
@@ -738,21 +738,31 @@
                     const data = await response.json();
 
                     if (response.ok && data.success) {
-                        // Store authentication data
-                        localStorage.setItem('access_token', data.access_token);
-                        localStorage.setItem('refresh_token', data.refresh_token);
-                        localStorage.setItem('user', JSON.stringify(data.user));
-
                         // Show success message
                         showAlert('Registration successful! Redirecting to dashboard...', 'success');
 
                         // Redirect to dashboard after a short delay
                         setTimeout(() => {
-                            window.location.href = '/dashboard/';
+                            window.location.href = data.redirect_url || '/dashboard/';
                         }, 1500);
                     } else {
                         // Show error message
-                        showAlert(data.error || 'Registration failed. Please try again.', 'error');
+                        if (data.errors) {
+                            // Display field-specific errors
+                            for (const [field, errors] of Object.entries(data.errors)) {
+                                const input = document.getElementById(`id_${field}`);
+                                if (input) {
+                                    input.classList.add('is-invalid');
+                                    const errorDiv = document.createElement('div');
+                                    errorDiv.className = 'form-error';
+                                    errorDiv.textContent = errors[0]; // Show first error
+                                    input.parentNode.appendChild(errorDiv);
+                                }
+                            }
+                            showAlert(data.message || 'Please correct the errors below.', 'error');
+                        } else {
+                            showAlert(data.error || 'Registration failed. Please try again.', 'error');
+                        }
 
                         // Reset form state
                         form.classList.remove('submitting');
@@ -761,7 +771,12 @@
                     }
                 } catch (error) {
                     console.error('Registration error:', error);
-                    showAlert('Network error. Please try again.', 'error');
+                    // Check if it's a network error or server error
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        showAlert('Network connection error. Please check your internet connection and try again.', 'error');
+                    } else {
+                        showAlert('An unexpected error occurred. Please try again.', 'error');
+                    }
 
                     // Reset form state
                     form.classList.remove('submitting');
