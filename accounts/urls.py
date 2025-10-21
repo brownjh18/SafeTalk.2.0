@@ -3,8 +3,7 @@ from . import views
 from safetalk import views as safetalk_views
 
 urlpatterns = [
-    path('', views.client_dashboard, name='dashboard'),
-    path('', safetalk_views.welcome_view, name='welcome'),
+    path('client-dashboard/', views.client_dashboard, name='client_dashboard'),
     path('register/', views.registration_view, name='register'),
     path('login/', views.login_view, name='login'),
     # Role-based dashboards
@@ -23,6 +22,7 @@ urlpatterns = [
     path('add-user/', views.add_user_view, name='add_user'),
     path('manage-users/', views.user_list_view, name='manage_users'),
     path('users/', views.user_list_view, name='user_list'),
+    path('counselor-clients/', views.counselor_clients_view, name='counselor_clients'),
     path('content/', views.content_management, name='content_management'),
     path('analytics/', views.user_insights, name='analytics'),
     path('insights/', views.user_insights, name='user_insights'),
@@ -52,6 +52,7 @@ urlpatterns = [
     path('social-settings/', views.social_settings, name='social_settings'),
     path('manage-appointments/', views.appointments_list, name='manage_appointments'),
     path('appointments/', views.appointments_list, name='appointments_list'),
+    path('appointments/history/', views.appointments_history, name='appointments_history'),
     path('appointments/create/', views.create_appointment, name='create_appointment'),
     path('appointments/<int:appointment_id>/', views.appointment_detail, name='appointment_detail'),
     path('appointments/<int:appointment_id>/edit/', views.edit_appointment, name='edit_appointment'),

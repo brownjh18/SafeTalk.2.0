@@ -1,0 +1,1502 @@
+{% extends "base.html" %}
+
+{% block title %}All Users - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+        /* Enhanced Dashboard Grid for All Users Page */
+        .users-dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .users-sidebar {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .users-main {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Enhanced Filter Section */
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .filter-title::before {
+            content: "🎛️";
+            font-size: 1.25rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-select,
+        .filter-input {
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            color: #1f2937;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            outline: none;
+            border-color: transparent;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn-filter {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-apply {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-apply:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #6d28d9 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-clear:hover {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            color: #374151;
+        }
+
+        /* Enhanced Users Table */
+        .users-table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background: white;
+            border: 1px solid #e2e8f0;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 800px;
+        }
+
+        .users-table thead {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .users-table th {
+            padding: 1.25rem 1rem;
+            text-align: left;
+            font-weight: 700;
+            color: #374151;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #e2e8f0;
+            position: relative;
+        }
+
+        .users-table th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #4f46e5 50%, transparent 100%);
+        }
+
+        .users-table td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .users-table tbody tr:hover {
+            transform: scale(1.005);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Enhanced User Display */
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 0.95rem;
+        }
+
+        .user-email {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Enhanced Badges */
+        .role-badge,
+        .status-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .role-badge::before,
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .role-admin {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        .role-admin::before { background: #f59e0b; }
+
+        .role-counselor {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        .role-counselor::before { background: #3b82f6; }
+
+        .role-client {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .role-client::before { background: #10b981; }
+
+        .status-active {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status-active::before { background: #10b981; }
+
+        .status-inactive {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+        .status-inactive::before { background: #ef4444; }
+
+        /* Enhanced Action Buttons */
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid transparent;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .action-btn.view {
+            color: #059669;
+            border-color: #059669;
+        }
+
+        .action-btn.view:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+        }
+
+        .action-btn.edit {
+            color: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .action-btn.edit:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .action-btn.delete {
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .action-btn.delete:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+        }
+
+        /* Statistics Cards */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #cbd5e1;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            color: #374151;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Results Summary */
+        .results-summary {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .results-text {
+            color: #0c4a6e;
+            font-weight: 600;
+        }
+
+        .results-count {
+            background: #0284c7;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Mobile Stats Grid */
+        .mobile-stats-grid {
+            display: none;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .mobile-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .mobile-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .mobile-stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .mobile-stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Mobile Users Cards */
+        .users-cards {
+            display: none;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .user-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            padding: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .user-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+        }
+
+        .user-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .user-card:hover::after {
+            width: 200px;
+            height: 200px;
+        }
+
+        .user-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .user-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-card-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .user-card-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        }
+
+        .user-card-info {
+            flex: 1;
+        }
+
+        .user-card-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-card-email {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .user-card-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .user-card-role,
+        .user-card-status {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .user-card-role::before,
+        .user-card-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .role-admin {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        .role-admin::before { background: #f59e0b; }
+
+        .role-counselor {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        .role-counselor::before { background: #3b82f6; }
+
+        .role-client {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .role-client::before { background: #10b981; }
+
+        .status-active {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status-active::before { background: #10b981; }
+
+        .status-inactive {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+        .status-inactive::before { background: #ef4444; }
+
+        .user-card-joined {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .user-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .mobile-action-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid transparent;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .mobile-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .mobile-action-btn.view {
+            color: #059669;
+            border-color: #059669;
+        }
+
+        .mobile-action-btn.view:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+        }
+
+        .mobile-action-btn.edit {
+            color: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .mobile-action-btn.edit:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .mobile-action-btn.delete {
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .mobile-action-btn.delete:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1800px) {
+            .users-dashboard {
+                grid-template-columns: 250px 1fr;
+                gap: 1.5rem;
+            }
+
+            .users-sidebar {
+                padding: 1.5rem;
+            }
+
+            .users-main {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 1524px) {
+            .users-dashboard {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .users-sidebar {
+                order: -1;
+                position: static;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .users-main {
+                padding: 1.5rem;
+            }
+
+            .stats-overview {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.25rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+                min-height: 120px;
+            }
+
+            .stat-number {
+                font-size: 1.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .filter-section {
+                margin-bottom: 1.5rem;
+            }
+
+            .filter-grid {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 1rem;
+            }
+
+            .users-table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .users-table {
+                min-width: 600px;
+                font-size: 0.85rem;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 0.875rem 0.625rem;
+                white-space: nowrap;
+            }
+
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+            }
+
+            .user-name {
+                font-size: 0.9rem;
+            }
+
+            .user-email {
+                font-size: 0.75rem;
+            }
+
+            .action-btn {
+                padding: 0.5rem 0.875rem;
+                font-size: 0.8rem;
+                min-height: 36px;
+            }
+        }
+
+        @media (max-width: 1324px) {
+            .users-dashboard {
+                gap: 1.25rem;
+            }
+
+            .users-sidebar {
+                padding: 1.25rem;
+            }
+
+            .users-main {
+                padding: 1.25rem;
+            }
+
+            .filter-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 1rem;
+            }
+
+            .stats-overview {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-number {
+                font-size: 1.75rem;
+            }
+
+            .users-table {
+                min-width: 700px;
+            }
+        }
+
+        @media (max-width: 1150px) {
+            .users-dashboard {
+                gap: 1rem;
+            }
+
+            .users-sidebar {
+                display: none;
+            }
+
+            /* Show mobile filters by default when sidebar is hidden */
+            .mobile-filters {
+                display: block !important;
+            }
+
+            .mobile-filters-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.625rem 1.25rem;
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-size: 0.875rem;
+                font-weight: 600;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: none;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+                min-height: 44px;
+                margin-bottom: 1.5rem;
+                gap: 0.5rem;
+            }
+
+            .mobile-filters-toggle::before {
+                content: "🔧";
+                font-size: 1.1rem;
+            }
+
+            .mobile-filters-toggle:hover {
+                background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+                color: white;
+                text-decoration: none;
+            }
+
+            .mobile-filters-toggle:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+            }
+
+            .mobile-filters {
+                display: none;
+                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                border-radius: 16px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(226, 232, 240, 0.8);
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .mobile-filters.show {
+                display: block;
+                animation: cardSlideIn 0.6s ease-out;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .users-main {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .results-summary {
+                flex-direction: column;
+                gap: 0.75rem;
+                text-align: center;
+            }
+
+            .mobile-stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .users-stats {
+                display: none;
+            }
+
+            .users-cards {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .users-table {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .users-dashboard {
+                gap: 1rem;
+            }
+
+            .users-main {
+                padding: 1rem;
+            }
+
+            .mobile-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+
+            .mobile-stat-card {
+                padding: 1rem;
+            }
+
+            .mobile-stat-number {
+                font-size: 1.5rem;
+            }
+
+            .user-card {
+                padding: 1.25rem;
+            }
+
+            .user-card-header {
+                gap: 0.75rem;
+            }
+
+            .user-card-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+
+            .user-card-name {
+                font-size: 0.95rem;
+            }
+
+            .user-card-email {
+                font-size: 0.8rem;
+            }
+
+            .user-card-meta {
+                gap: 0.375rem;
+            }
+
+            .user-card-actions {
+                gap: 0.375rem;
+            }
+
+            .mobile-action-btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.8rem;
+                min-height: 40px;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Dark Theme Support */
+        body.dark-theme .users-sidebar,
+        body.dark-theme .users-main {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        body.dark-theme .stat-card,
+        body.dark-theme .mobile-stat-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        body.dark-theme .user-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        body.dark-theme .users-table-container {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        body.dark-theme .users-table thead {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(71, 85, 105, 0.6) 100%);
+        }
+
+        body.dark-theme .users-table th {
+            color: #f1f5f9;
+            background: rgba(51, 65, 85, 0.8);
+        }
+
+        body.dark-theme .user-name,
+        body.dark-theme .user-card-name {
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .user-email,
+        body.dark-theme .user-card-email {
+            color: #cbd5e1;
+        }
+
+        body.dark-theme .user-card-joined {
+            color: #94a3b8;
+        }
+
+        body.dark-theme .page-title {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.dark-theme .page-subtitle {
+            color: #cbd5e1;
+        }
+
+        body.dark-theme .filter-select,
+        body.dark-theme .filter-input {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: rgba(71, 85, 105, 0.8);
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .results-summary {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(71, 85, 105, 0.6) 100%);
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        body.dark-theme .results-text {
+            color: #cbd5e1;
+        }
+
+        body.dark-theme .mobile-filters-toggle {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        body.dark-theme .mobile-filters-toggle:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        }
+
+        body.dark-theme .mobile-filters {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        body.dark-theme .mobile-action-btn {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(71, 85, 105, 0.6) 100%);
+            color: #cbd5e1;
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        body.dark-theme .mobile-action-btn:hover {
+            background: linear-gradient(135deg, rgba(71, 85, 105, 0.8) 0%, rgba(94, 163, 184, 0.6) 100%);
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .mobile-action-btn.view:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+        }
+
+        body.dark-theme .mobile-action-btn.edit:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        body.dark-theme .mobile-action-btn.delete:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">All Users</h1>
+    <p class="page-subtitle">Comprehensive view of all platform users with advanced filtering and management tools.</p>
+</div>
+
+<div class="users-dashboard">
+    <!-- Sidebar Filters -->
+    <div class="users-sidebar">
+        
+
+        <!-- Quick Stats Sidebar -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <span class="stat-number">{{ total_users }}</span>
+                <span class="stat-label">Total Users</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ active_users }}</span>
+                <span class="stat-label">Active Users</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ admin_users }}</span>
+                <span class="stat-label">Administrators</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ counselor_users }}</span>
+                <span class="stat-label">Counselors</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="users-main">
+        <!-- Mobile Search Filters (shown at top for mobile) -->
+        <div class="mobile-filters" id="mobileFilters">
+            <div class="filter-section">
+                <h3 class="filter-title">Search a user</h3>
+
+                <form method="GET" action="">
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label class="filter-label">Search</label>
+                            <input type="text" class="filter-input" name="search"
+                                   value="{{ current_filters.search|default:'' }}"
+                                   placeholder="Name, email, or username">
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Role</label>
+                            <select class="filter-select" name="role">
+                                <option value="">All Roles</option>
+                                <option value="admin" {% if current_filters.role == 'admin' %}selected{% endif %}>Admin</option>
+                                <option value="counselor" {% if current_filters.role == 'counselor' %}selected{% endif %}>Counselor</option>
+                                <option value="client" {% if current_filters.role == 'client' %}selected{% endif %}>Client</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Status</label>
+                            <select class="filter-select" name="status">
+                                <option value="">All Status</option>
+                                <option value="active" {% if current_filters.status == 'active' %}selected{% endif %}>Active</option>
+                                <option value="inactive" {% if current_filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter btn-apply">🔍 Apply Filters</button>
+                        <a href="{% url 'all_users' %}" class="btn-filter btn-clear">🔄 Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Back Navigation -->
+        <a href="{% url 'user_management' %}" class="back-button">
+            ← Back to User Dashboard
+        </a>
+
+        <!-- Mobile Stats Grid -->
+        <div class="mobile-stats-grid">
+            <div class="mobile-stat-card">
+                <span class="mobile-stat-number">{{ total_users }}</span>
+                <span class="mobile-stat-label">Total Users</span>
+            </div>
+            <div class="mobile-stat-card">
+                <span class="mobile-stat-number">{{ active_users }}</span>
+                <span class="mobile-stat-label">Active Users</span>
+            </div>
+            <div class="mobile-stat-card">
+                <span class="mobile-stat-number">{{ admin_users }}</span>
+                <span class="mobile-stat-label">Administrators</span>
+            </div>
+            <div class="mobile-stat-card">
+                <span class="mobile-stat-number">{{ counselor_users }}</span>
+                <span class="mobile-stat-label">Counselors</span>
+            </div>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="results-summary">
+            <div class="results-text">
+                Showing {{ users|length }} of {{ total_users }} users
+                {% if current_filters.search %}
+                    matching "{{ current_filters.search }}"
+                {% endif %}
+                {% if current_filters.role %}
+                    with role "{{ current_filters.role }}"
+                {% endif %}
+                {% if current_filters.status %}
+                    with status "{{ current_filters.status }}"
+                {% endif %}
+            </div>
+            <div class="results-count">{{ users|length }}</div>
+        </div>
+
+        <!-- Mobile Users Cards -->
+        <div class="users-cards">
+            {% for user in users %}
+                <div class="user-card">
+                    <div class="user-card-header">
+                        <div class="user-card-avatar">
+                            {{ user.first_name|first|default:user.username|first|upper }}
+                        </div>
+                        <div class="user-card-info">
+                            <div class="user-card-name">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="user-card-email">{{ user.email }}</div>
+                        </div>
+                    </div>
+                    <div class="user-card-meta">
+                        <span class="user-card-role {{ user.role }}">{{ user.role }}</span>
+                        <span class="user-card-status {{ user.is_active|yesno:'active,inactive' }}">
+                            {{ user.is_active|yesno:"Active,Inactive" }}
+                        </span>
+                    </div>
+                    <div class="user-card-joined">Joined {{ user.date_joined|date:"M d, Y" }}</div>
+                    <div class="user-card-actions">
+                        <a href="{% url 'user_profile' user.id %}" class="mobile-action-btn view">👁️ View</a>
+                        <a href="{% url 'edit_user_profile' user.id %}" class="mobile-action-btn edit">✏️ Edit</a>
+                        {% if user.is_active %}
+                            <button onclick="toggleUserStatus({{ user.id }}, false)" class="mobile-action-btn delete">🚫 Deactivate</button>
+                        {% else %}
+                            <button onclick="toggleUserStatus({{ user.id }}, true)" class="mobile-action-btn view">✅ Activate</button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="user-card" style="text-align: center; padding: 3rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+                    <div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #1f2937;">No users found</div>
+                    <div style="font-size: 0.9rem; color: #64748b;">Try adjusting your filters or search terms.</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Desktop Users Table -->
+        <div class="users-table-container">
+            <table class="users-table" role="table" aria-label="All users management table">
+                <thead>
+                    <tr>
+                        <th scope="col">User</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Join Date</th>
+                        <th scope="col">Last Login</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">
+                                        {{ user.first_name|first|default:user.username|first|upper }}
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                                        <div class="user-email">{{ user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="role-badge {{ user.role }}">{{ user.role }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge {{ user.is_active|yesno:'active,inactive' }}">
+                                    {{ user.is_active|yesno:"Active,Inactive" }}
+                                </span>
+                            </td>
+                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                            <td>{{ user.last_login|date:"M d, Y g:i A"|default:"Never" }}</td>
+                            <td>
+                                <div class="user-actions">
+                                    <a href="{% url 'user_profile' user.id %}" class="action-btn view">👁️ View</a>
+                                    <a href="{% url 'edit_user_profile' user.id %}" class="action-btn edit">✏️ Edit</a>
+                                    {% if user.is_active %}
+                                        <button onclick="toggleUserStatus({{ user.id }}, false)" class="action-btn delete">🚫 Deactivate</button>
+                                    {% else %}
+                                        <button onclick="toggleUserStatus({{ user.id }}, true)" class="action-btn view">✅ Activate</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 3rem; color: #6b7280;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+                                <div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">No users found</div>
+                                <div style="font-size: 0.9rem;">Try adjusting your filters or search terms.</div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    function toggleMobileFilters() {
+        const filters = document.getElementById('mobileFilters');
+        filters.classList.toggle('show');
+    }
+
+    function toggleUserStatus(userId, activate) {
+        const action = activate ? 'activate' : 'deactivate';
+        const confirmMessage = `Are you sure you want to ${action} this user?`;
+
+        if (confirm(confirmMessage)) {
+            fetch(`/accounts/${action}-user/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the user status.');
+            });
+        }
+    }
+
+    // Auto-hide mobile filters when clicking outside
+    document.addEventListener('click', function(e) {
+        const filters = document.getElementById('mobileFilters');
+        const toggleBtn = document.querySelector('.mobile-filters-toggle');
+
+        if (window.innerWidth <= 800 &&
+            filters.classList.contains('show') &&
+            !filters.contains(e.target) &&
+            e.target !== toggleBtn) {
+            filters.classList.remove('show');
+        }
+    });
+
+    // Show mobile filters toggle on small screens
+    if (window.innerWidth <= 800) {
+        document.querySelector('.mobile-filters-toggle').style.display = 'flex';
+    }
+
+    window.addEventListener('resize', function() {
+        const toggleBtn = document.querySelector('.mobile-filters-toggle');
+        if (window.innerWidth <= 800) {
+            toggleBtn.style.display = 'flex';
+        } else {
+            toggleBtn.style.display = 'none';
+            document.getElementById('mobileFilters').classList.remove('show');
+        }
+    });
+</script>
+{% endblock %}

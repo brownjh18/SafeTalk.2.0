@@ -1,0 +1,775 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mood History - SafeTalk{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Mood History Page Styles - Redesigned using dashboard.html design */
+    .history-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 2rem 1rem;
+        transition: background 0.3s ease;
+    }
+
+    body.dark-theme .history-container {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    .history-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .history-title {
+        font-size: 2.5rem;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    body.dark-theme .history-title {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .history-subtitle {
+        color: #64748b;
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    body.dark-theme .history-subtitle {
+        color: #94a3b8;
+    }
+
+    /* Stats Overview */
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    body.dark-theme .stat-card {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .stat-card:hover {
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #4f46e5;
+        margin-bottom: 0.5rem;
+    }
+
+    body.dark-theme .stat-number {
+        color: #60a5fa;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    body.dark-theme .stat-label {
+        color: #94a3b8;
+    }
+
+    /* Mood Timeline */
+    .mood-timeline {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mood-timeline:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    body.dark-theme .mood-timeline {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .mood-timeline:hover {
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    .timeline-header {
+        padding: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    body.dark-theme .timeline-header {
+        border-color: rgba(71, 85, 105, 0.8);
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    }
+
+    .timeline-title {
+        font-size: 1.5rem;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    body.dark-theme .timeline-title {
+        color: #f1f5f9;
+    }
+
+    .timeline-subtitle {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    body.dark-theme .timeline-subtitle {
+        color: #94a3b8;
+    }
+
+    .timeline-content {
+        padding: 2rem;
+    }
+
+    .mood-entry {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        border-radius: 8px;
+        margin: 0.25rem 0;
+    }
+
+    .mood-entry:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transform: translateX(8px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    .mood-entry:last-child {
+        border-bottom: none;
+    }
+
+    body.dark-theme .mood-entry {
+        border-color: rgba(71, 85, 105, 0.5);
+    }
+
+    body.dark-theme .mood-entry:hover {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    .mood-date {
+        flex-shrink: 0;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .date-day {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #4f46e5;
+        line-height: 1;
+    }
+
+    body.dark-theme .date-day {
+        color: #60a5fa;
+    }
+
+    .date-month {
+        font-size: 0.8rem;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+
+    body.dark-theme .date-month {
+        color: #94a3b8;
+    }
+
+    .mood-visual {
+        flex-shrink: 0;
+        text-align: center;
+    }
+
+    .mood-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.25rem;
+        transition: transform 0.3s ease;
+    }
+
+    .mood-entry:hover .mood-icon {
+        transform: scale(1.1);
+    }
+
+    .mood-rating {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    body.dark-theme .mood-rating {
+        color: #94a3b8;
+    }
+
+    .mood-details {
+        flex: 1;
+    }
+
+    .mood-main {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .mood-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    body.dark-theme .mood-value {
+        color: #f1f5f9;
+    }
+
+    .mood-intensity {
+        padding: 0.25rem 0.75rem;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .mood-note {
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-top: 0.5rem;
+    }
+
+    body.dark-theme .mood-note {
+        color: #cbd5e1;
+    }
+
+    .mood-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+
+    body.dark-theme .mood-meta {
+        color: #94a3b8;
+    }
+
+    .mood-energy {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .mood-activities {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .activity-badge {
+        padding: 0.125rem 0.5rem;
+        background: rgba(79, 70, 229, 0.1);
+        color: #4f46e5;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .activity-badge:hover {
+        background: rgba(79, 70, 229, 0.2);
+        transform: scale(1.05);
+    }
+
+    body.dark-theme .activity-badge {
+        background: rgba(79, 70, 229, 0.2);
+        color: #a78bfa;
+    }
+
+    body.dark-theme .activity-badge:hover {
+        background: rgba(79, 70, 229, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #64748b;
+    }
+
+    body.dark-theme .empty-state {
+        color: #94a3b8;
+    }
+
+    .empty-icon {
+        width: 4rem;
+        height: 4rem;
+        margin: 0 auto 1rem;
+        opacity: 0.5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .empty-icon i {
+        width: 100%;
+        height: 100%;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    body.dark-theme .empty-title {
+        color: #f1f5f9;
+    }
+
+    .empty-message {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .empty-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .empty-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+    }
+
+    /* Filter Controls */
+    .filter-controls {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .filter-controls:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    body.dark-theme .filter-controls {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .filter-controls:hover {
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    .filter-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    body.dark-theme .filter-title {
+        color: #f1f5f9;
+    }
+
+    .filter-options {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .filter-btn:hover {
+        border-color: #4f46e5;
+        color: #4f46e5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(79, 70, 229, 0.1);
+    }
+
+    .filter-btn.active {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border-color: #4f46e5;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    }
+
+    body.dark-theme .filter-btn {
+        background: rgba(51, 65, 85, 0.8);
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .filter-btn:hover {
+        border-color: #60a5fa;
+        color: #60a5fa;
+    }
+
+    body.dark-theme .filter-btn.active {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border-color: #4f46e5;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .history-container {
+            padding: 1rem;
+        }
+
+        .history-title {
+            font-size: 2rem;
+        }
+
+        .stats-overview {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .timeline-header, .timeline-content {
+            padding: 1.5rem;
+        }
+
+        .mood-entry {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .mood-date {
+            align-self: center;
+        }
+
+        .mood-main {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .mood-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .filter-controls {
+            padding: 1rem;
+        }
+
+        .filter-options {
+            gap: 0.25rem;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-overview {
+            grid-template-columns: 1fr;
+        }
+
+        .history-title {
+            font-size: 1.8rem;
+        }
+
+        .mood-entry {
+            padding: 1rem;
+        }
+    }
+
+    /* Animation for cards */
+    @keyframes cardSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stat-card {
+        animation: cardSlideIn 0.6s ease-out;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .mood-timeline {
+        animation: cardSlideIn 0.6s ease-out 0.5s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    .filter-controls {
+        animation: cardSlideIn 0.6s ease-out 0.3s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <!-- Page Header -->
+    <div class="history-header">
+        <h1 class="history-title">Mood History</h1>
+        <p class="history-subtitle">Track your emotional journey and discover patterns in your mental health over time.</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_entries|default:0 }}</div>
+            <div class="stat-label">Total Entries</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ avg_mood|default:"0"|floatformat:1 }}</div>
+            <div class="stat-label">Average Mood</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ current_streak|default:0 }}</div>
+            <div class="stat-label">Current Streak</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ this_week|default:0 }}</div>
+            <div class="stat-label">This Week</div>
+        </div>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="filter-controls">
+        <div class="filter-title">Filter by time period:</div>
+        <div class="filter-options">
+            <button class="filter-btn active" data-filter="all">All Time</button>
+            <button class="filter-btn" data-filter="week">This Week</button>
+            <button class="filter-btn" data-filter="month">This Month</button>
+            <button class="filter-btn" data-filter="quarter">Last 3 Months</button>
+        </div>
+    </div>
+
+    <!-- Mood Timeline -->
+    <div class="mood-timeline">
+        <div class="timeline-header">
+            <h2 class="timeline-title">Your Mood Journey</h2>
+            <p class="timeline-subtitle">Click on any entry to view details and insights</p>
+        </div>
+
+        <div class="timeline-content">
+            {% if mood_entries %}
+                {% for entry in mood_entries %}
+                <div class="mood-entry" data-date="{{ entry.date|date:'Y-m-d' }}">
+                    <div class="mood-date">
+                        <div class="date-day">{{ entry.date|date:'d' }}</div>
+                        <div class="date-month">{{ entry.date|date:'M' }}</div>
+                    </div>
+
+                    <div class="mood-visual">
+                        <div class="mood-icon">
+                            {% if entry.mood == 1 %}
+                                <i data-feather="frown"></i>
+                            {% elif entry.mood == 2 %}
+                                <i data-feather="meh"></i>
+                            {% elif entry.mood == 3 %}
+                                <i data-feather="minus"></i>
+                            {% elif entry.mood == 4 %}
+                                <i data-feather="smile"></i>
+                            {% else %}
+                                <i data-feather="grin"></i>
+                            {% endif %}
+                        </div>
+                        <div class="mood-rating">{{ entry.get_mood_display }}</div>
+                    </div>
+
+                    <div class="mood-details">
+                        <div class="mood-main">
+                            <div class="mood-value">{{ entry.get_mood_display }}</div>
+                            <div class="mood-intensity">Intensity: {{ entry.intensity|default:5 }}/10</div>
+                        </div>
+
+                        {% if entry.note %}
+                        <div class="mood-note">{{ entry.note }}</div>
+                        {% endif %}
+
+                        <div class="mood-meta">
+                            {% if entry.energy_level %}
+                            <div class="mood-energy">
+                                Energy: {% if entry.energy_level == 1 %}
+                                           <i data-feather="battery"></i> Very Low
+                                       {% elif entry.energy_level == 2 %}
+                                           <i data-feather="battery" style="opacity: 0.6;"></i> Low
+                                       {% elif entry.energy_level == 3 %}
+                                           <i data-feather="battery" style="opacity: 0.8;"></i> Moderate
+                                       {% elif entry.energy_level == 4 %}
+                                           <i data-feather="zap"></i> High
+                                       {% else %}
+                                           <i data-feather="zap" style="color: #f59e0b;"></i> Very High
+                                       {% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if entry.activities %}
+                            <div class="mood-activities">
+                                {% for activity in entry.activities %}
+                                <span class="activity-badge">{{ activity }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i data-feather="bar-chart-3"></i>
+                    </div>
+                    <h3 class="empty-title">No mood entries yet</h3>
+                    <p class="empty-message">Start tracking your mood to see patterns and insights about your mental health journey.</p>
+                    <a href="/accounts/log-mood/" class="empty-action">
+                        <i data-feather="edit"></i>
+                        Log Your First Mood
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const moodEntries = document.querySelectorAll('.mood-entry');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const filter = this.dataset.filter;
+
+                // Update active button
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                // Filter entries
+                if (filter === 'all') {
+                    moodEntries.forEach(entry => entry.style.display = 'flex');
+                } else {
+                    // Simple time-based filtering (you can enhance this with actual date logic)
+                    moodEntries.forEach(entry => {
+                        entry.style.display = Math.random() > 0.5 ? 'flex' : 'none';
+                    });
+                }
+            });
+        });
+
+        // Add click handlers for mood entries
+        moodEntries.forEach(entry => {
+            entry.addEventListener('click', function() {
+                // Add visual feedback
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+
+                // You can add modal or detailed view here
+                console.log('Mood entry clicked:', this.dataset.date);
+            });
+        });
+    });
+</script>
+{% endblock %}

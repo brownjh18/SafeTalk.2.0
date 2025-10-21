@@ -1,0 +1,660 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+    /* Dashboard Custom Styles - Resource Form Page */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+    
+    .card-header {
+        padding: 1.25rem 1.5rem 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+        letter-spacing: -0.025em;
+    }
+    
+    .card-icon {
+        font-size: 1.5rem;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+    
+    .dashboard-card:hover .card-icon {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    
+    .card-content {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    /* Form Styles */
+    .resource-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .form-label {
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.625rem 1.25rem;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        min-height: 44px;
+    }
+    
+    .action-btn:hover {
+        background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .action-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    }
+    
+    .required {
+        color: #ef4444;
+        margin-left: 0.25rem;
+    }
+    
+    .error-message {
+        color: #ef4444;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
+    
+    .help-text {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+        font-style: italic;
+    }
+    
+    /* Current File Section */
+    .current-file-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .current-file-section h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        letter-spacing: -0.025em;
+    }
+    
+    .current-file-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .file-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+    
+    .file-info {
+        flex: 1;
+    }
+    
+    .file-name {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    .file-size {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+    
+    .delete-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        color: #dc2626;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .delete-checkbox input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .file-help {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-style: italic;
+    }
+    
+    /* Page Header Enhancements */
+    .page-header {
+        margin-bottom: 2rem;
+        text-align: center;
+        padding: 1rem 0;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.05em;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .page-subtitle {
+        font-size: 1.1rem;
+        color: #64748b;
+        font-weight: 500;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    
+        .dashboard-card {
+            margin: 0 0.5rem;
+        }
+    
+        .card-header {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+    
+        .card-content {
+            padding: 1rem 1.25rem;
+        }
+    
+        .page-title {
+            font-size: 2rem;
+        }
+    
+        .page-subtitle {
+            font-size: 1rem;
+        }
+    
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    
+        .form-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+    
+        .action-btn {
+            width: 100%;
+        }
+    
+        .file-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.75rem;
+        }
+    
+        .card-title {
+            font-size: 1rem;
+        }
+    
+        .form-control {
+            padding: 0.625rem 0.875rem;
+            font-size: 0.8rem;
+        }
+    
+        .form-label {
+            font-size: 0.8rem;
+        }
+    
+        .action-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+    
+    /* Animation for cards */
+    @keyframes cardSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .dashboard-card {
+        animation: cardSlideIn 0.6s ease-out;
+    }
+    
+    .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+    .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+    
+    /* Dark theme support */
+    body.dark-theme .dashboard-card {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+    
+    body.dark-theme .card-header {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: #475569;
+    }
+    
+    body.dark-theme .card-title {
+        color: #f1f5f9;
+    }
+    
+    body.dark-theme .form-label {
+        color: #94a3b8;
+    }
+    
+    body.dark-theme .form-control {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.6);
+        color: #f1f5f9;
+    }
+    
+    body.dark-theme .form-control:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+    }
+    
+    body.dark-theme .current-file-section {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+    
+    body.dark-theme .current-file-section h3 {
+        color: #f1f5f9;
+    }
+    
+    body.dark-theme .current-file-card {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.6);
+    }
+    
+    body.dark-theme .file-name {
+        color: #f1f5f9;
+    }
+    
+    body.dark-theme .file-size {
+        color: #94a3b8;
+    }
+    
+    body.dark-theme .file-help {
+        color: #94a3b8;
+    }
+    
+    body.dark-theme .page-title {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    body.dark-theme .page-subtitle {
+        color: #94a3b8;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ title }}</h1>
+    <p class="page-subtitle">Resource Management</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Form Instructions Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Instructions</h3>
+            <div class="card-icon">📋</div>
+        </div>
+        <div class="card-content">
+            <div class="resource-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Required Fields</span>
+                    <span class="stat-value">Title, Content, Type</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Optional</span>
+                    <span class="stat-value">Category, Tags, Files</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">File Size Limit</span>
+                    <span class="stat-value">10MB max</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Resource Details</h3>
+            <div class="card-icon">📝</div>
+        </div>
+        <div class="card-content">
+            <form method="post" enctype="multipart/form-data" class="resource-form">
+                {% csrf_token %}
+
+                <!-- Title Field -->
+                <div class="form-group">
+                    <label class="form-label">
+                        {{ form.title.label }}{% if form.title.field.required %}<span class="required">*</span>{% endif %}
+                    </label>
+                    <input type="text" name="{{ form.title.name }}" value="{{ form.title.value|default:'' }}"
+                           class="form-control" placeholder="Enter resource title" required>
+                    {% if form.title.errors %}
+                        {% for error in form.title.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Type and Category Row -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            {{ form.resource_type.label }}{% if form.resource_type.field.required %}<span class="required">*</span>{% endif %}
+                        </label>
+                        <select name="{{ form.resource_type.name }}" class="form-control">
+                            {% for value, label in form.resource_type.field.choices %}
+                                <option value="{{ value }}" {% if form.resource_type.value == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.resource_type.errors %}
+                            {% for error in form.resource_type.errors %}
+                                <div class="error-message">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">{{ form.category.label }}</label>
+                        <select name="{{ form.category.name }}" class="form-control">
+                            <option value="">Select Category</option>
+                            {% for category in form.category.field.queryset %}
+                                <option value="{{ category.id }}" {% if form.category.value == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.category.errors %}
+                            {% for error in form.category.errors %}
+                                <div class="error-message">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Content Field -->
+                <div class="form-group">
+                    <label class="form-label">
+                        {{ form.content.label }}{% if form.content.field.required %}<span class="required">*</span>{% endif %}
+                    </label>
+                    <textarea name="{{ form.content.name }}" class="form-control"
+                              placeholder="Enter resource content">{{ form.content.value|default:'' }}</textarea>
+                    {% if form.content.errors %}
+                        {% for error in form.content.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Tags Field -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.tags.label }}</label>
+                    <input type="text" name="{{ form.tags.name }}" value="{{ form.tags.value|default:'' }}"
+                           class="form-control" placeholder="anxiety, depression, coping, mindfulness">
+                    {% if form.tags.errors %}
+                        {% for error in form.tags.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <div class="help-text">Separate tags with commas</div>
+                </div>
+
+                <!-- File Attachment Field -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.attachment.label }}</label>
+                    <input type="file" name="{{ form.attachment.name }}"
+                           class="form-control"
+                           accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.mp4,.mp3,.wav,.avi,.mov">
+                    {% if form.attachment.errors %}
+                        {% for error in form.attachment.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {% if form.attachment.help_text %}
+                        <div class="help-text">{{ form.attachment.help_text }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="action-btn">
+                        {{ submit_text }}
+                    </button>
+                    <a href="{% url 'resource_list' %}" class="action-btn" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Current File Section (if editing) -->
+{% if resource.attachment %}
+<div class="current-file-section">
+    <h3>Current Attachment</h3>
+    <div class="current-file-card">
+        <div class="file-header">
+            <div class="file-icon">📎</div>
+            <div class="file-info">
+                <div class="file-name">{{ resource.attachment_name|default:resource.attachment.name }}</div>
+                <div class="file-size">{% if resource.attachment_size %}{{ resource.attachment_size|filesizeformat }}{% endif %}</div>
+            </div>
+            <label class="delete-checkbox">
+                <input type="checkbox" name="delete_attachment" value="1">
+                <span>Delete file</span>
+            </label>
+        </div>
+        <div class="file-help">Upload a new file to replace the current one, or check the box above to remove it</div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Form enhancement functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-resize textarea
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    }
+
+    // Form validation
+    const form = document.querySelector('.resource-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = '#dc2626';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '#d1d5db';
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+
+        // Real-time validation feedback
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.style.borderColor = '#dc2626';
+                } else {
+                    this.style.borderColor = '#d1d5db';
+                }
+            });
+
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#4f46e5';
+            });
+        });
+    }
+
+    // Add loading animation to cards on page load
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach(card => {
+        card.classList.add('loading');
+        setTimeout(() => {
+            card.classList.remove('loading');
+        }, 1000);
+    });
+});
+</script>
+{% endblock %}

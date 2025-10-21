@@ -7,20 +7,736 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/welcome.css' %}">
     <link rel="icon" href="{% static 'img/favicon.png' %}">
+    <style>
+        /* Modern Navbar Styles */
+        .modern-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .modern-navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Enhanced Dark Theme Support for Welcome Page */
+        body.dark-theme .modern-navbar {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom-color: rgba(71, 85, 105, 0.2);
+        }
+
+        body.dark-theme .modern-navbar.scrolled {
+            background: rgba(15, 23, 42, 0.98);
+        }
+
+        body.dark-theme .nav-item-text {
+            color: #94a3b8;
+        }
+
+        body.dark-theme .nav-item:hover .nav-item-text {
+            color: white;
+        }
+
+        body.dark-theme .nav-btn-secondary {
+            background: transparent;
+            color: #60a5fa;
+            border-color: #60a5fa;
+        }
+
+        body.dark-theme .nav-btn-secondary:hover {
+            background: #60a5fa;
+            color: white;
+        }
+
+        body.dark-theme .mobile-menu {
+            background: rgba(15, 23, 42, 0.98);
+        }
+
+        body.dark-theme .mobile-nav-text {
+            color: #94a3b8;
+        }
+
+        body.dark-theme .mobile-nav-item:hover .mobile-nav-text {
+            color: #60a5fa;
+        }
+
+        body.dark-theme .mobile-btn-secondary {
+            background: transparent;
+            color: #60a5fa;
+            border-color: #60a5fa;
+        }
+
+        body.dark-theme .mobile-btn-secondary:hover {
+            background: #60a5fa;
+            color: white;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+
+        /* Logo Section */
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Desktop Navigation */
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-item {
+            position: relative;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover::before {
+            left: 0;
+        }
+
+        .nav-item-text {
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-item:hover .nav-item-text {
+            color: white;
+        }
+
+        /* Action Buttons */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-btn-secondary {
+            background: transparent;
+            color: #4f46e5;
+            border: 2px solid #4f46e5;
+        }
+
+        .nav-btn-secondary::before {
+            background: #4f46e5;
+        }
+
+        .nav-btn-secondary:hover::before {
+            left: 0;
+        }
+
+        .nav-btn-secondary:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .nav-btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .nav-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .hamburger-line {
+            width: 24px;
+            height: 2px;
+            background: #4f46e5;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .mobile-toggle.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .mobile-toggle.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-toggle.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateY(-100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mobile-nav-item {
+            text-decoration: none;
+            padding: 1rem;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mobile-nav-text {
+            color: #64748b;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .mobile-nav-item:hover {
+            background: rgba(79, 70, 229, 0.1);
+            transform: translateX(8px);
+        }
+
+        .mobile-nav-item:hover .mobile-nav-text {
+            color: #4f46e5;
+        }
+
+        .mobile-nav-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 1rem 0;
+        }
+
+        .mobile-nav-btn {
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin: 0.5rem 0;
+        }
+
+        .mobile-btn-secondary {
+            background: transparent;
+            color: #4f46e5;
+            border: 2px solid #4f46e5;
+        }
+
+        .mobile-btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+                height: 70px;
+            }
+
+            .nav-logo-img {
+                width: 32px;
+                height: 32px;
+            }
+
+            .nav-logo-text {
+                font-size: 1.25rem;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .nav-actions {
+                display: none;
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .modern-navbar.scrolled {
+                background: rgba(255, 255, 255, 0.98);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 0.75rem;
+                height: 60px;
+            }
+
+            .nav-logo-img {
+                width: 28px;
+                height: 28px;
+            }
+
+            .nav-logo-text {
+                font-size: 1.1rem;
+            }
+
+            .mobile-menu-content {
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        /* Enhanced navbar animations */
+        .modern-navbar {
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .nav-item {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .nav-item:nth-child(1) { animation-delay: 0.1s; }
+        .nav-item:nth-child(2) { animation-delay: 0.2s; }
+        .nav-item:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* About Section Styles */
+        .about {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            position: relative;
+        }
+
+        .about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #475569;
+        }
+
+        .about-text p {
+            margin-bottom: 1.5rem;
+        }
+
+        .about-values {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .value-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .value-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .value-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .value-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .value-item h4 {
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+            font-size: 1.1rem;
+        }
+
+        .value-item p {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Contact Section Styles */
+        .contact {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            position: relative;
+        }
+
+        .contact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .contact-details h4 {
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+            font-size: 1.2rem;
+        }
+
+        .contact-details p {
+            color: #4f46e5;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .contact-form-element {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            color: #1f2937;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: transparent;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Mobile responsiveness for new sections */
+        @media (max-width: 768px) {
+            .about-content,
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .about-values {
+                gap: 1.5rem;
+            }
+
+            .value-item {
+                padding: 1.25rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-form-element {
+                padding: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
+    <!-- Modern Navigation -->
+    <nav class="modern-navbar">
         <div class="nav-container">
-            <div class="nav-brand">
-                <h2>SafeTalk</h2>
+            <!-- Logo Section -->
+            <div class="nav-logo">
+                <img src="{% static 'img/SafeTalkLogo..png' %}" alt="SafeTalk Logo" class="nav-logo-img">
+                <span class="nav-logo-text">SafeTalk</span>
             </div>
-            <div class="nav-links">
-                <a href="#features" class="nav-link">Features</a>
-                <a href="#about" class="nav-link">About</a>
-                <a href="#contact" class="nav-link">Contact</a>
-                <a href="{% url 'login' %}" class="btn btn-secondary">Login</a>
-                <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+
+            <!-- Desktop Navigation -->
+            <div class="nav-menu" id="navMenu">
+                <a href="#features" class="nav-item">
+                    <span class="nav-item-text">Features</span>
+                </a>
+                <a href="#about" class="nav-item">
+                    <span class="nav-item-text">About</span>
+                </a>
+                <a href="#contact" class="nav-item">
+                    <span class="nav-item-text">Contact</span>
+                </a>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="nav-actions">
+                <a href="/accounts/login/" class="nav-btn nav-btn-secondary">Login</a>
+                <a href="/accounts/register/" class="nav-btn nav-btn-primary">Get Started</a>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-toggle" onclick="toggleMobileMenu()" id="mobileToggle">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="#features" class="mobile-nav-item" onclick="closeMobileMenu()">
+                    <span class="mobile-nav-text">Features</span>
+                </a>
+                <a href="#about" class="mobile-nav-item" onclick="closeMobileMenu()">
+                    <span class="mobile-nav-text">About</span>
+                </a>
+                <a href="#contact" class="mobile-nav-item" onclick="closeMobileMenu()">
+                    <span class="mobile-nav-text">Contact</span>
+                </a>
+                <div class="mobile-nav-divider"></div>
+                <a href="/accounts/login/" class="mobile-nav-btn mobile-btn-secondary" onclick="closeMobileMenu()">Login</a>
+                <a href="/accounts/register/" class="mobile-nav-btn mobile-btn-primary" onclick="closeMobileMenu()">Get Started</a>
             </div>
         </div>
     </nav>
@@ -37,7 +753,7 @@
                         with our comprehensive platform.
                     </p>
                     <div class="hero-buttons">
-                        <a href="{% url 'register' %}" class="btn btn-primary btn-large">Start Your Journey</a>
+                        <a href="/accounts/register/" class="btn btn-primary btn-large">Start Your Journey</a>
                         <a href="#features" class="btn btn-secondary btn-large">Learn More</a>
                     </div>
                 </div>
@@ -101,6 +817,39 @@
         </div>
     </section>
 
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>About SafeTalk</h2>
+                <p>Learn more about our mission and commitment to mental health support</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>SafeTalk was founded with a simple yet powerful mission: to make mental health support accessible, confidential, and effective for everyone. We believe that seeking help should be as easy as having a conversation with a trusted friend.</p>
+                    <p>Our platform combines cutting-edge technology with compassionate human support to create a comprehensive mental health ecosystem. From AI-powered chat support to licensed professional counseling, we're here to support you at every step of your journey.</p>
+                </div>
+                <div class="about-values">
+                    <div class="value-item">
+                        <div class="value-icon">🔒</div>
+                        <h4>Privacy First</h4>
+                        <p>End-to-end encryption ensures your conversations remain completely confidential and secure.</p>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon">🤝</div>
+                        <h4>Human-Centered</h4>
+                        <p>Technology serves humanity, not the other way around. Real connections matter.</p>
+                    </div>
+                    <div class="value-item">
+                        <div class="value-icon">⚡</div>
+                        <h4>24/7 Available</h4>
+                        <p>Support when you need it most, whether it's 2 AM or during a crisis moment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Stats Section -->
     <section class="stats">
         <div class="container">
@@ -125,13 +874,67 @@
         </div>
     </section>
 
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2>Get In Touch</h2>
+                <p>Have questions? We'd love to hear from you</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">📧</div>
+                        <div class="contact-details">
+                            <h4>Email Us</h4>
+                            <p>support@safetalk.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div class="contact-details">
+                            <h4>Call Us</h4>
+                            <p>1-800-SAFETALK</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div class="contact-details">
+                            <h4>Live Chat</h4>
+                            <p>Available 24/7 on our platform</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form class="contact-form-element">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" placeholder="Your Email" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" placeholder="Subject" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="Your Message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta">
         <div class="container">
             <div class="cta-content">
                 <h2>Ready to Take the First Step?</h2>
                 <p>Join thousands of people who have found support and healing through SafeTalk.</p>
-                <a href="{% url 'register' %}" class="btn btn-primary btn-large">Create Your Account</a>
+                <a href="/accounts/register/" class="btn btn-primary btn-large">Create Your Account</a>
             </div>
         </div>
     </section>
@@ -149,8 +952,8 @@
                     <ul>
                         <li><a href="#features">Features</a></li>
                         <li><a href="#about">About Us</a></li>
-                        <li><a href="{% url 'login' %}">Login</a></li>
-                        <li><a href="{% url 'register' %}">Sign Up</a></li>
+                        <li><a href="/accounts/login/">Login</a></li>
+                        <li><a href="/accounts/register/">Sign Up</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -193,15 +996,99 @@
             });
         });
 
-        // Navbar background on scroll
+        // Modern Navbar Scroll Effect
         window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar');
+            const navbar = document.querySelector('.modern-navbar');
             if (window.scrollY > 50) {
-                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-                navbar.style.backdropFilter = 'blur(10px)';
+                navbar.classList.add('scrolled');
             } else {
-                navbar.style.background = 'var(--white)';
+                navbar.classList.remove('scrolled');
             }
+        });
+
+        // Mobile menu toggle functionality
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileToggle = document.getElementById('mobileToggle');
+
+            const isActive = mobileMenu.classList.contains('active');
+
+            if (isActive) {
+                mobileMenu.classList.remove('active');
+                mobileToggle.classList.remove('active');
+            } else {
+                mobileMenu.classList.add('active');
+                mobileToggle.classList.add('active');
+            }
+        }
+
+        function closeMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileToggle = document.getElementById('mobileToggle');
+
+            mobileMenu.classList.remove('active');
+            mobileToggle.classList.remove('active');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileToggle = document.getElementById('mobileToggle');
+
+            if (!mobileMenu.contains(e.target) && !mobileToggle.contains(e.target)) {
+                closeMobileMenu();
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const navbarHeight = document.querySelector('.modern-navbar').offsetHeight;
+                    const targetPosition = target.offsetTop - navbarHeight;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Navbar items hover effect enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add ripple effect to buttons
+            const buttons = document.querySelectorAll('.nav-btn, .mobile-nav-btn');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+
+                    this.appendChild(ripple);
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
         });
     </script>
 </body>

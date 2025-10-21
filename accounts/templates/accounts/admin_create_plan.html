@@ -8,138 +8,224 @@
     <p class="page-subtitle">Set up a new subscription plan for your users</p>
 </div>
 
-<div class="settings-container">
-    <!-- Plan Creation Form -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>📋 Plan Details</h3>
-            <p>Configure the basic information for your subscription plan</p>
+<div class="dashboard-grid">
+    <!-- Plan Creation Form Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Plan Details</h3>
+            <div class="card-icon">📋</div>
         </div>
+        <div class="card-content">
+            <form method="post" class="plan-form">
+                {% csrf_token %}
 
-        <form method="post" class="plan-form">
-            {% csrf_token %}
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="id_name" class="form-label">Plan Name</label>
-                    <input type="text" name="name" id="id_name" class="form-input" placeholder="e.g., premium_monthly" required>
-                    <small>Internal identifier for the plan (lowercase, no spaces)</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="id_display_name" class="form-label">Display Name</label>
-                    <input type="text" name="display_name" id="id_display_name" class="form-input" placeholder="e.g., Premium Monthly" required>
-                    <small>User-friendly name shown to customers</small>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="id_description" class="form-label">Description</label>
-                <textarea name="description" id="id_description" class="form-input" rows="3" placeholder="Describe what this plan includes..." required></textarea>
-                <small>Brief description of the plan benefits</small>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Monthly Price</label>
-                <div class="price-input-group">
-                    <span class="currency-symbol">$</span>
-                    <input type="number" name="price_monthly" id="id_price_monthly" class="form-input price-input" placeholder="29.99" step="0.01" min="0" required>
-                    <span class="price-period">/month</span>
-                </div>
-                <small>Set the monthly subscription price</small>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Plan Features</label>
-                <div class="features-builder">
-                    <div class="features-input-group">
-                        <input type="text" id="feature-input" class="form-input" placeholder="Add a feature...">
-                        <button type="button" class="btn btn-secondary" onclick="addFeature()">Add Feature</button>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_name" class="form-label">Plan Name</label>
+                        <input type="text" name="name" id="id_name" class="form-input" placeholder="e.g., premium_monthly" required>
+                        <small>Internal identifier for the plan (lowercase, no spaces)</small>
                     </div>
-                    <div id="features-list" class="features-list">
-                        <!-- Features will be added here -->
+
+                    <div class="form-group">
+                        <label for="id_display_name" class="form-label">Display Name</label>
+                        <input type="text" name="display_name" id="id_display_name" class="form-input" placeholder="e.g., Premium Monthly" required>
+                        <small>User-friendly name shown to customers</small>
                     </div>
                 </div>
-                <small>List the key features included in this plan</small>
-                <!-- Hidden inputs for features will be added here -->
-                <div id="features-hidden-inputs"></div>
-            </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i>✅</i> Create Plan
-                </button>
-                <a href="{% url 'admin_plan_management' %}" class="btn btn-secondary">
-                    <i>⬅️</i> Back to Plans
-                </a>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label for="id_description" class="form-label">Description</label>
+                    <textarea name="description" id="id_description" class="form-input" rows="3" placeholder="Describe what this plan includes..." required></textarea>
+                    <small>Brief description of the plan benefits</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Monthly Price</label>
+                    <div class="price-input-group">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" name="price_monthly" id="id_price_monthly" class="form-input price-input" placeholder="29.99" step="0.01" min="0" required>
+                        <span class="price-period">/month</span>
+                    </div>
+                    <small>Set the monthly subscription price</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Plan Features</label>
+                    <div class="features-builder">
+                        <div class="features-input-group">
+                            <input type="text" id="feature-input" class="form-input" placeholder="Add a feature...">
+                            <button type="button" class="action-btn secondary" onclick="addFeature()">Add Feature</button>
+                        </div>
+                        <div id="features-list" class="features-list">
+                            <!-- Features will be added here -->
+                        </div>
+                    </div>
+                    <small>List the key features included in this plan</small>
+                    <!-- Hidden inputs for features will be added here -->
+                    <div id="features-hidden-inputs"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="action-btn">
+                        <i>✅</i> Create Plan
+                    </button>
+                    <a href="{% url 'admin_plan_management' %}" class="action-btn secondary">
+                        <i>⬅️</i> Back to Plans
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- Plan Preview -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>👁️ Plan Preview</h3>
-            <p>See how your plan will appear to users</p>
+    <!-- Plan Preview Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Live Preview</h3>
+            <div class="card-icon">👁️</div>
         </div>
+        <div class="card-content">
+            <div class="plan-preview">
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h4 id="preview-name">Premium Monthly</h4>
+                        <div class="plan-price" id="preview-price">$29.99/month</div>
+                    </div>
+                    <div class="plan-description" id="preview-description">
+                        Access to all premium features including unlimited sessions, priority support, and advanced analytics.
+                    </div>
+                    <ul class="plan-features" id="preview-features">
+                        <li>Unlimited counseling sessions</li>
+                        <li>24/7 priority support</li>
+                        <li>Advanced mood analytics</li>
+                        <li>Custom report generation</li>
+                    </ul>
+                    <div class="plan-status">
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="plan-preview">
-            <div class="plan-card">
-                <div class="plan-header">
-                    <h4 id="preview-name">Premium Monthly</h4>
-                    <div class="plan-price" id="preview-price">$29.99/month</div>
+    <!-- Quick Tips Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Quick Tips</h3>
+            <div class="card-icon">💡</div>
+        </div>
+        <div class="card-content">
+            <div class="tips-list">
+                <div class="tip-item">
+                    <div class="tip-icon">🎯</div>
+                    <div class="tip-content">
+                        <h5>Use clear, benefit-focused names</h5>
+                        <p>"Premium Monthly" vs "Plan A"</p>
+                    </div>
                 </div>
-                <div class="plan-description" id="preview-description">
-                    Access to all premium features including unlimited sessions, priority support, and advanced analytics.
+                <div class="tip-item">
+                    <div class="tip-icon">💰</div>
+                    <div class="tip-content">
+                        <h5>Price psychology</h5>
+                        <p>$29.99 feels better than $30</p>
+                    </div>
                 </div>
-                <ul class="plan-features" id="preview-features">
-                    <li>Unlimited counseling sessions</li>
-                    <li>24/7 priority support</li>
-                    <li>Advanced mood analytics</li>
-                    <li>Custom report generation</li>
-                </ul>
-                <div class="plan-status">
-                    <span class="status-badge status-active">Active</span>
+                <div class="tip-item">
+                    <div class="tip-icon">📝</div>
+                    <div class="tip-content">
+                        <h5>Feature benefits</h5>
+                        <p>Focus on outcomes, not features</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plan Analytics Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Plan Analytics</h3>
+            <div class="card-icon">📊</div>
+        </div>
+        <div class="card-content">
+            <div class="analytics-preview">
+                <div class="metric-item">
+                    <span class="metric-label">Est. Monthly Revenue</span>
+                    <span class="metric-value" id="est-revenue">$0</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Break-even Point</span>
+                    <span class="metric-value" id="break-even">0 subscribers</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Profit Margin</span>
+                    <span class="metric-value" id="profit-margin">0%</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+{% block extra_scripts %}
 <style>
-.settings-container {
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-.settings-section {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.section-header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+.dashboard-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
 }
 
-.section-header h3 {
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
     color: #1f2937;
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin: 0;
+    letter-spacing: -0.025em;
 }
 
-.section-header p {
-    color: #6b7280;
-    font-size: 0.875rem;
+.card-icon {
+    font-size: 1.5rem;
+    opacity: 0.8;
+    transition: all 0.3s ease;
 }
 
+.dashboard-card:hover .card-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.card-content {
+    padding: 1.25rem 1.5rem;
+}
+
+/* Form Styles */
 .plan-form {
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
 }
 
 .form-grid {
@@ -245,6 +331,12 @@ small {
     background: white;
     border-radius: 6px;
     border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+    border-color: #4f46e5;
+    background: #f8fafc;
 }
 
 .feature-text {
@@ -271,71 +363,36 @@ small {
     justify-content: center;
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid #e2e8f0;
 }
 
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 2rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.2s;
-    border: none;
-    cursor: pointer;
-    min-height: 48px;
-}
-
-.btn-primary {
-    background: #4f46e5;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #3730a3;
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #d1d5db;
-}
-
-.btn-secondary:hover {
-    background: #e5e7eb;
-}
-
+/* Plan Preview */
 .plan-preview {
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
 }
 
 .plan-card {
     border: 2px solid #e5e7eb;
     border-radius: 12px;
-    padding: 2rem;
+    padding: 1.5rem;
     background: white;
-    max-width: 400px;
-    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .plan-header {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .plan-header h4 {
     margin: 0 0 0.5rem 0;
     color: #1f2937;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
 }
 
 .plan-price {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 800;
     color: #4f46e5;
     margin-bottom: 1rem;
@@ -345,13 +402,13 @@ small {
     color: #6b7280;
     font-size: 0.9rem;
     line-height: 1.5;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .plan-features {
     list-style: none;
     padding: 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .plan-features li {
@@ -360,6 +417,7 @@ small {
     border-bottom: 1px solid #f3f4f6;
     position: relative;
     padding-left: 1.5rem;
+    font-size: 0.875rem;
 }
 
 .plan-features li:last-child {
@@ -388,15 +446,163 @@ small {
     color: #059669;
 }
 
-/* Mobile Responsive Design */
+/* Tips List */
+.tips-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.tip-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.tip-content h5 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
+}
+
+.tip-content p {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Analytics Preview */
+.analytics-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.metric-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.metric-value {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Action Buttons */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    min-height: 44px;
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn.secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.action-btn.secondary:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .settings-container {
-        padding: 0 1rem;
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
-    .settings-section {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
+    .dashboard-card {
+        margin: 0 0.5rem;
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem 0.5rem;
+    }
+
+    .card-content {
+        padding: 1rem 1.25rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
     }
 
     .form-grid {
@@ -408,7 +614,7 @@ small {
         flex-direction: column;
     }
 
-    .features-input-group .btn {
+    .features-input-group .action-btn {
         width: 100%;
         justify-content: center;
     }
@@ -418,32 +624,46 @@ small {
         gap: 0.75rem;
     }
 
-    .btn {
+    .action-btn {
         width: 100%;
         justify-content: center;
         min-height: 48px;
     }
 
     .plan-card {
-        padding: 1.5rem;
+        padding: 1.25rem;
     }
 
     .plan-header h4 {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
     }
 
     .plan-price {
         font-size: 1.5rem;
     }
+
+    .tips-list {
+        gap: 0.75rem;
+    }
+
+    .tip-item {
+        padding: 0.625rem;
+    }
+
+    .tip-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.875rem;
+    }
 }
 
 @media (max-width: 480px) {
-    .settings-section {
-        padding: 1rem;
+    .page-title {
+        font-size: 1.75rem;
     }
 
-    .section-header h3 {
-        font-size: 1.1rem;
+    .card-title {
+        font-size: 1rem;
     }
 
     .form-input {
@@ -464,52 +684,144 @@ small {
     }
 
     .plan-card {
-        padding: 1.25rem;
+        padding: 1rem;
     }
 
     .plan-header h4 {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
     .plan-price {
         font-size: 1.25rem;
     }
+
+    .tip-content h5 {
+        font-size: 0.85rem;
+    }
+
+    .tip-content p {
+        font-size: 0.75rem;
+    }
 }
 
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-    .form-input {
-        font-size: 16px; /* Prevents zoom on iOS */
+/* Animation for cards */
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-    .btn {
-        min-height: 48px;
-        transition: transform 0.1s ease;
-    }
+.dashboard-card {
+    animation: cardSlideIn 0.6s ease-out;
+}
 
-    .btn:active {
-        transform: scale(0.98);
-    }
+.dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.4s; }
 
-    .feature-item {
-        transition: transform 0.2s ease;
-    }
+/* Dark theme support */
+body.dark-theme .dashboard-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
 
-    .feature-item:active {
-        transform: scale(0.98);
-    }
+body.dark-theme .card-header {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: #475569;
+}
 
-    .remove-feature {
-        min-width: 44px;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+body.dark-theme .card-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .form-label {
+    color: #94a3b8;
+}
+
+body.dark-theme .form-input {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-theme .form-input::placeholder {
+    color: #64748b;
+}
+
+body.dark-theme .form-input:focus {
+    border-color: #60a5fa;
+}
+
+body.dark-theme .features-list {
+    background: #334155;
+    border-color: #475569;
+}
+
+body.dark-theme .feature-item {
+    background: #475569;
+    border-color: #64748b;
+    color: #f1f5f9;
+}
+
+body.dark-theme .plan-card {
+    background: #334155;
+    border-color: #475569;
+}
+
+body.dark-theme .plan-header h4 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .plan-description {
+    color: #94a3b8;
+}
+
+body.dark-theme .plan-features li {
+    color: #e2e8f0;
+    border-color: #475569;
+}
+
+body.dark-theme .tip-item {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: rgba(71, 85, 105, 0.6);
+}
+
+body.dark-theme .tip-content h5 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .tip-content p {
+    color: #94a3b8;
+}
+
+body.dark-theme .metric-label {
+    color: #94a3b8;
+}
+
+body.dark-theme .metric-value {
+    color: #f1f5f9;
+}
+
+body.dark-theme .page-title {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-theme .page-subtitle {
+    color: #94a3b8;
 }
 </style>
 
 <script>
+// Features management
 let features = [];
 
 function addFeature() {
@@ -520,6 +832,7 @@ function addFeature() {
         features.push(featureText);
         updateFeaturesList();
         updateFeaturesPreview();
+        updateAnalytics();
         input.value = '';
         input.focus();
     }
@@ -529,6 +842,7 @@ function removeFeature(index) {
     features.splice(index, 1);
     updateFeaturesList();
     updateFeaturesPreview();
+    updateAnalytics();
 }
 
 function updateFeaturesList() {
@@ -580,6 +894,23 @@ function updateFeaturesPreview() {
     }
 }
 
+function updateAnalytics() {
+    const priceInput = document.getElementById('id_price_monthly');
+    const price = parseFloat(priceInput.value) || 29.99;
+
+    // Calculate estimated revenue (assuming 10 subscribers)
+    const estRevenue = (price * 10).toFixed(0);
+    document.getElementById('est-revenue').textContent = '$' + estRevenue;
+
+    // Calculate break-even (assuming $500 fixed costs)
+    const breakEven = Math.ceil(500 / price);
+    document.getElementById('break-even').textContent = breakEven + ' subscribers';
+
+    // Calculate profit margin (assuming 70% margin after costs)
+    const profitMargin = '70%';
+    document.getElementById('profit-margin').textContent = profitMargin;
+}
+
 // Live preview updates
 document.addEventListener('DOMContentLoaded', function() {
     const nameInput = document.getElementById('id_display_name');
@@ -594,6 +925,7 @@ document.addEventListener('DOMContentLoaded', function() {
         previewName.textContent = nameInput.value || 'Premium Monthly';
         previewDescription.textContent = descriptionInput.value || 'Access to all premium features including unlimited sessions, priority support, and advanced analytics.';
         previewPrice.textContent = priceInput.value ? `$${parseFloat(priceInput.value).toFixed(2)}/month` : '$29.99/month';
+        updateAnalytics();
     }
 
     nameInput.addEventListener('input', updatePreview);
@@ -608,9 +940,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Initialize preview
+    // Add loading animation to cards
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach(card => {
+        card.classList.add('loading');
+        setTimeout(() => {
+            card.classList.remove('loading');
+        }, 1000);
+    });
+
+    // Initialize
     updatePreview();
     updateFeaturesPreview();
+    updateAnalytics();
 });
 </script>
+{% endblock %}
 {% endblock %}

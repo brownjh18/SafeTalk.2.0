@@ -5,423 +5,841 @@
 {% block content %}
 <div class="page-header">
     <h1 class="page-title">Account Settings</h1>
-    <p class="page-subtitle">Manage your account preferences and security settings</p>
+    <p class="page-subtitle">Manage your profile, preferences, and account details</p>
 </div>
 
-<div class="settings-container">
-    <!-- Notification Settings -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>🔔 Notification Preferences</h3>
-            <p>Choose how you want to be notified about activities</p>
+<div class="dashboard-grid">
+    <!-- Profile Information Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Profile Information</h3>
+            <div class="card-icon">👤</div>
         </div>
-
-        <form method="post" class="settings-form">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="update_notifications">
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="notification_message" {% if user.notification_message %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        Message notifications
-                    </label>
-                    <small>Get notified when you receive new messages</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="notification_appointment" {% if user.notification_appointment %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        Appointment reminders
-                    </label>
-                    <small>Receive reminders about upcoming appointments</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="notification_feedback" {% if user.notification_feedback %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        Feedback notifications
-                    </label>
-                    <small>Get notified about feedback on your sessions</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="notification_achievement" {% if user.notification_achievement %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        Achievement notifications
-                    </label>
-                    <small>Celebrate your milestones and achievements</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="notification_system" {% if user.notification_system %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        System notifications
-                    </label>
-                    <small>Important updates and system announcements</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="notification_sound" {% if user.notification_sound %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        Sound notifications
-                    </label>
-                    <small>Play sounds for notifications</small>
-                </div>
+        <div class="card-content">
+            <div class="profile-avatar">
+                {{ user.first_name.0|default:'U'|upper }}{{ user.last_name.0|default:'S'|upper }}
             </div>
-
-            <button type="submit" class="btn btn-primary">Save Notification Settings</button>
-        </form>
+            <div class="profile-details">
+                <div class="profile-name">{{ user.first_name|default:"User" }} {{ user.last_name|default:"Name" }}</div>
+                <div class="profile-email">{{ user.email|default:"user@example.com" }}</div>
+                <div class="profile-role">{{ user.role|default:"User"|title }}</div>
+            </div>
+            <a href="/accounts/profile/edit/" class="action-btn">Edit Profile</a>
+        </div>
     </div>
 
-    <!-- Privacy Settings -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>🔒 Privacy Settings</h3>
-            <p>Control your privacy and data sharing preferences</p>
+    <!-- Account Security Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Security Settings</h3>
+            <div class="card-icon">🔐</div>
         </div>
-
-        <form method="post" class="settings-form">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="update_privacy">
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="is_profile_public" {% if user.is_profile_public %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        Public profile
-                    </label>
-                    <small>Allow others to view your profile information</small>
+        <div class="card-content">
+            <div class="security-stats">
+                <div class="security-item">
+                    <span class="security-label">Password</span>
+                    <span class="security-status updated">✓ Updated</span>
                 </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="show_mood_history" {% if user.show_mood_history %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        Show mood history
-                    </label>
-                    <small>Display your mood tracking history to counselors</small>
+                <div class="security-item">
+                    <span class="security-label">Two-Factor Auth</span>
+                    <span class="security-status {% if user.two_factor_enabled %}enabled{% else %}disabled{% endif %}">
+                        {% if user.two_factor_enabled %}✓ Enabled{% else %}○ Disabled{% endif %}
+                    </span>
                 </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="allow_data_sharing" {% if user.allow_data_sharing %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        Allow data sharing for research
-                    </label>
-                    <small>Contribute anonymized data to mental health research</small>
+                <div class="security-item">
+                    <span class="security-label">Login Sessions</span>
+                    <span class="security-value">{{ active_sessions|default:1 }} active</span>
                 </div>
             </div>
-
-            <button type="submit" class="btn btn-primary">Save Privacy Settings</button>
-        </form>
+            <div class="security-actions">
+                <a href="/accounts/password/change/" class="action-btn">Change Password</a>
+                <a href="/accounts/security/" class="action-btn secondary">Security Settings</a>
+            </div>
+        </div>
     </div>
 
-    <!-- Security Settings -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>🔐 Security Settings</h3>
-            <p>Manage your account security and password</p>
+    <!-- Notification Preferences Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Notifications</h3>
+            <div class="card-icon">🔔</div>
         </div>
-
-        <form method="post" class="settings-form">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="change_password">
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="current_password">Current Password</label>
-                    <input type="password" id="current_password" name="current_password" class="form-input" required>
+        <div class="card-content">
+            <div class="notification-settings">
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Email Notifications</div>
+                        <div class="notification-description">Receive updates about appointments and messages</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" {% if user.email_notifications %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
                 </div>
-
-                <div class="form-group">
-                    <label for="new_password">New Password</label>
-                    <input type="password" id="new_password" name="new_password" class="form-input" required minlength="8">
-                    <small>Password must be at least 8 characters long</small>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Push Notifications</div>
+                        <div class="notification-description">Get notified about important updates</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" {% if user.push_notifications %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
                 </div>
-
-                <div class="form-group">
-                    <label for="confirm_password">Confirm New Password</label>
-                    <input type="password" id="confirm_password" name="confirm_password" class="form-input" required minlength="8">
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Mood Reminders</div>
+                        <div class="notification-description">Daily reminders to log your mood</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" {% if user.mood_reminders %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
-
-            <button type="submit" class="btn btn-primary">Change Password</button>
-        </form>
+            <a href="/accounts/notifications/" class="action-btn">Notification Settings</a>
+        </div>
     </div>
 
-    <!-- Account Actions -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>⚠️ Account Actions</h3>
-            <p>Dangerous actions that cannot be undone</p>
+    <!-- Privacy Settings Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Privacy</h3>
+            <div class="card-icon">🔒</div>
+        </div>
+        <div class="card-content">
+            <div class="privacy-settings">
+                <div class="privacy-item">
+                    <span class="privacy-label">Profile Visibility</span>
+                    <span class="privacy-value">{{ user.profile_visibility|default:"Public"|title }}</span>
+                </div>
+                <div class="privacy-item">
+                    <span class="privacy-label">Data Sharing</span>
+                    <span class="privacy-value">{{ user.data_sharing|default:"Enabled"|title }}</span>
+                </div>
+                <div class="privacy-item">
+                    <span class="privacy-label">Analytics</span>
+                    <span class="privacy-value">{{ user.analytics_consent|default:"Enabled"|title }}</span>
+                </div>
+            </div>
+            <a href="/accounts/privacy/" class="action-btn">Privacy Settings</a>
+        </div>
+    </div>
+</div>
+
+<!-- Account Management Section -->
+<div class="account-management-section">
+    <h3>Account Management</h3>
+    <div class="management-grid">
+        <div class="management-card">
+            <div class="management-icon">📊</div>
+            <div class="management-content">
+                <h4 class="management-title">Export Data</h4>
+                <p class="management-description">Download a copy of all your account data</p>
+                <button class="action-btn" onclick="exportAccountData()">Export Data</button>
+            </div>
         </div>
 
-        <div class="danger-zone">
-            <div class="action-item">
-                <div class="action-info">
-                    <h4>Delete Account</h4>
-                    <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
-                </div>
-                <button class="btn btn-danger" onclick="confirmDeleteAccount()">Delete Account</button>
-            </div>
-
-            <div class="action-item">
-                <div class="action-info">
-                    <h4>Export Data</h4>
-                    <p>Download all your data in a portable format</p>
-                </div>
-                <a href="{% url 'export_mood_data' %}" class="btn btn-secondary">Export Data</a>
+        <div class="management-card">
+            <div class="management-icon">🗑️</div>
+            <div class="management-content">
+                <h4 class="management-title">Delete Account</h4>
+                <p class="management-description">Permanently delete your account and all data</p>
+                <button class="action-btn danger" onclick="confirmAccountDeletion()">Delete Account</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Recent Activity -->
+<div class="activity-section">
+    <h3>Recent Account Activity</h3>
+    <div class="activity-list">
+        {% if recent_activity %}
+            {% for activity in recent_activity %}
+            <div class="activity-item">
+                <div class="activity-icon">📝</div>
+                <div class="activity-content">
+                    <div class="activity-title">{{ activity.description|default:"Account activity" }}</div>
+                    <div class="activity-time">{{ activity.timestamp|date:"M d, Y g:i A"|default:"Recently" }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="activity-item">
+                <div class="activity-content">
+                    <div class="activity-title">Welcome to your account settings!</div>
+                    <div class="activity-time">Manage your profile, security, and preferences</div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
 <style>
-.settings-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.settings-section {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.section-header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.section-header h3 {
-    color: #1f2937;
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.section-header p {
-    color: #6b7280;
-    font-size: 0.875rem;
-}
-
-.settings-form {
-    margin-top: 1.5rem;
-}
-
-.form-grid {
+/* Account Settings Page Styles - Matching Dashboard Design */
+.dashboard-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
+.dashboard-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
 }
 
-.form-group label {
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.5rem;
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(79, 70, 229, 0.2);
 }
 
-.form-input {
-    padding: 0.75rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #4f46e5;
-}
-
-.checkbox-container {
-    display: flex;
-    align-items: flex-start;
-    font-size: 0.875rem;
-    color: #374151;
-    cursor: pointer;
-    position: relative;
-    line-height: 1.5;
-    font-weight: 500;
-}
-
-.checkbox-container input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.checkmark {
-    height: 20px;
-    width: 20px;
-    background-color: #fff;
-    border: 2px solid #d1d5db;
-    border-radius: 4px;
-    margin-right: 12px;
-    margin-top: 2px;
-    position: relative;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-}
-
-.checkbox-container input:checked ~ .checkmark {
-    background-color: #4f46e5;
-    border-color: #4f46e5;
-}
-
-.checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 6px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.checkbox-container input:checked ~ .checkmark:after {
-    display: block;
-}
-
-.checkbox-container small {
-    color: #6b7280;
-    font-weight: normal;
-    margin-top: 0.25rem;
-    margin-left: 32px;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: #4f46e5;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #3730a3;
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #d1d5db;
-}
-
-.btn-secondary:hover {
-    background: #e5e7eb;
-}
-
-.btn-danger {
-    background: #dc2626;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #b91c1c;
-}
-
-.danger-zone {
-    border: 2px solid #fee2e2;
-    border-radius: 8px;
-    padding: 1.5rem;
-    background: #fef2f2;
-}
-
-.action-item {
+.card-header {
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: 1rem 0;
-    border-bottom: 1px solid #fecaca;
+    align-items: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
-.action-item:last-child {
-    border-bottom: none;
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    letter-spacing: -0.025em;
 }
 
-.action-info h4 {
-    color: #dc2626;
-    font-size: 1rem;
-    font-weight: 600;
+.card-icon {
+    font-size: 1.5rem;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover .card-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.card-content {
+    padding: 1.25rem 1.5rem;
+}
+
+/* Profile Section */
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.profile-details {
+    margin-bottom: 1.5rem;
+}
+
+.profile-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
     margin-bottom: 0.25rem;
 }
 
-.action-info p {
-    color: #991b1b;
+.profile-email {
     font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
 }
 
+.profile-role {
+    font-size: 0.8rem;
+    color: #4f46e5;
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    padding: 0.125rem 0.5rem;
+    border-radius: 8px;
+    display: inline-block;
+    font-weight: 600;
+}
+
+/* Security Settings */
+.security-stats {
+    margin-bottom: 1.5rem;
+}
+
+.security-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.security-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.security-status {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 6px;
+}
+
+.security-status.updated {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.security-status.enabled {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.security-status.disabled {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+}
+
+.security-value {
+    font-size: 0.875rem;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.security-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Notification Settings */
+.notification-settings {
+    margin-bottom: 1.5rem;
+}
+
+.notification-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.notification-info {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.125rem;
+    font-size: 0.9rem;
+}
+
+.notification-description {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+/* Privacy Settings */
+.privacy-settings {
+    margin-bottom: 1.5rem;
+}
+
+.privacy-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.privacy-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.privacy-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #374151;
+}
+
+/* Account Management */
+.account-management-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+}
+
+.account-management-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.management-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.management-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.2s ease;
+}
+
+.management-card:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.management-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.management-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.management-description {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    min-height: 44px;
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.action-btn.secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.action-btn.secondary:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+.action-btn.danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.action-btn.danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+/* Activity Section */
+.activity-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.activity-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.125rem;
+    font-size: 0.9rem;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .settings-container {
-        padding: 0 1rem;
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
-    .settings-section {
-        padding: 1.5rem;
+    .dashboard-card {
+        margin: 0 0.5rem;
     }
 
-    .action-item {
+    .card-header {
+        padding: 1rem 1.25rem 0.5rem;
+    }
+
+    .card-content {
+        padding: 1rem 1.25rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .account-management-section, .activity-section {
+        margin: 0 0.5rem;
+        padding: 1.25rem;
+    }
+
+    .management-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .security-actions {
         flex-direction: column;
-        gap: 1rem;
     }
 
-    .form-grid {
-        gap: 1rem;
+    .activity-item {
+        padding: 0.625rem;
     }
+
+    .activity-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+        margin-right: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 1.75rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+    }
+
+    .profile-name {
+        font-size: 1rem;
+    }
+
+    .profile-email {
+        font-size: 0.8rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        width: 100%;
+    }
+
+    .activity-title {
+        font-size: 0.85rem;
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
+    }
+}
+
+/* Animation for cards */
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-card {
+    animation: cardSlideIn 0.6s ease-out;
+}
+
+.dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Dark theme support */
+body.dark-theme .dashboard-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .card-header {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: #475569;
+}
+
+body.dark-theme .card-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .security-label, body.dark-theme .privacy-label {
+    color: #94a3b8;
+}
+
+body.dark-theme .security-value {
+    color: #f1f5f9;
+}
+
+body.dark-theme .account-management-section, body.dark-theme .activity-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .account-management-section h3, body.dark-theme .activity-section h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .management-card, body.dark-theme .activity-item {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: rgba(71, 85, 105, 0.6);
+}
+
+body.dark-theme .management-title, body.dark-theme .activity-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .management-description, body.dark-theme .activity-time {
+    color: #94a3b8;
+}
+
+body.dark-theme .profile-name {
+    color: #f1f5f9;
+}
+
+body.dark-theme .profile-email {
+    color: #cbd5e1;
+}
+
+body.dark-theme .profile-role {
+    background: linear-gradient(135deg, #3730a3 0%, #312e81 100%);
+    color: #c4b5fd;
+}
+
+body.dark-theme .page-title {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-theme .page-subtitle {
+    color: #94a3b8;
 }
 </style>
 
 <script>
-function confirmDeleteAccount() {
-    if (confirm('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.')) {
-        if (confirm('This is your final warning. Are you absolutely sure you want to delete your account?')) {
-            // Implement account deletion
-            alert('Account deletion is not yet implemented. Please contact support.');
-        }
+// Auto-refresh account data every 30 seconds
+setInterval(function() {
+    // Could add AJAX calls to refresh account data
+    console.log('Account settings refresh check');
+}, 30000);
+
+// Handle account management actions
+function exportAccountData() {
+    console.log('Exporting account data...');
+    // In a real implementation, this would trigger a download
+    alert('Account data export would be downloaded here');
+}
+
+function confirmAccountDeletion() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        console.log('Account deletion confirmed...');
+        alert('Account deletion would be processed here');
     }
 }
 
-// Password confirmation validation
-document.getElementById('confirm_password').addEventListener('input', function() {
-    const newPassword = document.getElementById('new_password').value;
-    const confirmPassword = this.value;
-
-    if (newPassword !== confirmPassword) {
-        this.setCustomValidity('Passwords do not match');
-    } else {
-        this.setCustomValidity('');
-    }
+// Add loading animation to cards on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach(card => {
+        card.classList.add('loading');
+        setTimeout(() => {
+            card.classList.remove('loading');
+        }, 1000);
+    });
 });
 </script>
 {% endblock %}

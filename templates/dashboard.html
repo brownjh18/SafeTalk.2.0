@@ -26,7 +26,7 @@
                     <span class="stat-value">{{ recent_mood_entries|length }} entries</span>
                 </div>
             </div>
-            <a href="/log-mood/" class="action-btn">Log Mood</a>
+            <a href="/accounts/log-mood/" class="action-btn">Log Mood</a>
         </div>
     </div>
 
@@ -66,7 +66,7 @@
                 <a href="/achievements/" class="action-btn">View All</a>
             {% else %}
                 <p class="no-data">No achievements yet</p>
-                <a href="/log-mood/" class="action-btn">Start Tracking</a>
+                <a href="/accounts/log-mood/" class="action-btn">Start Tracking</a>
             {% endif %}
         </div>
     </div>
@@ -88,7 +88,7 @@
                     <span class="stat-value">{{ recent_messages|default:0 }}</span>
                 </div>
             </div>
-            <a href="/chat/sessions/" class="action-btn">Open Messages</a>
+            <a href="/messaging/" class="action-btn">Open Messages</a>
         </div>
     </div>
 
@@ -115,6 +115,71 @@
             </div>
             <div class="progress-bar">
                 <div class="progress-fill" style="width: {{ progress_percentage|default:0 }}%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Section -->
+<div class="quick-actions-section">
+    <h3>Quick Actions</h3>
+    <div class="quick-actions-grid">
+        <a href="/accounts/log-mood/" class="quick-action-card">
+            <div class="action-icon">😊</div>
+            <div class="action-content">
+                <h4>Log Mood</h4>
+                <p>Track your emotional well-being</p>
+            </div>
+        </a>
+        <a href="/chat/book-appointment/" class="quick-action-card">
+            <div class="action-icon">📅</div>
+            <div class="action-content">
+                <h4>Book Session</h4>
+                <p>Schedule counseling appointment</p>
+            </div>
+        </a>
+        <a href="/messaging/" class="quick-action-card">
+            <div class="action-icon">💬</div>
+            <div class="action-content">
+                <h4>Messages</h4>
+                <p>Connect with your counselor</p>
+            </div>
+        </a>
+        <a href="/resources/" class="quick-action-card">
+            <div class="action-icon">📚</div>
+            <div class="action-content">
+                <h4>Resources</h4>
+                <p>Access helpful materials</p>
+            </div>
+        </a>
+        <a href="/accounts/mood-history/" class="quick-action-card">
+            <div class="action-icon">📊</div>
+            <div class="action-content">
+                <h4>View History</h4>
+                <p>Review your progress</p>
+            </div>
+        </a>
+        <a href="/accounts/user-insights/" class="quick-action-card">
+            <div class="action-icon">🎯</div>
+            <div class="action-content">
+                <h4>Insights</h4>
+                <p>Personal analytics</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Wellness Tips Section -->
+<div class="wellness-tips">
+    <h3>Daily Wellness Tip</h3>
+    <div class="tip-card">
+        <div class="tip-icon">💡</div>
+        <div class="tip-content">
+            <h4>Practice Deep Breathing</h4>
+            <p>Take 5 deep breaths when feeling stressed. Inhale for 4 counts, hold for 4, exhale for 4. This simple technique can help calm your nervous system and reduce anxiety.</p>
+            <div class="tip-actions">
+                <button class="tip-btn" onclick="markTipHelpful()">Helpful</button>
+                <button class="tip-btn secondary" onclick="getNewTip()">New Tip</button>
             </div>
         </div>
     </div>
@@ -357,6 +422,183 @@
     padding: 1rem 0;
 }
 
+/* Quick Actions Section */
+.quick-actions-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+}
+
+.quick-actions-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.025em;
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.quick-action-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.quick-action-card:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);
+    border-color: rgba(79, 70, 229, 0.3);
+}
+
+.action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.quick-action-card:hover .action-icon {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.action-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    margin: 0;
+}
+
+.action-content p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.quick-action-card:hover .action-content h4,
+.quick-action-card:hover .action-content p {
+    color: white;
+}
+
+/* Wellness Tips Section */
+.wellness-tips {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+}
+
+.wellness-tips h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.tip-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.tip-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.tip-content {
+    flex: 1;
+}
+
+.tip-content h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 0.5rem;
+    margin: 0;
+}
+
+.tip-content p {
+    font-size: 0.9rem;
+    color: #a16207;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    margin: 0;
+}
+
+.tip-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.tip-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.tip-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.tip-btn.secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.tip-btn.secondary:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
 /* Recent Activity Styles */
 .recent-activity {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -429,6 +671,70 @@
     font-weight: 500;
 }
 
+/* Dark theme support for new dashboard features */
+body.dark-theme .quick-actions-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .quick-actions-section h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .quick-action-card {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: rgba(71, 85, 105, 0.6);
+    color: #e2e8f0;
+}
+
+body.dark-theme .quick-action-card:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border-color: rgba(79, 70, 229, 0.4);
+}
+
+body.dark-theme .action-content h4,
+body.dark-theme .action-content p {
+    color: #e2e8f0;
+}
+
+body.dark-theme .quick-action-card:hover .action-content h4,
+body.dark-theme .quick-action-card:hover .action-content p {
+    color: white;
+}
+
+body.dark-theme .wellness-tips {
+    background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+body.dark-theme .wellness-tips h3 {
+    color: #fed7aa;
+}
+
+body.dark-theme .tip-content h4 {
+    color: #fed7aa;
+}
+
+body.dark-theme .tip-content p {
+    color: #fdba74;
+}
+
+body.dark-theme .tip-btn {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+body.dark-theme .tip-btn:hover {
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+}
+
+body.dark-theme .tip-btn.secondary {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+body.dark-theme .tip-btn.secondary:hover {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+}
+
 /* Page Header Enhancements */
 .page-header {
     margin-bottom: 2rem;
@@ -481,6 +787,42 @@
 
     .page-subtitle {
         font-size: 1rem;
+    }
+
+    .quick-actions-section {
+        margin: 0 0.5rem;
+        padding: 1.25rem;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .quick-action-card {
+        padding: 0.875rem;
+    }
+
+    .action-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .wellness-tips {
+        margin: 0 0.5rem;
+        padding: 1.25rem;
+    }
+
+    .tip-card {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+    }
+
+    .tip-actions {
+        justify-content: center;
+        flex-wrap: wrap;
     }
 
     .recent-activity {
@@ -640,7 +982,7 @@ setInterval(function() {
 function quickAction(action) {
     switch(action) {
         case 'log-mood':
-            window.location.href = '/log-mood/';
+            window.location.href = '/accounts/log-mood/';
             break;
         case 'schedule-appointment':
             window.location.href = '/chat/book-appointment/';
@@ -654,6 +996,57 @@ function quickAction(action) {
     }
 }
 
+// Wellness tip functions
+function markTipHelpful() {
+    // Show success feedback
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = 'Thanks!';
+    btn.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
+
+    // Reset after 2 seconds
+    setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    }, 2000);
+}
+
+function getNewTip() {
+    const tips = [
+        {
+            title: "Practice Mindfulness",
+            content: "Take 5 minutes each day to focus on the present moment. Sit quietly and observe your thoughts without judgment. This can help reduce anxiety and improve emotional regulation."
+        },
+        {
+            title: "Stay Hydrated",
+            content: "Dehydration can affect your mood and cognitive function. Aim for 8 glasses of water daily. Keep a water bottle nearby as a reminder."
+        },
+        {
+            title: "Connect with Others",
+            content: "Social connection is crucial for mental health. Reach out to a friend or loved one today, even if it's just a quick message or call."
+        },
+        {
+            title: "Get Moving",
+            content: "Physical activity releases endorphins that naturally boost your mood. Even a 10-minute walk can make a difference in how you feel."
+        },
+        {
+            title: "Practice Gratitude",
+            content: "Write down 3 things you're grateful for each day. This simple practice can shift your focus from negative to positive aspects of life."
+        }
+    ];
+
+    const randomTip = tips[Math.floor(Math.random() * tips.length)];
+    const tipContent = document.querySelector('.tip-content');
+
+    // Animate transition
+    tipContent.style.opacity = '0';
+    setTimeout(() => {
+        tipContent.querySelector('h4').textContent = randomTip.title;
+        tipContent.querySelector('p').textContent = randomTip.content;
+        tipContent.style.opacity = '1';
+    }, 300);
+}
+
 // Add loading animation to cards on page load
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.dashboard-card');
@@ -662,6 +1055,18 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             card.classList.remove('loading');
         }, 1000);
+    });
+
+    // Add hover effects to quick action cards
+    const quickCards = document.querySelectorAll('.quick-action-card');
+    quickCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px) scale(1.02)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
     });
 });
 </script>

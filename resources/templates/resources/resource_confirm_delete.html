@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Resource - SafeTalk{% endblock %}
+
+{% block extra_head %}
+    <style>
+    /* Dashboard Custom Styles - Delete Confirmation Page */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+    
+    .card-header {
+        padding: 1.25rem 1.5rem 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+        letter-spacing: -0.025em;
+    }
+    
+    .card-icon {
+        font-size: 1.5rem;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+    
+    .dashboard-card:hover .card-icon {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    
+    .card-content {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    /* Resource Info Styles */
+    .resource-info {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .resource-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+    
+    .resource-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+    
+    .resource-type {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+    
+    .resource-category {
+        background: #e5e7eb;
+        color: #4f46e5;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+    
+    /* Warning Styles */
+    .warning-message {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 1px solid #f59e0b;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .warning-text {
+        color: #78350f;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    /* Confirmation Section */
+    .confirmation-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .confirmation-section h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        letter-spacing: -0.025em;
+    }
+    
+    .confirmation-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .confirmation-text {
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+        color: #374151;
+        line-height: 1.6;
+    }
+    
+    .confirmation-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+    
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.625rem 1.25rem;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        min-height: 44px;
+    }
+    
+    .action-btn:hover {
+        background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .action-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    }
+    
+    /* Page Header Enhancements */
+    .page-header {
+        margin-bottom: 2rem;
+        text-align: center;
+        padding: 1rem 0;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.05em;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .page-subtitle {
+        font-size: 1.1rem;
+        color: #64748b;
+        font-weight: 500;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    
+        .dashboard-card {
+            margin: 0 0.5rem;
+        }
+    
+        .card-header {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+    
+        .card-content {
+            padding: 1rem 1.25rem;
+        }
+    
+        .page-title {
+            font-size: 2rem;
+        }
+    
+        .page-subtitle {
+            font-size: 1rem;
+        }
+    
+        .confirmation-section {
+            margin: 0 0.5rem 1.5rem;
+            padding: 1.25rem;
+        }
+    
+        .confirmation-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+    
+        .action-btn {
+            width: 100%;
+        }
+    
+        .resource-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.75rem;
+        }
+    
+        .card-title {
+            font-size: 1rem;
+        }
+    
+        .confirmation-text {
+            font-size: 1rem;
+        }
+    
+        .resource-title {
+            font-size: 1.1rem;
+        }
+    
+        .resource-meta {
+            font-size: 0.8rem;
+        }
+    }
+    
+    /* Animation for cards */
+    @keyframes cardSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .dashboard-card {
+        animation: cardSlideIn 0.6s ease-out;
+    }
+    
+    .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+    .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+    
+    /* Dark theme support */
+    body.dark-theme .dashboard-card {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+    
+    body.dark-theme .card-header {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: #475569;
+    }
+    
+    body.dark-theme .card-title {
+        color: #f1f5f9;
+    }
+    
+    body.dark-theme .resource-info {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.6);
+    }
+    
+    body.dark-theme .resource-title {
+        color: #f1f5f9;
+    }
+    
+    body.dark-theme .resource-meta {
+        color: #94a3b8;
+    }
+    
+    body.dark-theme .confirmation-section {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+    
+    body.dark-theme .confirmation-section h3 {
+        color: #f1f5f9;
+    }
+    
+    body.dark-theme .confirmation-card {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.6);
+    }
+    
+    body.dark-theme .confirmation-text {
+        color: #e5e7eb;
+    }
+    
+    body.dark-theme .warning-message {
+        background: linear-gradient(135deg, #7c2d12 0%, #991b1b 100%);
+        border-color: #dc2626;
+    }
+    
+    body.dark-theme .warning-text {
+        color: #fecaca;
+    }
+    
+    body.dark-theme .page-title {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    body.dark-theme .page-subtitle {
+        color: #94a3b8;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Delete Resource</h1>
+    <p class="page-subtitle">Confirm Deletion</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Resource Information Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Resource Information</h3>
+            <div class="card-icon">📋</div>
+        </div>
+        <div class="card-content">
+            <div class="resource-info">
+                <h3 class="resource-title">{{ resource.title }}</h3>
+                <div class="resource-meta">
+                    <span class="resource-type">{{ resource.get_resource_type_display }}</span>
+                    {% if resource.category %}
+                        <span class="resource-category">{{ resource.category.name }}</span>
+                    {% endif %}
+                    <span>Created by: {% if resource.created_by %}{{ resource.created_by.get_full_name|default:resource.created_by.username }}{% else %}Anonymous{% endif %}</span>
+                    <span>Created: {{ resource.created_at|date:"M j, Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Warning</h3>
+            <div class="card-icon">⚠️</div>
+        </div>
+        <div class="card-content">
+            <div class="warning-message">
+                <p class="warning-text">
+                    Deleting this resource will permanently remove it from the system.
+                    This action cannot be reversed and other users will no longer be able to access this mental health resource.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Section -->
+<div class="confirmation-section">
+    <h3>Confirm Deletion</h3>
+    <div class="confirmation-card">
+        <div class="confirmation-text">
+            Are you sure you want to delete "<strong>{{ resource.title }}</strong>"?
+            This action cannot be undone.
+        </div>
+        <div class="confirmation-actions">
+            <a href="{% url 'resource_detail' resource.id %}" class="action-btn" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
+                Cancel
+            </a>
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="action-btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    Delete Resource
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

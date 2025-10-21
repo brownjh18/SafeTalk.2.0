@@ -1,139 +1,77 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}User Insights - SafeTalk{% endblock %}
+{% block title %}My Insights - SafeTalk{% endblock %}
 
-{% block content %}
-<div class="page-header">
-    <h1 class="page-title">User Insights & Analytics</h1>
-    <p class="page-subtitle">Comprehensive analytics and insights for mental health tracking</p>
-</div>
-
-<div class="insights-container">
-    <!-- Mood Statistics -->
-    <div class="insights-section">
-        <h2 class="section-title">Mood Statistics</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">{{ mood_stats.total_entries|default:0 }}</div>
-                <div class="stat-label">Total Entries</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ mood_stats.avg_mood|floatformat:1|default:"0.0" }}</div>
-                <div class="stat-label">Average Mood</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Monthly Trends -->
-    {% if monthly_trends %}
-    <div class="insights-section">
-        <h2 class="section-title">Monthly Mood Trends</h2>
-        <div class="trends-chart">
-            <canvas id="monthlyTrendsChart" width="400" height="200"></canvas>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- User Activity -->
-    {% if user_activity %}
-    <div class="insights-section">
-        <h2 class="section-title">User Activity</h2>
-        <div class="activity-list">
-            {% for user in user_activity %}
-            <div class="activity-item">
-                <div class="activity-user">{{ user.username }}</div>
-                <div class="activity-count">{{ user.mood_count }} entries</div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-</div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Monthly Trends Chart
-    {% if monthly_trends %}
-    const monthlyData = {{ monthly_trends|safe }};
-    const ctx = document.getElementById('monthlyTrendsChart').getContext('2d');
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: monthlyData.map(item => new Date(item.month).toLocaleDateString()),
-            datasets: [{
-                label: 'Average Mood',
-                data: monthlyData.map(item => item.avg_mood),
-                borderColor: '#4f46e5',
-                backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 5
-                }
-            }
-        }
-    });
-    {% endif %}
-});
-</script>
-
+{% block extra_head %}
 <style>
-.insights-container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.insights-section {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid #e5e7eb;
-    padding-bottom: 0.5rem;
-}
-
-.stats-grid {
+/* User Insights Page Styles - Matching Dashboard Design */
+.dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
-.stat-card {
+.dashboard-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 8px;
-    padding: 1.5rem;
-    text-align: center;
-    border: 1px solid #e2e8f0;
 }
 
-.stat-number {
-    font-size: 2rem;
+.card-title {
+    font-size: 1.1rem;
     font-weight: 700;
-    color: #4f46e5;
-    margin-bottom: 0.5rem;
+    color: #1f2937;
+    margin: 0;
+    letter-spacing: -0.025em;
+}
+
+.card-icon {
+    font-size: 1.5rem;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover .card-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.card-content {
+    padding: 1.25rem 1.5rem;
+}
+
+/* Stats Sections */
+.mood-stats, .progress-stats, .appointment-stats, .resource-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .stat-label {
@@ -142,53 +80,661 @@ document.addEventListener('DOMContentLoaded', function() {
     font-weight: 500;
 }
 
-.trends-chart {
-    height: 300px;
-    position: relative;
+.stat-value {
+    font-size: 0.875rem;
+    color: #1f2937;
+    font-weight: 600;
 }
 
-.activity-list {
+/* Quick Actions Grid */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    min-height: 44px;
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.btn-icon {
+    font-size: 1.1rem;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px rgba(79, 70, 229, 0.3);
+}
+
+/* User Insights Sections */
+.quick-actions-section, .mood-history-section, .achievements-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+}
+
+.quick-actions-section h3, .mood-history-section h3, .achievements-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+/* Mood Entries */
+.mood-entries-list {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
 }
 
-.activity-item {
+.mood-entry-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 1rem;
-    background: #f8fafc;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.2s ease;
 }
 
-.activity-user {
+.mood-entry-item:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.mood-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.mood-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.mood-value {
     font-weight: 600;
     color: #1f2937;
+    margin-bottom: 0.125rem;
+    font-size: 0.9rem;
 }
 
-.activity-count {
+.mood-date {
+    font-size: 0.8rem;
     color: #64748b;
-    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
 }
 
+.mood-notes {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* Achievements */
+.achievements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.2s ease;
+}
+
+.achievement-item:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.achievement-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.achievement-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.achievement-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.125rem;
+    font-size: 0.9rem;
+}
+
+.achievement-description {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+}
+
+.achievement-date {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Empty States */
+.no-moods, .no-achievements {
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.empty-state p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .insights-section {
-        padding: 1rem;
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
-    .stats-grid {
+    .dashboard-card {
+        margin: 0 0.5rem;
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem 0.5rem;
+    }
+
+    .card-content {
+        padding: 1rem 1.25rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .quick-actions-section, .mood-history-section, .achievements-section {
+        margin: 0 0.5rem;
+        padding: 1.25rem;
+    }
+
+    .quick-actions-grid {
         grid-template-columns: 1fr;
     }
 
-    .stat-card {
-        padding: 1rem;
+    .mood-entry-item, .achievement-item {
+        padding: 0.625rem;
     }
 
-    .stat-number {
-        font-size: 1.5rem;
+    .mood-icon, .achievement-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+        margin-right: 0.75rem;
     }
 }
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 1.75rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+    }
+
+    .stat-label, .stat-value {
+        font-size: 0.8rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        width: 100%;
+    }
+
+    .mood-value, .achievement-title {
+        font-size: 0.85rem;
+    }
+
+    .mood-date, .achievement-description {
+        font-size: 0.75rem;
+    }
+}
+
+/* Animation for cards */
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-card {
+    animation: cardSlideIn 0.6s ease-out;
+}
+
+.dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Dark theme support */
+body.dark-theme .dashboard-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .card-header {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: #475569;
+}
+
+body.dark-theme .card-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .stat-label {
+    color: #94a3b8;
+}
+
+body.dark-theme .stat-value {
+    color: #f1f5f9;
+}
+
+body.dark-theme .quick-actions-section, body.dark-theme .mood-history-section, body.dark-theme .achievements-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .quick-actions-section h3, body.dark-theme .mood-history-section h3, body.dark-theme .achievements-section h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .mood-entry-item, body.dark-theme .achievement-item {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: rgba(71, 85, 105, 0.6);
+}
+
+body.dark-theme .mood-value, body.dark-theme .achievement-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .mood-date, body.dark-theme .achievement-description {
+    color: #94a3b8;
+}
+
+body.dark-theme .page-title {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-theme .page-subtitle {
+    color: #94a3b8;
+}
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">My Insights</h1>
+    <p class="page-subtitle">Personal insights into your mental health journey and progress</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Mood Tracking Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Mood Tracking</h3>
+            <div class="card-icon">😊</div>
+        </div>
+        <div class="card-content">
+            <div class="mood-stats">
+                <div class="stat-item">
+                    <span class="stat-label">This Week</span>
+                    <span class="stat-value">{{ mood_entries_week|default:0 }} entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Month</span>
+                    <span class="stat-value">{{ mood_entries_month|default:0 }} entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Current Streak</span>
+                    <span class="stat-value">{{ mood_streak|default:0 }} days</span>
+                </div>
+            </div>
+            <a href="/accounts/log-mood/" class="action-btn">Log Mood</a>
+        </div>
+    </div>
+
+    <!-- My Progress Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">My Progress</h3>
+            <div class="card-icon">📈</div>
+        </div>
+        <div class="card-content">
+            <div class="progress-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Sessions Completed</span>
+                    <span class="stat-value">{{ sessions_completed|default:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Goals Achieved</span>
+                    <span class="stat-value">{{ goals_achieved|default:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Days Active</span>
+                    <span class="stat-value">{{ days_active|default:0 }} days</span>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress_percentage|default:0 }}%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Appointments Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">My Appointments</h3>
+            <div class="card-icon">📅</div>
+        </div>
+        <div class="card-content">
+            <div class="appointment-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Upcoming</span>
+                    <span class="stat-value">{{ upcoming_appointments|length }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Completed</span>
+                    <span class="stat-value">{{ completed_sessions|default:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Month</span>
+                    <span class="stat-value">{{ monthly_sessions|default:0 }}</span>
+                </div>
+            </div>
+            <a href="/appointments/" class="action-btn">View All</a>
+        </div>
+    </div>
+
+    <!-- My Resources Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">My Resources</h3>
+            <div class="card-icon">📚</div>
+        </div>
+        <div class="card-content">
+            <div class="resource-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Viewed</span>
+                    <span class="stat-value">{{ resources_viewed|default:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Favorites</span>
+                    <span class="stat-value">{{ favorite_resources|default:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Categories</span>
+                    <span class="stat-value">{{ categories_explored|default:0 }}</span>
+                </div>
+            </div>
+            <a href="/resources/" class="action-btn">Browse Resources</a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Section -->
+<div class="quick-actions-section">
+    <h3>Quick Actions</h3>
+    <div class="quick-actions-grid">
+        <a href="/accounts/log-mood/" class="action-btn">
+            <span class="btn-icon">😊</span>
+            Log Mood
+        </a>
+        <a href="/chat/book-appointment/" class="action-btn">
+            <span class="btn-icon">📅</span>
+            Book Session
+        </a>
+        <a href="/resources/" class="action-btn">
+            <span class="btn-icon">📚</span>
+            Browse Resources
+        </a>
+        <a href="/accounts/mood-history/" class="action-btn">
+            <span class="btn-icon">📈</span>
+            View History
+        </a>
+    </div>
+</div>
+
+<!-- Recent Mood Entries -->
+<div class="mood-history-section">
+    <h3>Recent Mood Entries</h3>
+    <div class="mood-entries-list">
+        {% if recent_moods %}
+            {% for mood in recent_moods %}
+            <div class="mood-entry-item">
+                <div class="mood-icon">{{ mood.get_mood_display|slice:":2"|default:"😊" }}</div>
+                <div class="mood-content">
+                    <div class="mood-value">{{ mood.get_mood_display|default:"Happy" }}</div>
+                    <div class="mood-date">{{ mood.date|date:"M d, Y" }}</div>
+                    {% if mood.notes %}
+                    <div class="mood-notes">{{ mood.notes|truncatechars:50 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-moods">
+                <div class="empty-state">
+                    <div class="empty-icon">😊</div>
+                    <h3>No mood entries yet</h3>
+                    <p>Start tracking your mood to see patterns and insights about your mental health journey.</p>
+                    <a href="/accounts/log-mood/" class="action-btn">Log First Mood</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- My Achievements -->
+<div class="achievements-section">
+    <h3>My Achievements</h3>
+    <div class="achievements-list">
+        {% if achievements %}
+            {% for achievement in achievements %}
+            <div class="achievement-item">
+                <div class="achievement-icon">🏆</div>
+                <div class="achievement-content">
+                    <div class="achievement-title">{{ achievement.title|default:"Achievement Unlocked" }}</div>
+                    <div class="achievement-description">{{ achievement.description|default:"Great progress on your mental health journey!" }}</div>
+                    <div class="achievement-date">{{ achievement.unlocked_at|date:"M d, Y"|default:"Recently" }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-achievements">
+                <div class="empty-state">
+                    <div class="empty-icon">🏆</div>
+                    <h3>No achievements yet</h3>
+                    <p>Complete sessions, log moods regularly, and engage with resources to unlock achievements.</p>
+                    <a href="/accounts/log-mood/" class="action-btn">Get Started</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-refresh user insights data every 30 seconds
+setInterval(function() {
+    // Could add AJAX calls to refresh user insights data
+    console.log('User insights refresh check');
+}, 30000);
+
+// Handle quick actions
+function quickAction(action) {
+    switch(action) {
+        case 'log-mood':
+            window.location.href = '/accounts/log-mood/';
+            break;
+        case 'book-session':
+            window.location.href = '/chat/book-appointment/';
+            break;
+        case 'browse-resources':
+            window.location.href = '/resources/';
+            break;
+        case 'view-history':
+            window.location.href = '/accounts/mood-history/';
+            break;
+        case 'view-achievements':
+            window.location.href = '/achievements/';
+            break;
+        case 'view-progress':
+            window.location.href = '/accounts/progress/';
+            break;
+    }
+}
+
+// Add loading animation to cards on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach(card => {
+        card.classList.add('loading');
+        setTimeout(() => {
+            card.classList.remove('loading');
+        }, 1000);
+    });
+});
+</script>
 {% endblock %}

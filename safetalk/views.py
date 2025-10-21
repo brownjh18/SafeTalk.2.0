@@ -60,6 +60,118 @@ def conversations_view(request):
     return render(request, 'conversations.html')
 
 
+@login_required
+def chat_view(request):
+    """Chat interface view"""
+    return render(request, 'chat.html')
+
+
+@login_required
+def ai_chat_view(request):
+    """AI Chat interface view"""
+    return render(request, 'chat.html')
+
+
+@login_required
+def user_management_view(request):
+    """User management page view with enhanced dashboard-style design"""
+    if request.user.role not in ['admin', 'counselor']:
+        from django.contrib import messages
+        messages.error(request, "You don't have permission to view user management.")
+        from django.shortcuts import redirect
+        return redirect('profile')
+
+    from django.db.models import Count
+    from accounts.models import User
+
+    # Get user statistics for the dashboard cards
+    users = User.objects.all().order_by('username')
+    total_users = users.count()
+    admin_count = users.filter(role='admin').count()
+    counselor_count = users.filter(role='counselor').count()
+    client_count = users.filter(role='client').count()
+    today_users = users.filter(date_joined__date=timezone.now().date()).count()
+
+    context = {
+        'users': users,
+        'total_users': total_users,
+        'admin_count': admin_count,
+        'counselor_count': counselor_count,
+        'client_count': client_count,
+        'today_users': today_users,
+        'active_sessions': 0,  # Placeholder for session counting
+        'pending_actions': 0,  # Placeholder for pending actions count
+    }
+
+    return render(request, 'users.html', context)
+
+
+@login_required
+def all_users_view(request):
+    """Comprehensive view of all users with detailed information"""
+    if request.user.role not in ['admin', 'counselor']:
+        from django.contrib import messages
+        messages.error(request, "You don't have permission to view all users.")
+        from django.shortcuts import redirect
+        return redirect('profile')
+
+    from django.db.models import Count, Q
+    from accounts.models import User
+
+    # Get all users with enhanced filtering
+    users = User.objects.all().order_by('-date_joined')
+
+    # Apply filters if provided
+    role_filter = request.GET.get('role')
+    status_filter = request.GET.get('status')
+    search_query = request.GET.get('search')
+
+    if role_filter:
+        users = users.filter(role=role_filter)
+
+    if status_filter:
+        users = users.filter(is_active=(status_filter == 'active'))
+
+    if search_query:
+        users = users.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(username__icontains=search_query)
+        )
+
+    # Get comprehensive statistics
+    total_users = User.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    inactive_users = User.objects.filter(is_active=False).count()
+    admin_users = User.objects.filter(role='admin').count()
+    counselor_users = User.objects.filter(role='counselor').count()
+    client_users = User.objects.filter(role='client').count()
+    new_users_this_month = User.objects.filter(
+        date_joined__year=timezone.now().year,
+        date_joined__month=timezone.now().month
+    ).count()
+
+    context = {
+        'users': users,
+        'filtered_users': users,  # For template compatibility
+        'total_users': total_users,
+        'active_users': active_users,
+        'inactive_users': inactive_users,
+        'admin_users': admin_users,
+        'counselor_users': counselor_users,
+        'client_users': client_users,
+        'new_users_this_month': new_users_this_month,
+        'current_filters': {
+            'role': role_filter,
+            'status': status_filter,
+            'search': search_query,
+        }
+    }
+
+    return render(request, 'all_users.html', context)
+
+
 @require_GET
 def health_check(request):
     """

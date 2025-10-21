@@ -33,10 +33,14 @@ urlpatterns = i18n_patterns(
     path('dashboard/', views.dashboard_redirect_view, name='dashboard'),  # Main dashboard with auth
     path('dashboard/', include('accounts.urls')),  # Dashboard routes
     path('appointments/', include('accounts.urls')),  # Appointments routes
+    path('users/', views.user_management_view, name='user_management'),  # User management page
+    path('users/all/', views.all_users_view, name='all_users'),  # Comprehensive user list page
     path('profile/', accounts_views.profile_view, name='profile'),
+    path('profile/<int:user_id>/', accounts_views.profile_view, name='user_profile'),
     path('profile/edit/', accounts_views.edit_profile_view, name='edit_profile'),
     path('settings/', accounts_views.account_settings_view, name='settings'),
-    # path('chat/session/', include('chat.urls')),  # Commented out as chat app doesn't exist
+    path('chat/', views.chat_view, name='chat'),
+    path('chat/ai/', views.ai_chat_view, name='ai_chat'),
 
     # Payment webhooks
     path('stripe/webhook/', accounts_views.stripe_webhook, name='stripe_webhook'),

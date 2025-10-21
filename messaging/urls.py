@@ -32,4 +32,11 @@ urlpatterns = [
     path('conversation/<int:conversation_id>/mute/', views.mute_conversation, name='mute_conversation'),
     path('conversation/<int:conversation_id>/unmute/', views.unmute_conversation, name='unmute_conversation'),
     path('notifications/', views.notifications_page, name='notifications_page'),
+
+    # Chat API endpoints (matching chat.html expectations)
+    path('api/chat/rooms/', views.chat_rooms_api, name='chat_rooms_api'),
+    path('api/chat/rooms/<int:room_id>/messages/', views.chat_room_messages_api, name='chat_room_messages_api'),
+    path('api/chat/rooms/with/<int:user_id>/', views.chat_rooms_with_user_api, name='chat_rooms_with_user_api'),
+    path('api/users/counselors/', views.counselors_api, name='counselors_api'),
+    path('api/users/', views.users_api, name='users_api'),
 ]

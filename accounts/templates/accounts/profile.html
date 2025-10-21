@@ -2,687 +2,1557 @@
 
 {% block title %}Profile - SafeTalk{% endblock %}
 
-{% block extra_head %}
-    <style>
-        .profile-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .profile-header {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: #4f46e5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: white;
-            margin: 0 auto 1rem;
-            font-weight: bold;
-        }
-
-        .profile-name {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-        }
-
-        .profile-role {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: #dbeafe;
-            color: #1e40af;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: capitalize;
-        }
-
-        .profile-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .stat-item {
-            background: #f9fafb;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4f46e5;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            color: #6b7280;
-            font-size: 0.9rem;
-        }
-
-        .profile-content {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 2rem;
-        }
-
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .profile-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #1f2937;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #4f46e5;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .checkbox-input {
-            width: 18px;
-            height: 18px;
-            accent-color: #4f46e5;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .btn-primary {
-            background: #4f46e5;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #3730a3;
-        }
-
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-
-        .sidebar-content {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            height: fit-content;
-        }
-
-        .quick-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .quick-action-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            color: #374151;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            text-align: left;
-        }
-
-        .quick-action-btn:hover {
-            background: #4f46e5;
-            color: white;
-            border-color: #4f46e5;
-        }
-
-        .recent-activity {
-            margin-top: 1.5rem;
-        }
-
-        .activity-item {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-title {
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0.25rem;
-        }
-
-        .activity-meta {
-            font-size: 0.8rem;
-            color: #6b7280;
-        }
-
-        .mood-entry {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .mood-emoji {
-            font-size: 1.5rem;
-            margin-right: 0.75rem;
-        }
-
-        .mood-content {
-            flex: 1;
-        }
-
-        .mood-date {
-            font-size: 0.8rem;
-            color: #6b7280;
-        }
-
-        @media (max-width: 768px) {
-            .profile-content {
-                grid-template-columns: 1fr;
-            }
-
-            .profile-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
-{% endblock %}
-
-{% block content %}
-<div class="profile-container">
-    <!-- Profile Header -->
-    <div class="profile-header">
-        <div class="profile-avatar">{{ user.first_name|first|upper }}</div>
-        <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
-        <p class="profile-bio">
-            {% if user.bio %}
-                {{ user.bio }}
-            {% else %}
-                Welcome to my SafeTalk profile! I'm here to support mental health and well-being.
-            {% endif %}
-        </p>
-        <div class="profile-meta">
-            <span class="profile-role">{{ user.get_role_display }}</span>
-            <span class="profile-joined">Member since {{ user.date_joined|date:"M Y" }}</span>
-        </div>
-
-        <div class="profile-actions">
-            <a href="{% url 'edit_profile' %}" class="btn btn-primary">
-                ✏️ Edit Profile
-            </a>
-            <a href="{% url 'settings' %}" class="btn btn-secondary">
-                ⚙️ Account Settings
-            </a>
-        </div>
-    </div>
-
-    <!-- Profile Preview -->
-    <div class="profile-preview">
-        <div class="preview-section">
-            <h3 class="section-title">👤 Basic Information</h3>
-            <div class="info-list">
-                <div class="info-row">
-                    <span class="info-label">Full Name:</span>
-                    <span class="info-value">{{ user.first_name }} {{ user.last_name }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Email:</span>
-                    <span class="info-value">{{ user.email }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Username:</span>
-                    <span class="info-value">{{ user.username }}</span>
-                </div>
-                {% if user.phone_number %}
-                <div class="info-row">
-                    <span class="info-label">Phone:</span>
-                    <span class="info-value">{{ user.phone_number }}</span>
-                </div>
-                {% endif %}
-                {% if user.date_of_birth %}
-                <div class="info-row">
-                    <span class="info-label">Date of Birth:</span>
-                    <span class="info-value">{{ user.date_of_birth|date:"M j, Y" }}</span>
-                </div>
-                {% endif %}
-                {% if user.timezone %}
-                <div class="info-row">
-                    <span class="info-label">Timezone:</span>
-                    <span class="info-value">{{ user.timezone }}</span>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        {% if mood_entries %}
-        <div class="preview-section">
-            <h3 class="section-title">📊 Activity Summary</h3>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-number">{{ mood_entries.count }}</div>
-                    <div class="stat-label">Mood Entries</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">{{ upcoming_appointments.count }}</div>
-                    <div class="stat-label">Upcoming Sessions</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">{{ achievements.count }}</div>
-                    <div class="stat-label">Achievements</div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if mood_entries %}
-        <div class="preview-section">
-            <h3 class="section-title">😊 Latest Mood</h3>
-            {% with latest_mood=mood_entries.first %}
-            <div class="latest-mood">
-                <div class="mood-display">
-                    <span class="mood-emoji">{{ latest_mood.get_mood_display }}</span>
-                    <span class="mood-text">{{ latest_mood.get_mood_display }}</span>
-                </div>
-                {% if latest_mood.note %}
-                <div class="mood-note">{{ latest_mood.note }}</div>
-                {% endif %}
-                <div class="mood-date">{{ latest_mood.date|date:"M j, Y" }}</div>
-            </div>
-            {% endwith %}
-        </div>
-        {% endif %}
-    </div>
-</div>
-
+{% block extra_scripts %}
 <style>
-.profile-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
+/* Profile Page Styles - Matching Dashboard Design */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
-.profile-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+.dashboard-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 16px;
-    padding: 3rem 2rem;
-    text-align: center;
-    margin-bottom: 2rem;
-    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     overflow: hidden;
-}
-
-.profile-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(5deg); }
-}
-
-.profile-avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(10px);
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    font-weight: bold;
-    margin: 0 auto 1.5rem;
-    position: relative;
-    z-index: 2;
 }
 
-.profile-name {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    position: relative;
-    z-index: 2;
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(79, 70, 229, 0.2);
 }
 
-.profile-bio {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 1rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-    z-index: 2;
-}
-
-.profile-meta {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    position: relative;
-    z-index: 2;
-}
-
-.profile-role {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: capitalize;
-}
-
-.profile-joined {
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
-
-.profile-actions {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    position: relative;
-    z-index: 2;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-}
-
-.btn-secondary {
-    background: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.8);
-}
-
-/* Profile Preview */
-.profile-preview {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.preview-section {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.section-title::before {
-    content: '';
-    width: 4px;
-    height: 20px;
-    background: #4f46e5;
-    border-radius: 2px;
-}
-
-/* Information List */
-.info-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.info-row {
+.card-header {
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
-.info-row:last-child {
-    border-bottom: none;
-}
-
-.info-label {
-    font-weight: 600;
-    color: #374151;
-}
-
-.info-value {
-    color: #6b7280;
-}
-
-/* Statistics Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.stat-box {
-    background: #f9fafb;
-    padding: 1.5rem;
-    border-radius: 8px;
-    text-align: center;
-    border: 1px solid #e5e7eb;
-}
-
-.stat-number {
-    font-size: 2rem;
+.card-title {
+    font-size: 1.1rem;
     font-weight: 700;
-    color: #4f46e5;
-    margin-bottom: 0.5rem;
+    color: #1f2937;
+    margin: 0;
+    letter-spacing: -0.025em;
 }
 
-.stat-label {
-    color: #6b7280;
-    font-size: 0.9rem;
-    font-weight: 500;
+.card-icon {
+    font-size: 1.5rem;
+    opacity: 0.8;
+    transition: all 0.3s ease;
 }
 
-/* Latest Mood */
-.latest-mood {
-    background: #f9fafb;
-    padding: 1.5rem;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
+.dashboard-card:hover .card-icon {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
-.mood-display {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
+.card-content {
+    padding: 1.25rem 1.5rem;
 }
 
-.mood-emoji {
-    font-size: 2rem;
-    width: 50px;
-    height: 50px;
+/* Profile Section */
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #dbeafe;
-    border-radius: 50%;
+    color: white;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
-.mood-text {
-    font-size: 1.25rem;
+.profile-details {
+    margin-bottom: 1.5rem;
+}
+
+.profile-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+
+.profile-email {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.profile-role {
+    font-size: 0.8rem;
+    color: #4f46e5;
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    padding: 0.125rem 0.5rem;
+    border-radius: 8px;
+    display: inline-block;
+    font-weight: 600;
+}
+
+/* Stats and Activity */
+.activity-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 0.875rem;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+/* Quick Actions */
+.quick-actions-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+/* Achievements Preview */
+.achievements-preview {
+    margin-bottom: 1.5rem;
+}
+
+.achievement-preview-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.achievement-icon-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.achievement-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.achievement-title-small {
     font-weight: 600;
     color: #1f2937;
+    margin-bottom: 0.125rem;
+    font-size: 0.85rem;
 }
 
-.mood-note {
-    color: #6b7280;
-    margin-bottom: 0.5rem;
+.achievement-date-small {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.no-data {
+    color: #64748b;
     font-style: italic;
+    margin: 0;
+    text-align: center;
+    padding: 1rem 0;
 }
 
-.mood-date {
+/* Activity Section */
+.recent-activity-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.recent-activity-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.125rem;
+    font-size: 0.9rem;
+}
+
+.activity-time {
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Action Button */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    min-height: 44px;
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .profile-container {
-        padding: 1rem;
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
-    .profile-header {
-        padding: 2rem 1rem;
+    .dashboard-card {
+        margin: 0 0.5rem;
     }
 
-    .profile-name {
+    .card-header {
+        padding: 1rem 1.25rem 0.5rem;
+    }
+
+    .card-content {
+        padding: 1rem 1.25rem;
+    }
+
+    .page-title {
         font-size: 2rem;
     }
 
-    .profile-actions {
-        flex-direction: column;
-        align-items: center;
+    .page-subtitle {
+        font-size: 1rem;
     }
 
-    .btn {
-        width: 100%;
-        max-width: 300px;
-        justify-content: center;
+    .recent-activity-section {
+        margin: 0 0.5rem;
+        padding: 1.25rem;
     }
 
-    .info-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-    }
-
-    .stats-grid {
+    .quick-actions-buttons {
         grid-template-columns: 1fr;
+    }
+
+    .activity-item {
+        padding: 0.625rem;
+    }
+
+    .activity-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+        margin-right: 0.75rem;
     }
 }
 
 @media (max-width: 480px) {
-    .profile-name {
+    .page-title {
         font-size: 1.75rem;
     }
 
-    .preview-section {
-        padding: 1.5rem;
+    .card-title {
+        font-size: 1rem;
+    }
+
+    .profile-name {
+        font-size: 1rem;
+    }
+
+    .profile-email {
+        font-size: 0.8rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        width: 100%;
+    }
+
+    .activity-title {
+        font-size: 0.85rem;
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
     }
 }
+
+/* Animation for cards */
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-card {
+    animation: cardSlideIn 0.6s ease-out;
+}
+
+.dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Dark theme support */
+body.dark-theme .dashboard-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .card-header {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: #475569;
+}
+
+body.dark-theme .card-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .stat-label {
+    color: #94a3b8;
+}
+
+body.dark-theme .stat-value {
+    color: #f1f5f9;
+}
+
+body.dark-theme .recent-activity-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .recent-activity-section h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .activity-item {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: rgba(71, 85, 105, 0.6);
+}
+
+body.dark-theme .activity-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .activity-time {
+    color: #94a3b8;
+}
+
+body.dark-theme .profile-name {
+    color: #f1f5f9;
+}
+
+body.dark-theme .profile-email {
+    color: #cbd5e1;
+}
+
+body.dark-theme .profile-role {
+    background: linear-gradient(135deg, #3730a3 0%, #312e81 100%);
+    color: #c4b5fd;
+}
+
+body.dark-theme .page-title {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-theme .page-subtitle {
+    color: #94a3b8;
+}
 </style>
+
+    <style>
+    /* Profile Page Redesigned - Based on Notifications Design */
+    .profile-activity-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        backdrop-filter: blur(10px);
+    }
+
+    .profile-activity-section h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        letter-spacing: -0.025em;
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 12px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.3s ease;
+        animation: activitySlideIn 0.4s ease-out;
+    }
+
+    .activity-item:nth-child(1) { animation-delay: 0.1s; }
+    .activity-item:nth-child(2) { animation-delay: 0.2s; }
+    .activity-item:nth-child(3) { animation-delay: 0.3s; }
+    .activity-item:nth-child(4) { animation-delay: 0.4s; }
+    .activity-item:nth-child(5) { animation-delay: 0.5s; }
+
+    .activity-item:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-color: rgba(79, 70, 229, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+    }
+
+    .activity-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    }
+
+    .activity-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+
+    .activity-description {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-bottom: 0.25rem;
+        line-height: 1.4;
+    }
+
+    .activity-time {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        font-weight: 500;
+    }
+
+    .activity-actions {
+        margin-left: 1rem;
+    }
+
+    .activity-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+    }
+
+    .activity-btn:hover {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Modal Styles */
+    .profile-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+    }
+
+    .profile-modal.show {
+        display: flex;
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .modal-content {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .modal-header {
+        padding: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.025em;
+    }
+
+    .modal-subtitle {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #64748b;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        letter-spacing: -0.025em;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        color: #1f2937;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: transparent;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-input::placeholder {
+        color: #9ca3af;
+        font-weight: 500;
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* Enhanced Button Designs */
+    .action-btn {
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        min-height: 48px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .action-btn .btn-icon {
+        font-size: 1.1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .action-btn:hover .btn-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Edit Profile Button */
+    .edit-profile-btn {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .edit-profile-btn:hover {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Mood History Button */
+    .mood-history-btn {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .mood-history-btn:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Achievements Button */
+    .achievements-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .achievements-btn:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Export Button */
+    .export-btn {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .export-btn:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Quick Action Buttons */
+    .settings-btn {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+    }
+
+    .settings-btn:hover {
+        background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(107, 114, 128, 0.4);
+    }
+
+    .appointments-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .appointments-btn:hover {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .messages-btn {
+        background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+    }
+
+    .messages-btn:hover {
+        background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+    }
+
+    .resources-btn {
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+    }
+
+    .resources-btn:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(20, 184, 166, 0.4);
+    }
+
+    /* View Full Profile Button */
+    .view-full-btn {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .view-full-btn:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    .view-full-btn .btn-effect {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .view-full-btn:active .btn-effect {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* Modal Action Buttons */
+    .save-btn {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .save-btn:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .cancel-btn {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+    }
+
+    .cancel-btn:hover {
+        background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(107, 114, 128, 0.4);
+    }
+
+    /* Button Ripple Effect */
+    .btn-ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(0);
+        animation: none;
+        transition: transform 0.5s, opacity 1s;
+    }
+
+    .action-btn:active .btn-ripple {
+        transform: scale(4);
+        opacity: 0;
+    }
+
+    /* Loading State */
+    .loading-state {
+        text-align: center;
+        padding: 3rem;
+        color: #64748b;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e2e8f0;
+        border-top: 3px solid #4f46e5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .profile-activity-section {
+            margin: 1rem 0.5rem 0.5rem;
+            padding: 1.25rem;
+        }
+
+        .activity-item {
+            padding: 0.875rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .activity-actions {
+            margin-left: 0;
+            align-self: flex-end;
+        }
+
+        .profile-quick-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            width: 95%;
+            margin: 1rem;
+            border-radius: 16px;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .activity-title {
+            font-size: 0.9rem;
+        }
+
+        .activity-description {
+            font-size: 0.8rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+        }
+
+        .form-input {
+            font-size: 0.9rem;
+        }
+
+        .overview-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+
+        .overview-value {
+            text-align: left;
+        }
+    }
+
+    /* Animation for activities */
+    @keyframes activitySlideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .activity-item {
+        animation: activitySlideIn 0.4s ease-out;
+    }
+
+    .activity-item:nth-child(1) { animation-delay: 0.1s; }
+    .activity-item:nth-child(2) { animation-delay: 0.2s; }
+    .activity-item:nth-child(3) { animation-delay: 0.3s; }
+    .activity-item:nth-child(4) { animation-delay: 0.4s; }
+    .activity-item:nth-child(5) { animation-delay: 0.5s; }
+
+    /* Dark theme support */
+    body.dark-theme .profile-activity-section {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .profile-activity-section h3 {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .activity-item {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.6);
+    }
+
+    body.dark-theme .activity-title {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .activity-description {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .activity-time {
+        color: #64748b;
+    }
+
+    body.dark-theme .modal-content {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .modal-title {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .modal-subtitle {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .form-input {
+        background: #334155;
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .form-label {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .section-title {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .overview-label {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .overview-value {
+        color: #f1f5f9;
+    }
+
+    /* Enhanced Dark Theme Support for Profile */
+    body.dark-theme .profile-avatar-section {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.8) 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .stat-item {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(71, 85, 105, 0.6) 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .form-input {
+        background: rgba(51, 65, 85, 0.9);
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .form-input:focus {
+        background: rgba(71, 85, 105, 0.95);
+        border-color: rgba(59, 130, 246, 0.6);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    body.dark-theme .form-input::placeholder {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .form-label {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .page-title {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    body.dark-theme .page-subtitle {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .activity-item {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(71, 85, 105, 0.6) 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .activity-title {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .activity-description {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .activity-time {
+        color: #94a3b8;
+    }
+
+    /* Enhanced Dark Theme Support for Profile */
+    body.dark-theme .profile-avatar-section {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.8) 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .stat-item {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(71, 85, 105, 0.6) 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .form-input {
+        background: rgba(51, 65, 85, 0.9);
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .form-input:focus {
+        background: rgba(71, 85, 105, 0.95);
+        border-color: rgba(59, 130, 246, 0.6);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    body.dark-theme .form-input::placeholder {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .form-label {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .page-title {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    body.dark-theme .page-subtitle {
+        color: #94a3b8;
+    }
+
+    /* Card Animations */
+    @keyframes activitySlideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+    }
+
+    /* Loading States */
+    .stat-item.loading {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-item.loading::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    /* Enhanced Dark Theme Support for Profile */
+    body.dark-theme .profile-avatar-section {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.8) 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .stat-item {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(71, 85, 105, 0.6) 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .form-input {
+        background: rgba(51, 65, 85, 0.9);
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .form-input:focus {
+        background: rgba(71, 85, 105, 0.95);
+        border-color: rgba(59, 130, 246, 0.6);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    body.dark-theme .form-input::placeholder {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .form-label {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .page-title {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    body.dark-theme .page-subtitle {
+        color: #94a3b8;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Profile</h1>
+    <p class="page-subtitle">Manage your account settings and view your activity</p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Profile Overview Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Profile Overview</h3>
+            <div class="card-icon">👤</div>
+        </div>
+        <div class="card-content">
+            <div class="profile-avatar">
+                {{ user.first_name.0|default:'U'|upper }}{{ user.last_name.0|default:'S'|upper }}
+            </div>
+            <div class="profile-details">
+                <div class="profile-name">{{ user.first_name|default:"User" }} {{ user.last_name|default:"Name" }}</div>
+                <div class="profile-email">{{ user.email|default:"user@example.com" }}</div>
+                <div class="profile-role">{{ user.role|default:"User"|title }}</div>
+            </div>
+            <a href="/accounts/profile/edit/" class="action-btn">Edit Profile</a>
+        </div>
+    </div>
+
+    <!-- Activity Summary Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Activity Summary</h3>
+            <div class="card-icon">📊</div>
+        </div>
+        <div class="card-content">
+            <div class="activity-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Mood Entries</span>
+                    <span class="stat-value" id="moodEntries">{{ mood_entries|default:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Achievements</span>
+                    <span class="stat-value" id="achievements">{{ achievements|default:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Sessions</span>
+                    <span class="stat-value" id="sessions">{{ sessions_completed|default:0 }}</span>
+                </div>
+            </div>
+            <a href="/accounts/activity/" class="action-btn">View All Activity</a>
+        </div>
+    </div>
+
+    <!-- Quick Actions Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Quick Actions</h3>
+            <div class="card-icon">⚡</div>
+        </div>
+        <div class="card-content">
+            <div class="quick-actions-buttons">
+                <a href="/accounts/settings/" class="action-btn">Account Settings</a>
+                <a href="/accounts/mood-history/" class="action-btn">Mood History</a>
+                <a href="/appointments/" class="action-btn">My Appointments</a>
+                <a href="/resources/" class="action-btn">Browse Resources</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Achievements Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Recent Achievements</h3>
+            <div class="card-icon">🏆</div>
+        </div>
+        <div class="card-content">
+            {% if recent_achievements %}
+                <div class="achievements-preview">
+                    {% for achievement in recent_achievements|slice:":3" %}
+                    <div class="achievement-preview-item">
+                        <div class="achievement-icon-small">🏆</div>
+                        <div class="achievement-info">
+                            <div class="achievement-title-small">{{ achievement.title|default:"Achievement" }}</div>
+                            <div class="achievement-date-small">{{ achievement.unlocked_at|date:"M d"|default:"Recent" }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="/achievements/" class="action-btn">View All</a>
+            {% else %}
+                <p class="no-data">No achievements yet</p>
+                <a href="/accounts/log-mood/" class="action-btn">Get Started</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity Section -->
+<div class="recent-activity-section">
+    <h3>Recent Activity</h3>
+    <div class="activity-list">
+        {% if recent_activity %}
+            {% for activity in recent_activity %}
+            <div class="activity-item">
+                <div class="activity-icon">📝</div>
+                <div class="activity-content">
+                    <div class="activity-title">{{ activity.description|default:"Account activity" }}</div>
+                    <div class="activity-time">{{ activity.timestamp|date:"M d, Y g:i A"|default:"Recently" }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="activity-item">
+                <div class="activity-content">
+                    <div class="activity-title">Welcome to your profile!</div>
+                    <div class="activity-time">Start using SafeTalk to see your activity here</div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Profile Edit Modal -->
+<div class="profile-modal" id="profileModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2 class="modal-title">Edit Profile</h2>
+                <p class="modal-subtitle">Update your personal information</p>
+            </div>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <form id="editProfileForm">
+                <div class="form-section">
+                    <h3 class="section-title">Personal Information</h3>
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-input" id="firstName" name="first_name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-input" id="lastName" name="last_name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bio</label>
+                        <textarea class="form-input form-textarea" id="bio" name="bio" placeholder="Tell us about yourself..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Preferences</h3>
+                    <div class="form-group">
+                        <label class="form-label">Timezone</label>
+                        <select class="form-input" id="timezone" name="timezone">
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">Eastern Time</option>
+                            <option value="America/Chicago">Central Time</option>
+                            <option value="America/Denver">Mountain Time</option>
+                            <option value="America/Los_Angeles">Pacific Time</option>
+                            <option value="Europe/London">London</option>
+                            <option value="Europe/Paris">Paris</option>
+                            <option value="Asia/Tokyo">Tokyo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="action-btn primary save-btn">
+                        <i class="btn-icon">💾</i>
+                        <span>Save Changes</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                    <button type="button" class="action-btn secondary cancel-btn" onclick="closeModal()">
+                        <i class="btn-icon">❌</i>
+                        <span>Cancel</span>
+                        <div class="btn-effect"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+// Auto-refresh profile data every 30 seconds
+setInterval(function() {
+    // Could add AJAX calls to refresh profile data
+    console.log('Profile refresh check');
+}, 30000);
+
+// Handle quick actions
+function quickAction(action) {
+    switch(action) {
+        case 'edit-profile':
+            window.location.href = '/accounts/profile/edit/';
+            break;
+        case 'account-settings':
+            window.location.href = '/accounts/settings/';
+            break;
+        case 'mood-history':
+            window.location.href = '/accounts/mood-history/';
+            break;
+        case 'my-appointments':
+            window.location.href = '/appointments/';
+            break;
+        case 'browse-resources':
+            window.location.href = '/resources/';
+            break;
+        case 'view-achievements':
+            window.location.href = '/achievements/';
+            break;
+        case 'view-activity':
+            window.location.href = '/accounts/activity/';
+            break;
+    }
+}
+
+// Add loading animation to cards on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach(card => {
+        card.classList.add('loading');
+        setTimeout(() => {
+            card.classList.remove('loading');
+        }, 1000);
+    });
+});
+</script>
 {% endblock %}

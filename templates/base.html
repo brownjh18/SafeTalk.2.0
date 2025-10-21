@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" type="image/png" href="/static/img/SafeTalkLogo..png">
     <title>{% block title %}SafeTalk{% endblock %}</title>
     <style>
         * {
@@ -231,7 +232,11 @@
         }
 
         .sidebar.minimized .sidebar-nav {
-            padding: 1rem 0.5rem;
+            padding: 0.5rem 0.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
         }
 
         .nav-section {
@@ -258,44 +263,81 @@
         .nav-item {
             display: flex;
             align-items: center;
-            padding: 0.75rem 1rem;
+            padding: 0.875rem 1rem;
             color: #d1d5db;
             text-decoration: none;
-            transition: all 0.3s ease;
-            border-radius: 0.5rem;
-            margin: 0.25rem 0.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            margin: 0.375rem 0.5rem;
             font-size: 0.9rem;
             position: relative;
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.8) 0%, rgba(55, 65, 81, 0.8) 100%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(75, 85, 99, 0.6);
+            backdrop-filter: blur(8px);
         }
 
         .nav-item:hover {
-            background: rgba(79, 70, 229, 0.2);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.3) 0%, rgba(124, 58, 237, 0.3) 100%);
             color: #f9fafb;
-            transform: translateX(4px);
+            transform: translateY(-2px) translateX(2px);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: rgba(79, 70, 229, 0.4);
         }
 
         .nav-item.active {
-            background: #4f46e5;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             color: #f9fafb;
-            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-color: rgba(79, 70, 229, 0.6);
+            transform: translateY(-1px);
         }
 
-        .nav-item i {
-            margin-right: 0.75rem;
-            width: 18px;
+        .nav-item .icon {
+            margin-right: 0.875rem;
+            width: 20px;
             text-align: center;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.9;
         }
 
-        .sidebar.minimized .nav-item i {
+        .nav-item:hover .icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .sidebar.minimized .nav-item .icon {
             margin-right: 0;
-            font-size: 1.3rem;
+            font-size: 1.6rem;
+            display: block;
+            text-align: center;
+            width: 100%;
         }
 
         .sidebar.minimized .nav-item {
             justify-content: center;
-            padding: 0.75rem 0.5rem;
+            padding: 0.625rem 0.25rem;
+            flex-direction: column;
+            gap: 0.25rem;
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(55, 65, 81, 0.9) 100%);
+            margin: 0.125rem 0.25rem;
+            border-radius: 8px;
+            min-height: 48px;
+            width: 48px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .sidebar.minimized .nav-item:hover {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%);
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        .sidebar.minimized .nav-item.active {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
         }
 
         .sidebar.minimized .nav-item {
@@ -308,26 +350,36 @@
             left: 100%;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(31, 41, 55, 0.95) 100%);
             color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            padding: 0.625rem 0.875rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
             white-space: nowrap;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            margin-left: 0.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+            margin-left: 0.875rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            backdrop-filter: blur(8px);
         }
 
         .sidebar.minimized .nav-item:hover::after {
             opacity: 1;
             visibility: visible;
+            transform: translateY(-50%) translateX(8px);
         }
 
         .sidebar.minimized .nav-item span {
             display: none;
+        }
+
+        .sidebar.minimized .nav-item .icon {
+            margin-bottom: 0.125rem;
+            font-size: 1.4rem;
         }
 
         .sidebar.minimized .sidebar-logo span {
@@ -337,6 +389,33 @@
         .sidebar.minimized .sidebar-logo-section .sidebar-status {
             display: none;
         }
+
+        /* Add subtle animation for nav items */
+        @keyframes navItemSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .nav-item {
+            animation: navItemSlideIn 0.4s ease-out;
+        }
+
+        .nav-item:nth-child(1) { animation-delay: 0.05s; }
+        .nav-item:nth-child(2) { animation-delay: 0.1s; }
+        .nav-item:nth-child(3) { animation-delay: 0.15s; }
+        .nav-item:nth-child(4) { animation-delay: 0.2s; }
+        .nav-item:nth-child(5) { animation-delay: 0.25s; }
+        .nav-item:nth-child(6) { animation-delay: 0.3s; }
+        .nav-item:nth-child(7) { animation-delay: 0.35s; }
+        .nav-item:nth-child(8) { animation-delay: 0.4s; }
+        .nav-item:nth-child(9) { animation-delay: 0.45s; }
+        .nav-item:nth-child(10) { animation-delay: 0.5s; }
 
         .sidebar-footer {
             padding: 1rem;
@@ -559,6 +638,10 @@
             color: #64748b;
             font-size: 1.2rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-icon .icon {
+            font-size: 1.2rem;
         }
 
         .nav-icon:hover {
@@ -886,7 +969,7 @@
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
         }
 
-        .dropdown-item i {
+        .dropdown-item .icon {
             margin-right: 0.875rem;
             width: 18px;
             text-align: center;
@@ -964,6 +1047,8 @@
                 transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 z-index: 1000;
                 box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+                background: linear-gradient(180deg, #1f2937 0%, #374151 100%);
+                backdrop-filter: blur(10px);
             }
 
             .sidebar.show {
@@ -985,6 +1070,8 @@
 
             .sidebar.show::before {
                 opacity: 1;
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
             }
 
             .main-content {
@@ -1096,6 +1183,22 @@
             .nav-item {
                 padding: 0.875rem 1rem;
                 font-size: 0.95rem;
+                margin: 0.25rem 0.75rem;
+                background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(55, 65, 81, 0.9) 100%);
+                border-radius: 10px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(75, 85, 99, 0.5);
+            }
+
+            .nav-item:hover {
+                background: linear-gradient(135deg, rgba(79, 70, 229, 0.3) 0%, rgba(124, 58, 237, 0.3) 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(79, 70, 229, 0.2);
+            }
+
+            .nav-item.active {
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                box-shadow: 0 4px 8px rgba(79, 70, 229, 0.4);
             }
 
             .nav-item i {
@@ -1195,6 +1298,17 @@
             .sidebar.minimized .upgrade-btn:hover::after {
                 opacity: 1;
                 visibility: visible;
+            }
+
+            body.dark-theme .upgrade-btn {
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                color: white;
+                border-color: #f59e0b;
+            }
+
+            body.dark-theme .upgrade-btn:hover {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                border-color: #d97706;
             }
     
             @media (max-width: 768px) {
@@ -1402,6 +1516,18 @@
             transform: translateY(0) scale(0.98);
         }
 
+        body.dark-theme .theme-toggle-btn {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #475569;
+            color: #cbd5e1;
+        }
+
+        body.dark-theme .theme-toggle-btn:hover {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            border-color: #f59e0b;
+        }
+
         /* Menu Dropdown */
         .menu-dropdown {
             position: relative;
@@ -1432,6 +1558,18 @@
 
         .menu-trigger:active {
             transform: translateY(0) scale(0.98);
+        }
+
+        body.dark-theme .menu-trigger {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #475569;
+            color: #cbd5e1;
+        }
+
+        body.dark-theme .menu-trigger:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-color: #4f46e5;
         }
 
         .menu-dots {
@@ -1486,8 +1624,39 @@
             border-color: #475569;
         }
 
+        body.dark-theme .dropdown-header {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #475569;
+        }
+
+        body.dark-theme .dropdown-user-name,
+        body.dark-theme .dropdown-user-role {
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .dropdown-item {
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+
         body.dark-theme .dropdown-item:hover {
             background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .dropdown-item:last-child {
+            border-color: #475569;
+            color: #ef4444;
+        }
+
+        body.dark-theme .dropdown-item:last-child:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: #f1f5f9;
+        }
+
+        body.dark-theme .dropdown-footer {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            border-color: #475569;
         }
     </style>
     {% block extra_head %}{% endblock %}
@@ -1499,7 +1668,7 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo-section">
                     <a href="/" class="sidebar-logo">
-                        <i>🛡️</i> <span>SafeTalk</span>
+                        <img src="/static/img/SafeTalkLogo..png" alt="SafeTalk Logo" style="width: 32px; height: 32px; margin-right: 0.5rem; border-radius: 4px;"> <span>SafeTalk</span>
                     </a>
                     <div class="sidebar-status">
                         <div class="status-indicator"></div>
@@ -1528,19 +1697,19 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
                     <a href="/dashboard/" class="nav-item" id="nav-home" data-tooltip="Dashboard">
-                        <i>🏠</i> <span>Dashboard</span>
+                        <span class="icon">🏠</span> <span>Dashboard</span>
                     </a>
                     <a href="/messaging/" class="nav-item" id="nav-messaging" data-tooltip="Messages">
-                        <i>💬</i> <span>Messages</span>
+                        <span class="icon">💬</span> <span>Messages</span>
                     </a>
                     <a href="/resources/" class="nav-item" id="nav-resources" data-tooltip="Resources">
-                        <i>📚</i> <span>Resources</span>
+                        <span class="icon">📚</span> <span>Resources</span>
                     </a>
                     <a href="/profile/" class="nav-item" id="nav-profile" data-tooltip="Profile">
-                        <i>👤</i> <span>Profile</span>
+                        <span class="icon">👤</span> <span>Profile</span>
                     </a>
                     <a href="/settings/" class="nav-item" id="nav-settings" data-tooltip="Settings">
-                        <i>⚙️</i> <span>Settings</span>
+                        <span class="icon">⚙️</span> <span>Settings</span>
                     </a>
                 </div>
 
@@ -1548,27 +1717,27 @@
                 <div class="nav-section client-only" id="client-section">
                     <div class="nav-section-title">My Tools</div>
                     <a href="/accounts/appointments/" class="nav-item" id="nav-book-appointment" data-tooltip="Sessions">
-                        <i>📅</i> <span>Sessions</span>
+                        <span class="icon">📅</span> <span>Sessions</span>
                     </a>
                     <a href="/chat/ai/" class="nav-item" id="nav-ai-chat" data-tooltip="AI Support">
-                        <i>🤖</i> <span>AI Support</span>
+                        <span class="icon">🤖</span> <span>AI Support</span>
                     </a>
                 </div>
 
                 <!-- Management (Admin Only) -->
                 <div class="nav-section admin-only" id="admin-section">
                     <div class="nav-section-title">Management</div>
-                    <a href="/dashboard/manage-users/" class="nav-item" id="nav-users" data-tooltip="Users">
-                        <i>👥</i> <span>Users</span>
+                    <a href="/users/" class="nav-item" id="nav-users" data-tooltip="Users">
+                        <span class="icon">👥</span> <span>Users</span>
                     </a>
                     <a href="/dashboard/content/" class="nav-item" id="nav-manage-resources" data-tooltip="Content">
-                        <i>📝</i> <span>Content</span>
+                        <span class="icon">📝</span> <span>Content</span>
                     </a>
                     <a href="/dashboard/manage-appointments/" class="nav-item" id="nav-appointments" data-tooltip="Appointments">
-                        <i>📅</i> <span>Appointments</span>
+                        <span class="icon">📋</span> <span>Appointments</span>
                     </a>
                     <a href="/dashboard/analytics/" class="nav-item" id="nav-analytics" data-tooltip="Analytics">
-                        <i>📊</i> <span>Analytics</span>
+                        <span class="icon">📊</span> <span>Analytics</span>
                     </a>
                 </div>
 
@@ -1576,13 +1745,13 @@
                 <div class="nav-section counselor-only" id="counselor-section">
                     <div class="nav-section-title">Tools</div>
                     <a href="/dashboard/manage-appointments/" class="nav-item" id="nav-my-appointments" data-tooltip="My Sessions">
-                        <i>📅</i> <span>My Sessions</span>
+                        <span class="icon">📅</span> <span>My Sessions</span>
                     </a>
-                    <a href="/counselor-clients/" class="nav-item" id="nav-clients" data-tooltip="My Clients">
-                        <i>👥</i> <span>My Clients</span>
+                    <a href="/dashboard/counselor-clients/" class="nav-item" id="nav-clients" data-tooltip="My Clients">
+                        <span class="icon">👥</span> <span>My Clients</span>
                     </a>
                     <a href="/dashboard/calendar/" class="nav-item" id="nav-calendar" data-tooltip="Calendar">
-                        <i>📅</i> <span>Calendar</span>
+                        <span class="icon">📅</span> <span>Calendar</span>
                     </a>
                 </div>
             </nav>
@@ -1600,7 +1769,7 @@
             <nav class="navbar">
                 <div class="navbar-left">
                     <button class="nav-icon" id="sidebarToggle" onclick="toggleSidebar()">
-                        ☰
+                        <span class="icon">☰</span>
                     </button>
                     <div class="search-bar">
                         <input type="text" class="search-input" placeholder="Search resources, users, appointments..." id="globalSearch">
@@ -1612,7 +1781,7 @@
 
                 <div class="navbar-right">
                     <div class="nav-icon badge messages-dropdown" onclick="toggleMessagesDropdown()" title="Messages">
-                        <i>💬</i>
+                        <span class="icon">💬</span>
                         <span class="notification-badge" id="messagesBadge" style="display: none;">0</span>
                         <div class="dropdown-menu messages-menu" id="messagesDropdown">
                             <div class="dropdown-header">
@@ -1629,7 +1798,7 @@
                         </div>
                     </div>
                     <div class="nav-icon badge notifications-dropdown" onclick="toggleNotificationsDropdown()" title="Notifications">
-                        <i>🔔</i>
+                        <span class="icon">🔔</span>
                         <span class="notification-badge" id="notificationsBadge" style="display: none;">0</span>
                         <div class="dropdown-menu notifications-menu" id="notificationsDropdown">
                             <div class="dropdown-header">
@@ -1646,11 +1815,11 @@
                         </div>
                     </div>
                     <div class="nav-icon" onclick="showSettings()" title="Settings">
-                        <i>⚙️</i>
+                        <span class="icon">⚙️</span>
                     </div>
                     <div class="nav-theme-toggle">
                         <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">
-                            <i id="themeIcon">🌙</i>
+                            <span id="themeIcon" class="icon">🌙</span>
                         </button>
                     </div>
                     {% if user.is_authenticated and user.role == 'client' %}
@@ -1660,7 +1829,7 @@
                     {% endif %}
                     <div class="menu-dropdown">
                         <button class="menu-trigger" onclick="toggleMenuDropdown()" title="Menu">
-                            <span class="menu-dots">⋮</span>
+                            <span class="icon">⋮</span>
                         </button>
                         <div class="dropdown-menu" id="menuDropdown">
                             <div class="dropdown-header">
@@ -1673,16 +1842,16 @@
                                 </div>
                             </div>
                             <a href="/profile/" class="dropdown-item">
-                                <i>👤</i> View Profile
+                                <span class="icon">👤</span> View Profile
                             </a>
                             <a href="/profile/edit/" class="dropdown-item">
-                                <i>✏️</i> Edit Profile
+                                <span class="icon">✏️</span> Edit Profile
                             </a>
                             <a href="/settings/" class="dropdown-item">
-                                <i>⚙️</i> Settings
+                                <span class="icon">⚙️</span> Settings
                             </a>
                             <a href="#" class="dropdown-item" onclick="logout()">
-                                <i>🚪</i> Logout
+                                <span class="icon">🚪</span> Logout
                             </a>
                         </div>
                     </div>
@@ -1758,14 +1927,14 @@
                 '/resources/': 'nav-resources',
                 '/profile/': 'nav-profile',
                 '/settings/': 'nav-settings',
-                '/dashboard/manage-users/': 'nav-users',
+                '/users/': 'nav-users',
                 '/dashboard/content/': 'nav-manage-resources',
                 '/dashboard/manage-appointments/': 'nav-appointments',
                 '/dashboard/analytics/': 'nav-analytics',
                 '/chat/conversations/': 'nav-counselor-conversations',
                 '/chat/conversations/': 'nav-admin-messages',
                 '/dashboard/manage-appointments/': 'nav-my-appointments',
-                '/counselor-clients/': 'nav-clients',
+                '/dashboard/counselor-clients/': 'nav-clients',
                 '/dashboard/calendar/': 'nav-calendar'
             };
 
@@ -2190,6 +2359,8 @@
                 // Save state to localStorage
                 const isMinimized = sidebar.classList.contains('minimized');
                 localStorage.setItem('sidebarMinimized', isMinimized);
+                // Update toggle button icon
+                updateToggleButtonIcon(isMinimized);
             }
         }
 
@@ -2213,9 +2384,18 @@
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('show');
                 document.body.style.overflow = '';
+                // Restore minimized state on desktop
+                const isMinimized = localStorage.getItem('sidebarMinimized') === 'true';
+                if (isMinimized) {
+                    sidebar.classList.add('minimized');
+                } else {
+                    sidebar.classList.remove('minimized');
+                }
+                updateToggleButtonIcon(isMinimized);
             } else {
                 // On mobile, remove minimized state if present
                 sidebar.classList.remove('minimized');
+                updateToggleButtonIcon(false);
             }
         });
 
@@ -2225,6 +2405,25 @@
 
             if (isMinimized && window.innerWidth > 768) {
                 sidebar.classList.add('minimized');
+            }
+
+            // Update toggle button icon based on current state
+            updateToggleButtonIcon(isMinimized);
+        }
+
+        function updateToggleButtonIcon(isMinimized) {
+            const toggleBtn = document.getElementById('sidebarToggle');
+            if (toggleBtn) {
+                const icon = toggleBtn.querySelector('.icon');
+                if (icon) {
+                    // On mobile, always show hamburger menu for opening sidebar
+                    if (window.innerWidth <= 768) {
+                        icon.textContent = '☰';
+                    } else {
+                        // On desktop, show based on minimized state
+                        icon.textContent = isMinimized ? '☰' : '✕';
+                    }
+                }
             }
         }
 
@@ -2382,6 +2581,7 @@
                 e.preventDefault();
             }
         }, { passive: false });
+
 
         // Make functions available globally for templates
         window.toggleSidebar = toggleSidebar;

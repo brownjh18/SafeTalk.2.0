@@ -1,0 +1,1688 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Log Mood - SafeTalk{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Mood Logging Page Styles - Redesigned using dashboard.html design */
+    .mood-content {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 56px);
+        padding: 2rem 1rem;
+        transition: background 0.3s ease;
+    }
+
+    body.dark-theme .mood-content {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    .mood-layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .mood-main {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .mood-main:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    .mood-sidebar {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .mood-sidebar:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    /* Enhanced Header Styling */
+    .mood-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px 16px 0 0;
+        text-align: center;
+        margin-bottom: 0;
+    }
+
+    .mood-header h2 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+    }
+
+    .mood-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    /* Enhanced Form Styling */
+    .mood-form {
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        background: #f8fafc;
+        color: #1f2937;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .recent-entries {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .recent-entry {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .recent-entry:hover {
+        background: rgba(79, 70, 229, 0.1);
+        transform: translateX(4px);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    body.dark-theme .recent-entry {
+        background: rgba(51, 65, 85, 0.8);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .recent-entry:hover {
+        background: rgba(79, 70, 229, 0.2);
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    .recent-date {
+        text-align: center;
+        min-width: 50px;
+    }
+
+    .recent-day {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #4f46e5;
+        line-height: 1;
+    }
+
+    body.dark-theme .recent-day {
+        color: #60a5fa;
+    }
+
+    .recent-month {
+        font-size: 0.7rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    body.dark-theme .recent-month {
+        color: #94a3b8;
+    }
+
+    .recent-mood {
+        text-align: center;
+    }
+
+    .recent-mood-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .recent-mood-text {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    body.dark-theme .recent-mood-text {
+        color: #cbd5e1;
+    }
+
+    .sidebar-footer {
+        text-align: center;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    body.dark-theme .sidebar-footer {
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    .view-all-link {
+        color: #4f46e5;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    .view-all-link:hover {
+        color: #7c3aed;
+    }
+
+    body.dark-theme .view-all-link {
+        color: #60a5fa;
+    }
+
+    body.dark-theme .view-all-link:hover {
+        color: #a78bfa;
+    }
+
+    .mood-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .mood-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .mood-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+    }
+
+    .mood-form {
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 1rem;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    /* Enhanced Mood Selection */
+    .mood-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .mood-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mood-option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+        border-radius: 16px 16px 0 0;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .mood-option:hover {
+        border-color: #4f46e5;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(79, 70, 229, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .mood-option:hover::before {
+        opacity: 1;
+    }
+
+    .mood-option.selected {
+        border-color: #4f46e5;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+    }
+
+    .mood-option.selected::before {
+        opacity: 1;
+    }
+
+    .mood-emoji {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .mood-option:hover .mood-emoji {
+        transform: scale(1.1);
+    }
+
+    .mood-label {
+        font-weight: 600;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    /* Mood Intensity Slider */
+    .intensity-container {
+        margin: 1rem 0;
+    }
+
+    .intensity-slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        background: linear-gradient(to right, #ef4444 0%, #f59e0b 25%, #eab308 50%, #84cc16 75%, #10b981 100%);
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .intensity-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #4f46e5;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .intensity-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    }
+
+    .intensity-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #4f46e5;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    }
+
+    .intensity-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    /* Energy Level Selection */
+    .energy-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .energy-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .energy-option:hover {
+        border-color: #f59e0b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+    }
+
+    .energy-option.selected {
+        border-color: #f59e0b;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: white;
+    }
+
+    body.dark-theme .energy-option {
+        background: rgba(51, 65, 85, 0.8);
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #e2e8f0;
+    }
+
+    body.dark-theme .energy-option:hover {
+        background: rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    body.dark-theme .energy-option.selected {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        border-color: #f59e0b;
+        color: white;
+    }
+
+    .energy-emoji {
+        font-size: 1.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .energy-label {
+        font-weight: 500;
+        text-align: center;
+        font-size: 0.8rem;
+    }
+
+    /* Activity and Trigger Tags */
+    .activity-tags, .trigger-tags {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .activity-tag, .trigger-tag {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        font-size: 0.9rem;
+        gap: 0.5rem;
+    }
+
+    .activity-tag:hover, .trigger-tag:hover {
+        border-color: #4f46e5;
+        background: rgba(79, 70, 229, 0.05);
+    }
+
+    .activity-tag.selected, .trigger-tag.selected {
+        border-color: #4f46e5;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+    }
+
+    .activity-tag input, .trigger-tag input {
+        margin-right: 0.25rem;
+    }
+
+    /* Field Error Styling */
+    .form-input.error, .form-select.error, .form-textarea.error {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .field-error {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .field-error::before {
+        content: '⚠️';
+        font-size: 0.8rem;
+    }
+
+    /* Celebration Animation */
+    .celebration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 9999;
+        overflow: hidden;
+    }
+
+    .celebration-particle {
+        position: absolute;
+        font-size: 2rem;
+        animation: celebrate 3s ease-out forwards;
+    }
+
+    @keyframes celebrate {
+        0% {
+            opacity: 0;
+            transform: translateY(100vh) scale(0.5) rotate(0deg);
+        }
+        20% {
+            opacity: 1;
+            transform: translateY(60vh) scale(1) rotate(45deg);
+        }
+        40% {
+            transform: translateY(40vh) scale(1.2) rotate(90deg);
+        }
+        60% {
+            transform: translateY(20vh) scale(1) rotate(135deg);
+        }
+        80% {
+            opacity: 1;
+            transform: translateY(10vh) scale(0.8) rotate(180deg);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-10vh) scale(0.3) rotate(225deg);
+        }
+    }
+
+    /* Progress Indicator */
+    .form-progress {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    .progress-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .progress-dot.active {
+        background: #4f46e5;
+    }
+
+    .progress-dot.completed {
+        background: #10b981;
+    }
+
+    /* Quick Access Section */
+    .quick-access {
+        margin-top: 2rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .quick-access h3 {
+        margin-bottom: 1.5rem;
+        color: #1e293b;
+        font-size: 1.3rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .quick-access-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .quick-access-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .quick-access-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-color: #4f46e5;
+    }
+
+    .quick-access-icon {
+        font-size: 2.5rem;
+        flex-shrink: 0;
+    }
+
+    .quick-access-content h4 {
+        margin: 0 0 0.25rem;
+        color: #1e293b;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .quick-access-content p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    /* Desktop Wide Layout (Default) */
+    .mood-mobile-layout {
+        display: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .mood-layout {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .mood-main, .mood-sidebar {
+            margin: 0 0.5rem;
+        }
+
+        .mood-header {
+            padding: 1.5rem;
+        }
+
+        .mood-header h2 {
+            font-size: 1.75rem;
+        }
+
+        .mood-form {
+            padding: 1.5rem;
+        }
+
+        .mood-selection {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .mood-option {
+            padding: 1rem;
+        }
+
+        .mood-emoji {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .mood-layout {
+            padding: 0 0.5rem;
+            gap: 1rem;
+        }
+
+        .mood-sidebar {
+            padding: 1.25rem;
+        }
+
+        .mood-main {
+            padding: 1.25rem;
+        }
+
+        .mood-header {
+            padding: 1.5rem;
+        }
+
+        .mood-header h2 {
+            font-size: 1.75rem;
+        }
+
+        .mood-selection {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .mood-option {
+            padding: 1rem;
+        }
+
+        .mood-emoji {
+            font-size: 2rem;
+        }
+
+        .energy-selection {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .activity-tags, .trigger-tags {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .activity-tag, .trigger-tag {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .intensity-labels {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .mood-selection {
+            grid-template-columns: 1fr;
+        }
+
+        .energy-selection {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .activity-tags, .trigger-tags {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+        }
+    }
+
+    /* Enhanced Submit Button */
+    .submit-btn {
+        width: 100%;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-top: 1rem;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        min-height: 48px;
+    }
+
+    .submit-btn:hover {
+        background: linear-gradient(135deg, #3730a3 0%, #6d28d9 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    }
+
+    .submit-btn::before {
+        content: "📝";
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    /* Success Message */
+    .success-message {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 1rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .mood-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .mood-selection {
+            grid-template-columns: 1fr;
+        }
+
+        .energy-selection {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .activity-tags, .trigger-tags {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+        }
+    }
+
+    /* Animation for cards */
+    @keyframes cardSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .mood-main, .mood-sidebar {
+        animation: cardSlideIn 0.6s ease-out;
+    }
+
+    .mood-main {
+        animation-delay: 0.1s;
+    }
+
+    .mood-sidebar {
+        animation-delay: 0.2s;
+    }
+
+    /* Dark theme support */
+    body.dark-theme .mood-main,
+    body.dark-theme .mood-sidebar {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .mood-header {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    }
+
+    body.dark-theme .form-input,
+    body.dark-theme .form-select,
+    body.dark-theme .form-textarea {
+        background: rgba(51, 65, 85, 0.8);
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .form-input:focus,
+    body.dark-theme .form-select:focus,
+    body.dark-theme .form-textarea:focus {
+        background: rgba(71, 85, 105, 0.9);
+        border-color: rgba(59, 130, 246, 0.5);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    body.dark-theme .mood-option {
+        background: rgba(51, 65, 85, 0.8);
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #e2e8f0;
+    }
+
+    body.dark-theme .mood-option:hover {
+        background: rgba(79, 70, 229, 0.2);
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    body.dark-theme .mood-option.selected {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border-color: #4f46e5;
+    }
+
+    body.dark-theme .activity-tag,
+    body.dark-theme .trigger-tag {
+        background: rgba(51, 65, 85, 0.8);
+        border-color: rgba(71, 85, 105, 0.8);
+        color: #e2e8f0;
+    }
+
+    body.dark-theme .activity-tag:hover,
+    body.dark-theme .trigger-tag:hover {
+        background: rgba(79, 70, 229, 0.1);
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    body.dark-theme .activity-tag.selected,
+    body.dark-theme .trigger-tag.selected {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border-color: #4f46e5;
+        color: white;
+    }
+
+    body.dark-theme .form-label {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .page-title {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    body.dark-theme .page-subtitle {
+        color: #94a3b8;
+    }
+
+    /* Dark theme for recent activity */
+    body.dark-theme .recent-activity {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .recent-activity h3 {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .activity-item {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.6);
+    }
+
+    body.dark-theme .activity-item:hover {
+        background: linear-gradient(135deg, #475569 0%, #59697d 100%);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    body.dark-theme .activity-title {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .activity-time {
+        color: #94a3b8;
+    }
+
+    /* Mood History Styles */
+    .mood-history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .mood-history-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .mood-history-item:last-child {
+        border-bottom: none;
+    }
+
+    .mood-history-item:hover {
+        background: rgba(79, 70, 229, 0.05);
+        border-radius: 8px;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        margin: 0 -0.5rem;
+    }
+
+    .mood-history-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .mood-history-date {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4f46e5;
+        min-width: 45px;
+        text-align: center;
+    }
+
+    .mood-history-emoji {
+        font-size: 1.2rem;
+        margin-right: 0.25rem;
+    }
+
+    .mood-history-mood {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .empty-history {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #64748b;
+    }
+
+    .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.6;
+    }
+
+    /* Dark theme for mood history */
+    body.dark-theme .mood-sidebar-card {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .sidebar-header {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .sidebar-title {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .sidebar-subtitle {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .mood-history-item {
+        border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+        padding: 0.75rem 0;
+    }
+
+    body.dark-theme .mood-history-item:last-child {
+        border-bottom: none;
+    }
+
+    body.dark-theme .mood-history-item:hover {
+        background: rgba(79, 70, 229, 0.1);
+    }
+
+    body.dark-theme .mood-history-date {
+        color: #60a5fa;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    body.dark-theme .mood-history-emoji {
+        font-size: 1.2rem;
+        margin: 0 0.5rem;
+    }
+
+    body.dark-theme .mood-history-mood {
+        color: #f1f5f9;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    body.dark-theme .empty-history {
+        color: #94a3b8;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    body.dark-theme .empty-history small {
+        color: #64748b;
+        display: block;
+        margin-top: 0.25rem;
+    }
+
+    body.dark-theme .empty-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.7;
+    }
+
+    /* Mood History Section Styles */
+    .mood-history-section {
+        padding: 2rem;
+    }
+
+    .mood-history-entry {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .mood-history-entry:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    .mood-history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .mood-history-date {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4f46e5;
+    }
+
+    .mood-history-emoji {
+        font-size: 1.5rem;
+    }
+
+    .mood-history-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .mood-history-mood {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .mood-history-intensity {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .mood-history-note {
+        font-size: 0.9rem;
+        color: #64748b;
+        line-height: 1.5;
+        font-style: italic;
+    }
+
+    .empty-history-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #64748b;
+    }
+
+    .empty-history-state h3 {
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-size: 1.3rem;
+    }
+
+    .empty-history-state p {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Dark theme for mood history */
+    body.dark-theme .mood-history-entry {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.8);
+    }
+
+    body.dark-theme .mood-history-entry:hover {
+        background: linear-gradient(135deg, #475569 0%, #59697d 100%);
+        border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    body.dark-theme .mood-history-date {
+        color: #60a5fa;
+    }
+
+    body.dark-theme .mood-history-mood {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .mood-history-intensity {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .mood-history-note {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .empty-history-state {
+        color: #94a3b8;
+    }
+
+    body.dark-theme .empty-history-state h3 {
+        color: #f1f5f9;
+    }
+
+    /* Page header styling */
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mood-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Mood Tracking Center</h1>
+        <p class="page-subtitle">Log your current mood and view your emotional journey patterns</p>
+    </div>
+
+    <!-- Desktop Wide Layout -->
+    <div class="mood-layout">
+        <!-- Main Mood Logging -->
+        <div class="mood-main">
+            <div class="mood-header">
+                <h2>Log Your Mood</h2>
+                <p>Select your current emotional state and add context</p>
+            </div>
+
+                <form class="mood-form" method="post" novalidate id="moodForm">
+                    {% csrf_token %}
+
+                    <!-- Progress Indicator -->
+                    <div class="form-progress">
+                        <span class="progress-dot completed" title="Welcome">1</span>
+                        <span class="progress-dot active" title="Mood Selection">2</span>
+                        <span class="progress-dot" title="Details">3</span>
+                        <span class="progress-dot" title="Submit">4</span>
+                    </div>
+
+                    <!-- Alert Container -->
+                    <div class="alert-container">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Mood Selection -->
+                    <div class="form-group">
+                        <label class="form-label">How are you feeling?</label>
+                        <div class="mood-selection">
+                            <label class="mood-option" for="mood-1">
+                                <input type="radio" id="mood-1" name="mood" value="1" required>
+                                <i data-feather="frown" class="mood-icon"></i>
+                                <span class="mood-label">Very Sad</span>
+                            </label>
+                            <label class="mood-option" for="mood-2">
+                                <input type="radio" id="mood-2" name="mood" value="2" required>
+                                <i data-feather="meh" class="mood-icon"></i>
+                                <span class="mood-label">Sad</span>
+                            </label>
+                            <label class="mood-option" for="mood-3">
+                                <input type="radio" id="mood-3" name="mood" value="3" required>
+                                <i data-feather="minus" class="mood-icon"></i>
+                                <span class="mood-label">Neutral</span>
+                            </label>
+                            <label class="mood-option" for="mood-4">
+                                <input type="radio" id="mood-4" name="mood" value="4" required>
+                                <i data-feather="smile" class="mood-icon"></i>
+                                <span class="mood-label">Happy</span>
+                            </label>
+                            <label class="mood-option" for="mood-5">
+                                <input type="radio" id="mood-5" name="mood" value="5" required>
+                                <i data-feather="grin" class="mood-icon"></i>
+                                <span class="mood-label">Very Happy</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Mood Intensity Slider -->
+                    <div class="form-group">
+                        <label class="form-label">Mood Intensity: <span id="intensity-value">Medium</span></label>
+                        <div class="intensity-container">
+                            <input type="range" id="mood-intensity" name="intensity" min="1" max="10" value="5" class="intensity-slider">
+                            <div class="intensity-labels">
+                                <span>Low</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Energy Level -->
+                    <div class="form-group">
+                        <label class="form-label">Energy Level</label>
+                        <div class="energy-selection">
+                            <label class="energy-option" for="energy-1">
+                                <input type="radio" id="energy-1" name="energy_level" value="1">
+                                <i data-feather="battery" class="energy-icon"></i>
+                                <span class="energy-label">Very Low</span>
+                            </label>
+                            <label class="energy-option" for="energy-2">
+                                <input type="radio" id="energy-2" name="energy_level" value="2">
+                                <i data-feather="battery" class="energy-icon" style="opacity: 0.6;"></i>
+                                <span class="energy-label">Low</span>
+                            </label>
+                            <label class="energy-option" for="energy-3">
+                                <input type="radio" id="energy-3" name="energy_level" value="3">
+                                <i data-feather="battery" class="energy-icon" style="opacity: 0.8;"></i>
+                                <span class="energy-label">Moderate</span>
+                            </label>
+                            <label class="energy-option" for="energy-4">
+                                <input type="radio" id="energy-4" name="energy_level" value="4">
+                                <i data-feather="zap" class="energy-icon"></i>
+                                <span class="energy-label">High</span>
+                            </label>
+                            <label class="energy-option" for="energy-5">
+                                <input type="radio" id="energy-5" name="energy_level" value="5">
+                                <i data-feather="zap" class="energy-icon" style="color: #f59e0b;"></i>
+                                <span class="energy-label">Very High</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Current Activities -->
+                    <div class="form-group">
+                        <label class="form-label">What were you doing?</label>
+                        <div class="activity-tags">
+                            <label class="activity-tag">
+                                <input type="checkbox" name="activities" value="work">
+                                <i data-feather="briefcase"></i> Work
+                            </label>
+                            <label class="activity-tag">
+                                <input type="checkbox" name="activities" value="exercise">
+                                <i data-feather="activity"></i> Exercise
+                            </label>
+                            <label class="activity-tag">
+                                <input type="checkbox" name="activities" value="social">
+                                <i data-feather="users"></i> Social
+                            </label>
+                            <label class="activity-tag">
+                                <input type="checkbox" name="activities" value="family">
+                                <i data-feather="heart"></i> Family
+                            </label>
+                            <label class="activity-tag">
+                                <input type="checkbox" name="activities" value="hobby">
+                                <i data-feather="palette"></i> Hobby
+                            </label>
+                            <label class="activity-tag">
+                                <input type="checkbox" name="activities" value="relaxation">
+                                <i data-feather="sun"></i> Relaxation
+                            </label>
+                            <label class="activity-tag">
+                                <input type="checkbox" name="activities" value="study">
+                                <i data-feather="book"></i> Study
+                            </label>
+                            <label class="activity-tag">
+                                <input type="checkbox" name="activities" value="entertainment">
+                                <i data-feather="play"></i> Entertainment
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Mood Triggers -->
+                    <div class="form-group">
+                        <label class="form-label">What might have influenced your mood? (Optional)</label>
+                        <div class="trigger-tags">
+                            <label class="trigger-tag">
+                                <input type="checkbox" name="triggers" value="stress">
+                                <i data-feather="alert-triangle"></i> Stress
+                            </label>
+                            <label class="trigger-tag">
+                                <input type="checkbox" name="triggers" value="relationships">
+                                <i data-feather="heart"></i> Relationships
+                            </label>
+                            <label class="trigger-tag">
+                                <input type="checkbox" name="triggers" value="health">
+                                <i data-feather="plus-circle"></i> Health
+                            </label>
+                            <label class="trigger-tag">
+                                <input type="checkbox" name="triggers" value="weather">
+                                <i data-feather="cloud"></i> Weather
+                            </label>
+                            <label class="trigger-tag">
+                                <input type="checkbox" name="triggers" value="news">
+                                <i data-feather="newspaper"></i> News/Events
+                            </label>
+                            <label class="trigger-tag">
+                                <input type="checkbox" name="triggers" value="food">
+                                <i data-feather="coffee"></i> Food/Sleep
+                            </label>
+                            <label class="trigger-tag">
+                                <input type="checkbox" name="triggers" value="achievement">
+                                <i data-feather="award"></i> Achievement
+                            </label>
+                            <label class="trigger-tag">
+                                <input type="checkbox" name="triggers" value="nature">
+                                <i data-feather="tree-pine"></i> Nature/Environment
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Gratitude Section -->
+                    <div class="form-group">
+                        <label class="form-label">What are you grateful for today? (Optional)</label>
+                        <textarea id="id_gratitude" name="gratitude" class="form-textarea"
+                                  placeholder="Take a moment to reflect on the positive aspects of your day..."></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn">Log My Mood</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Mood History Section -->
+        <div class="mood-main">
+            <div class="mood-header">
+                <h2>Mood History</h2>
+                <p>View your recent mood entries and track your progress</p>
+            </div>
+
+            <div class="mood-history-section">
+                {% if recent_moods %}
+                    {% for mood in recent_moods|slice:":10" %}
+                    <div class="mood-history-entry">
+                        <div class="mood-history-header">
+                            <div class="mood-history-date">{{ mood.date|date:"M d, Y" }}</div>
+                            <div class="mood-history-emoji">
+                                {% if mood.mood == 1 %}😢{% elif mood.mood == 2 %}😕{% elif mood.mood == 3 %}😐{% elif mood.mood == 4 %}😊{% else %}😄{% endif %}
+                            </div>
+                        </div>
+                        <div class="mood-history-content">
+                            <div class="mood-history-mood">{{ mood.get_mood_display }}</div>
+                            {% if mood.intensity %}
+                            <div class="mood-history-intensity">Intensity: {{ mood.intensity }}/10</div>
+                            {% endif %}
+                            {% if mood.note %}
+                            <div class="mood-history-note">{{ mood.note|truncatechars:100 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <a href="/accounts/mood-history/" class="action-btn" style="margin-top: 2rem; width: 100%; text-align: center;">View Full History</a>
+                {% else %}
+                    <div class="empty-history-state">
+                        <div class="empty-icon">📊</div>
+                        <h3>No mood entries yet</h3>
+                        <p>Start logging your mood to see your history here</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Enhanced mood logging functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mood selection
+        const moodOptions = document.querySelectorAll('.mood-option');
+        moodOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                moodOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+            });
+        });
+
+        // Energy level selection
+        const energyOptions = document.querySelectorAll('.energy-option');
+        energyOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                energyOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+            });
+        });
+
+        // Activity tags selection
+        const activityTags = document.querySelectorAll('.activity-tag');
+        activityTags.forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+            });
+        });
+
+        // Trigger tags selection
+        const triggerTags = document.querySelectorAll('.trigger-tag');
+        triggerTags.forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+            });
+        });
+
+        // Mood intensity slider
+        const intensitySlider = document.getElementById('mood-intensity');
+        const intensityValue = document.getElementById('intensity-value');
+
+        const intensityLabels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
+        intensitySlider.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            const labelIndex = Math.floor((value - 1) / 2); // Convert 1-10 to 0-4
+            intensityValue.textContent = intensityLabels[labelIndex];
+        });
+
+        // Form submission enhancement
+        const form = document.getElementById('moodForm');
+        const submitBtn = form.querySelector('.submit-btn');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Show loading state
+            submitBtn.textContent = 'Logging Mood...';
+            submitBtn.disabled = true;
+
+            // Submit form via AJAX
+            const formData = new FormData(form);
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch('/accounts/log-mood/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message with animation
+                    showSuccessMessage('Mood logged successfully!');
+
+                    // Add celebration effect
+                    showCelebration();
+
+                    // Redirect to mood history after a short delay
+                    setTimeout(() => {
+                        window.location.href = '/accounts/mood-history/';
+                    }, 2000);
+                } else {
+                    showErrorMessage(data.error || 'Failed to log mood. Please try again.');
+                    submitBtn.textContent = 'Log My Mood';
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorMessage('Network error. Please try again.');
+                submitBtn.textContent = 'Log My Mood';
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Real-time form validation
+        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+        requiredFields.forEach(field => {
+            field.addEventListener('blur', function() {
+                validateField(this);
+            });
+        });
+    });
+
+    function validateField(field) {
+        const value = field.value.trim();
+        let isValid = true;
+        let errorMessage = '';
+
+        // Remove existing error
+        field.classList.remove('error');
+        let existingError = field.parentNode.querySelector('.field-error');
+        if (existingError) {
+            existingError.remove();
+        }
+
+        // Validation rules
+        if (field.name === 'mood' && !value) {
+            isValid = false;
+            errorMessage = 'Please select your mood';
+        }
+
+        if (!isValid) {
+            field.classList.add('error');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error';
+            errorDiv.textContent = errorMessage;
+            field.parentNode.appendChild(errorDiv);
+        }
+
+        return isValid;
+    }
+
+    function showCelebration() {
+        // Create celebration animation
+        const celebration = document.createElement('div');
+        celebration.className = 'celebration';
+        celebration.innerHTML = `
+            <div class="celebration-particle">✨</div>
+            <div class="celebration-particle">🎉</div>
+            <div class="celebration-particle">⭐</div>
+            <div class="celebration-particle">🌟</div>
+            <div class="celebration-particle">🎊</div>
+        `;
+
+        document.body.appendChild(celebration);
+
+        // Remove after animation
+        setTimeout(() => {
+            celebration.remove();
+        }, 3000);
+    }
+
+    function showSuccessMessage(message) {
+        const alertContainer = document.querySelector('.alert-container');
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.textContent = message;
+
+        // Remove existing alerts
+        alertContainer.innerHTML = '';
+        alertContainer.appendChild(successDiv);
+    }
+
+    function showErrorMessage(message) {
+        const alertContainer = document.querySelector('.alert-container');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-error';
+        errorDiv.textContent = message;
+
+        // Remove existing alerts
+        alertContainer.innerHTML = '';
+        alertContainer.appendChild(errorDiv);
+    }
+</script>
+{% endblock %}

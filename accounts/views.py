@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.utils.deprecation import MiddlewareMixin
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Q
 from django.db.models.functions import TruncMonth
 import csv
 from django.views.decorators.http import require_POST
@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from .models import (
     User, MoodEntry, Achievement, Appointment, CalendarIntegration, SocialMediaIntegration,
     SocialMediaPost, MoodDataShare, SubscriptionPlan, UserSubscription, Invoice, Payment, VideoCall,
-    FileAttachment, SharedFile, PushNotification, OfflineData, APIKey, Webhook
+    FileAttachment, SharedFile, PushNotification, OfflineData, APIKey, Webhook, Streak
 )
 from .forms import CustomUserCreationForm, ProfileUpdateForm, MoodForm, SubscriptionPlanForm
 from .integrations import GoogleCalendarService, CalendarReminderService
@@ -268,26 +268,213 @@ def achievements_view(request):
 
 @login_required
 def log_mood(request):
-    """View for logging mood entries"""
+    """View for logging mood entries with enhanced features"""
     if request.method == 'POST':
-        form = MoodForm(request.POST)
-        if form.is_valid():
-            mood_entry = form.save(commit=False)
-            mood_entry.user = request.user
-            mood_entry.save()
-            messages.success(request, "Mood logged successfully!")
-            return redirect('mood_history')
+        # Handle both AJAX and regular form submissions
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return handle_ajax_mood_log(request)
+        else:
+            return handle_form_mood_log(request)
     else:
-        form = MoodForm()
-    return render(request, 'accounts/log_mood.html', {'form': form})
+        # GET request - show the form with sidebar data
+        context = {
+            'form': MoodForm(),
+            'recent_moods': get_recent_moods(request.user),
+            'this_week': get_this_week_count(request.user),
+            'avg_mood': get_average_mood(request.user),
+            'current_streak': get_current_streak(request.user),
+        }
+        return render(request, 'accounts/log_mood.html', context)
+
+def handle_ajax_mood_log(request):
+    """Handle AJAX mood logging with enhanced fields"""
+    try:
+        # Get form data
+        mood = request.POST.get('mood')
+        intensity = request.POST.get('intensity', 5)
+        energy_level = request.POST.get('energy_level')
+        activities = request.POST.getlist('activities')
+        triggers = request.POST.getlist('triggers')
+        gratitude = request.POST.get('gratitude', '').strip()
+        note = request.POST.get('note', '').strip()
+
+        # Validate required fields
+        if not mood:
+            return JsonResponse({
+                'success': False,
+                'error': 'Please select your mood'
+            })
+
+        # Create mood entry with all new fields
+        mood_entry = MoodEntry.objects.create(
+            user=request.user,
+            mood=mood,
+            mood_score=int(mood),  # Use mood value as score
+            intensity=int(intensity),
+            energy_level=energy_level if energy_level else None,
+            activities=activities,
+            triggers=triggers,
+            gratitude=gratitude if gratitude else None,
+            note=note if note else None,
+            date=timezone.now().date()
+        )
+
+        # Update user streak
+        update_mood_streak(request.user)
+
+        # Check for achievements
+        check_mood_achievements(request.user, mood_entry)
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Mood logged successfully!',
+            'mood_entry': {
+                'id': mood_entry.id,
+                'mood': mood_entry.get_mood_display(),
+                'intensity': mood_entry.intensity,
+                'date': mood_entry.date.isoformat(),
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error logging mood: {str(e)}'
+        })
+
+def handle_form_mood_log(request):
+    """Handle regular form submission"""
+    try:
+        # Get form data
+        mood = request.POST.get('mood')
+        intensity = request.POST.get('intensity', 5)
+        energy_level = request.POST.get('energy_level')
+        activities = request.POST.getlist('activities')
+        triggers = request.POST.getlist('triggers')
+        gratitude = request.POST.get('gratitude', '').strip()
+        note = request.POST.get('note', '').strip()
+
+        # Validate required fields
+        if not mood:
+            messages.error(request, "Please select your mood")
+            return redirect('log_mood')
+
+        # Create mood entry with all new fields
+        mood_entry = MoodEntry.objects.create(
+            user=request.user,
+            mood=mood,
+            mood_score=int(mood),
+            intensity=int(intensity),
+            energy_level=energy_level if energy_level else None,
+            activities=activities,
+            triggers=triggers,
+            gratitude=gratitude if gratitude else None,
+            note=note if note else None,
+            date=timezone.now().date()
+        )
+
+        # Update user streak
+        update_mood_streak(request.user)
+
+        # Check for achievements
+        check_mood_achievements(request.user, mood_entry)
+
+        messages.success(request, "Mood logged successfully!")
+        return redirect('mood_history')
+
+    except Exception as e:
+        messages.error(request, f"Error logging mood: {str(e)}")
+        return redirect('log_mood')
+
+def get_recent_moods(user, limit=5):
+    """Get recent mood entries for sidebar display"""
+    return MoodEntry.objects.filter(user=user).order_by('-date')[:limit]
+
+def get_this_week_count(user):
+    """Get mood entries count for this week"""
+    week_start = timezone.now().date() - timezone.timedelta(days=timezone.now().weekday())
+    return MoodEntry.objects.filter(
+        user=user,
+        date__gte=week_start
+    ).count()
+
+def get_average_mood(user):
+    """Get average mood score for the user"""
+    result = MoodEntry.objects.filter(user=user).aggregate(avg_mood=Avg('mood_score'))
+    return result['avg_mood']
+
+def get_current_streak(user):
+    """Get current mood logging streak"""
+    try:
+        streak_obj = Streak.objects.get(user=user, streak_type='mood_logging')
+        return streak_obj.current_streak
+    except Streak.DoesNotExist:
+        return 0
+
+def update_mood_streak(user):
+    """Update user's mood logging streak"""
+    today = timezone.now().date()
+
+    # Get or create streak object
+    streak_obj, created = Streak.objects.get_or_create(
+        user=user,
+        streak_type='mood_logging',
+        defaults={'current_streak': 1, 'last_activity_date': today}
+    )
+
+    if not created:
+        streak_obj.update_streak(today)
+
+def check_mood_achievements(user, mood_entry):
+    """Check and award achievements for mood logging"""
+    total_entries = MoodEntry.objects.filter(user=user).count()
+
+    # First mood log achievement
+    if total_entries == 1:
+        Achievement.objects.get_or_create(
+            user=user,
+            achievement_type='first_mood_log',
+            defaults={
+                'description': 'Logged your first mood entry!',
+                'icon': '🌟'
+            }
+        )
+
+    # Consistent logger achievement (7 days in a row)
+    if get_current_streak(user) >= 7:
+        Achievement.objects.get_or_create(
+            user=user,
+            achievement_type='consistent_logger',
+            defaults={
+                'description': 'Logged mood for 7 consecutive days!',
+                'icon': '🔥'
+            }
+        )
 
 
 @login_required
 def mood_history(request):
-    """View for displaying mood history"""
+    """View for displaying mood history with enhanced data"""
     mood_entries = MoodEntry.objects.filter(user=request.user).order_by('-date')
+
+    # Calculate statistics
+    total_entries = mood_entries.count()
+    avg_mood_result = mood_entries.aggregate(avg_mood=Avg('mood_score'))
+    avg_mood = avg_mood_result['avg_mood'] if avg_mood_result['avg_mood'] else 0
+
+    # Get current streak
+    current_streak = get_current_streak(request.user)
+
+    # Get this week's entries
+    week_start = timezone.now().date() - timezone.timedelta(days=timezone.now().weekday())
+    this_week = mood_entries.filter(date__gte=week_start).count()
+
     context = {
         'mood_entries': mood_entries,
+        'total_entries': total_entries,
+        'avg_mood': avg_mood,
+        'current_streak': current_streak,
+        'this_week': this_week,
     }
     return render(request, 'accounts/mood_history.html', context)
 
@@ -319,16 +506,61 @@ def add_user_view(request):
 
 @login_required
 def user_list_view(request):
-    """View for listing all users"""
+    """View for listing all users with enhanced dashboard-style context"""
     if request.user.role not in ['admin', 'counselor']:
         messages.error(request, "You don't have permission to view users.")
         return redirect('profile')
 
     users = User.objects.all().order_by('username')
+
+    # Enhanced context data for dashboard-style display
     context = {
         'users': users,
+        'total_users': users.count(),
+        'admin_count': users.filter(role='admin').count(),
+        'counselor_count': users.filter(role='counselor').count(),
+        'client_count': users.filter(role='client').count(),
+        'today_users': users.filter(date_joined__date=timezone.now().date()).count(),
+        'active_sessions': 0,  # Placeholder - implement session counting
+        'pending_actions': 0,  # Placeholder - implement pending actions count
     }
     return render(request, 'accounts/user_list.html', context)
+
+
+@login_required
+def counselor_clients_view(request):
+    """View for counselors to see their clients"""
+    if request.user.role != 'counselor':
+        messages.error(request, "Access denied. This page is only for counselors.")
+        return redirect('profile')
+
+    # Get clients that have appointments with this counselor
+    clients_with_appointments = User.objects.filter(
+        role='client',
+        appointments__counselor=request.user
+    ).distinct().order_by('first_name', 'last_name')
+
+    # Get upcoming appointments for this counselor
+    upcoming_appointments = Appointment.objects.filter(
+        counselor=request.user,
+        scheduled_date__gte=timezone.now(),
+        status__in=['scheduled', 'confirmed']
+    ).order_by('scheduled_date')[:5]
+
+    # Get recent appointments (last 10)
+    recent_appointments = Appointment.objects.filter(
+        counselor=request.user,
+        scheduled_date__lt=timezone.now()
+    ).order_by('-scheduled_date')[:10]
+
+    context = {
+        'clients': clients_with_appointments,
+        'upcoming_appointments': upcoming_appointments,
+        'recent_appointments': recent_appointments,
+        'total_clients': clients_with_appointments.count(),
+        'upcoming_count': upcoming_appointments.count(),
+    }
+    return render(request, 'accounts/counselor_clients.html', context)
 
 
 @login_required
@@ -544,7 +776,7 @@ def video_calls_list(request):
     """View for listing video calls"""
     # Show calls where user is host or participant
     calls = VideoCall.objects.filter(
-        models.Q(host=request.user) | models.Q(participants=request.user)
+        Q(host=request.user) | Q(participants=request.user)
     ).distinct().order_by('-scheduled_start')
 
     upcoming = calls.filter(
@@ -553,7 +785,7 @@ def video_calls_list(request):
     )
 
     past = calls.filter(
-        models.Q(scheduled_start__lt=timezone.now()) | models.Q(status__in=['completed', 'cancelled'])
+        Q(scheduled_start__lt=timezone.now()) | Q(status__in=['completed', 'cancelled'])
     )[:10]
 
     context = {
@@ -1201,12 +1433,12 @@ def appointments_list(request):
 
     if search:
         appointments = appointments.filter(
-            models.Q(title__icontains=search) |
-            models.Q(description__icontains=search) |
-            models.Q(counselor__first_name__icontains=search) |
-            models.Q(counselor__last_name__icontains=search) |
-            models.Q(user__first_name__icontains=search) |
-            models.Q(user__last_name__icontains=search)
+            Q(title__icontains=search) |
+            Q(description__icontains=search) |
+            Q(counselor__first_name__icontains=search) |
+            Q(counselor__last_name__icontains=search) |
+            Q(user__first_name__icontains=search) |
+            Q(user__last_name__icontains=search)
         )
 
     upcoming = appointments.filter(
@@ -1221,12 +1453,111 @@ def appointments_list(request):
     # Get counselors for filter dropdown
     counselors = User.objects.filter(role='counselor', is_active=True)
 
+    # Calculate statistics for overview
+    monthly_appointments = appointments.filter(
+        scheduled_date__month=timezone.now().month,
+        scheduled_date__year=timezone.now().year
+    ).count()
+
+    completed_appointments = appointments.filter(status='completed').count()
+
     context = {
         'upcoming_appointments': upcoming,
         'past_appointments': past[:10],  # Show last 10 past appointments
         'counselors': counselors,
+        'monthly_appointments': monthly_appointments,
+        'completed_appointments': completed_appointments,
     }
     return render(request, 'accounts/appointments.html', context)
+
+
+@login_required
+def appointments_history(request):
+    """View for displaying appointment history with detailed overview"""
+    # Filter appointments based on user role
+    if request.user.role == 'counselor':
+        # Counselors see appointments where they are the counselor
+        appointments = Appointment.objects.filter(
+            counselor=request.user
+        ).order_by('-scheduled_date')
+    elif request.user.role == 'admin':
+        # Admins see all appointments
+        appointments = Appointment.objects.all().order_by('-scheduled_date')
+    else:
+        # Clients see their own appointments
+        appointments = Appointment.objects.filter(
+            user=request.user
+        ).order_by('-scheduled_date')
+
+    # Apply filters
+    status = request.GET.get('status')
+    counselor_id = request.GET.get('counselor')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    search = request.GET.get('search')
+
+    if status:
+        appointments = appointments.filter(status=status)
+
+    if counselor_id:
+        appointments = appointments.filter(counselor_id=counselor_id)
+
+    if date_from:
+        appointments = appointments.filter(scheduled_date__date__gte=date_from)
+
+    if date_to:
+        appointments = appointments.filter(scheduled_date__date__lte=date_to)
+
+    if search:
+        appointments = appointments.filter(
+            Q(title__icontains=search) |
+            Q(description__icontains=search) |
+            Q(counselor__first_name__icontains=search) |
+            Q(counselor__last_name__icontains=search) |
+            Q(user__first_name__icontains=search) |
+            Q(user__last_name__icontains=search)
+        )
+
+    # Get all past appointments for history
+    past_appointments = appointments.filter(
+        scheduled_date__lt=timezone.now()
+    ) | appointments.filter(status__in=['completed', 'cancelled'])
+
+    # Calculate detailed statistics
+    total_appointments = appointments.count()
+    completed_count = appointments.filter(status='completed').count()
+    cancelled_count = appointments.filter(status='cancelled').count()
+    upcoming_count = appointments.filter(
+        scheduled_date__gte=timezone.now(),
+        status__in=['scheduled', 'confirmed']
+    ).count()
+
+    # Monthly breakdown for the last 12 months
+    monthly_stats = []
+    for i in range(12):
+        month_date = timezone.now() - timedelta(days=30*i)
+        month_appointments = appointments.filter(
+            scheduled_date__month=month_date.month,
+            scheduled_date__year=month_date.year
+        ).count()
+        monthly_stats.append({
+            'month': month_date.strftime('%B %Y'),
+            'count': month_appointments
+        })
+
+    # Get counselors for filter dropdown
+    counselors = User.objects.filter(role='counselor', is_active=True)
+
+    context = {
+        'past_appointments': past_appointments,
+        'counselors': counselors,
+        'total_appointments': total_appointments,
+        'completed_count': completed_count,
+        'cancelled_count': cancelled_count,
+        'upcoming_count': upcoming_count,
+        'monthly_stats': monthly_stats,
+    }
+    return render(request, 'accounts/appointments_history.html', context)
 
 
 @login_required
@@ -1272,7 +1603,7 @@ def cancel_appointment(request, appointment_id):
     appointment.save()
 
     # Create notification
-    Notification.objects.create(
+    PushNotification.objects.create(
         user=appointment.user,
         title='Appointment Cancelled',
         message=f'Your appointment "{appointment.title}" with {appointment.counselor.get_full_name() or appointment.counselor.username} has been cancelled.',
@@ -1322,12 +1653,12 @@ def export_appointments(request):
 
     if search:
         appointments = appointments.filter(
-            models.Q(title__icontains=search) |
-            models.Q(description__icontains=search) |
-            models.Q(counselor__first_name__icontains=search) |
-            models.Q(counselor__last_name__icontains=search) |
-            models.Q(user__first_name__icontains=search) |
-            models.Q(user__last_name__icontains=search)
+            Q(title__icontains=search) |
+            Q(description__icontains=search) |
+            Q(counselor__first_name__icontains=search) |
+            Q(counselor__last_name__icontains=search) |
+            Q(user__first_name__icontains=search) |
+            Q(user__last_name__icontains=search)
         )
 
     response = HttpResponse(content_type='text/csv')
@@ -1391,7 +1722,7 @@ def create_appointment(request):
             )
 
             # Create notification for the client
-            Notification.objects.create(
+            PushNotification.objects.create(
                 user=appointment_user,
                 title='New Appointment Scheduled',
                 message=f'Your appointment "{title}" with {counselor.get_full_name() or counselor.username} has been scheduled for {scheduled_date.strftime("%B %d, %Y at %I:%M %p")}.',

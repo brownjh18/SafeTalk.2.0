@@ -8,532 +8,894 @@
     <p class="page-subtitle">Manage subscription plans and user subscriptions</p>
 </div>
 
-<div class="settings-container">
-    <!-- Statistics Section -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>📊 Statistics Overview</h3>
-            <p>Key metrics for subscription management</p>
+<div class="dashboard-grid">
+    <!-- Statistics Overview Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Statistics Overview</h3>
+            <div class="card-icon">📊</div>
         </div>
-
-        <div class="stats-overview">
-            <div class="stat-item">
-                <div class="stat-number">{{ total_subscriptions }}</div>
-                <div class="stat-label">Total Subscriptions</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">{{ active_subscriptions }}</div>
-                <div class="stat-label">Active Subscriptions</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">${{ total_revenue|floatformat:0 }}</div>
-                <div class="stat-label">Monthly Revenue</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">{{ churn_rate|floatformat:1 }}%</div>
-                <div class="stat-label">Churn Rate</div>
+        <div class="card-content">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Total Subscriptions</span>
+                    <span class="stat-value">{{ total_subscriptions }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Active Subscriptions</span>
+                    <span class="stat-value">{{ active_subscriptions }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Monthly Revenue</span>
+                    <span class="stat-value">${{ total_revenue|floatformat:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Churn Rate</span>
+                    <span class="stat-value">{{ churn_rate|floatformat:1 }}%</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Subscription Plans Management -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>📋 Subscription Plans</h3>
-            <p>Manage available subscription plans</p>
+    <!-- Quick Actions Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Quick Actions</h3>
+            <div class="card-icon">⚡</div>
         </div>
-
-        <div class="plans-management">
-            <div class="section-actions">
-                <a href="{% url 'admin_create_plan' %}" class="btn btn-primary">
-                    <i>➕</i> Create New Plan
-                </a>
-                <button onclick="exportPlans()" class="btn btn-secondary">
-                    <i>📊</i> Export Plans
-                </button>
+        <div class="card-content">
+            <div class="quick-actions">
+                <a href="{% url 'admin_create_plan' %}" class="action-btn">Create Plan</a>
+                <a href="#" onclick="exportPlans()" class="action-btn secondary">Export Plans</a>
+                <a href="#" onclick="exportSubscriptions()" class="action-btn secondary">Export Data</a>
+                <a href="#" onclick="refreshSubscriptions()" class="action-btn secondary">Refresh</a>
             </div>
-
-            {% if plans %}
-                <div class="plans-list">
-                    {% for plan in plans %}
-                        <div class="plan-item">
-                            <div class="plan-info">
-                                <h4>{{ plan.display_name }}</h4>
-                                <div class="plan-price">${{ plan.price_monthly }}/month</div>
-                                <div class="plan-status">
-                                    <span class="status-badge {% if plan.is_active %}status-active{% else %}status-inactive{% endif %}">
-                                        {% if plan.is_active %}Active{% else %}Inactive{% endif %}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="plan-actions">
-                                <a href="{% url 'admin_edit_plan' plan.id %}" class="btn btn-secondary btn-small">
-                                    <i>✏️</i> Edit
-                                </a>
-                                {% if plan.is_active %}
-                                    <button onclick="togglePlanStatus({{ plan.id }})" class="btn btn-secondary btn-small" style="color: #dc2626;">
-                                        <i>🚫</i> Deactivate
-                                    </button>
-                                {% else %}
-                                    <button onclick="togglePlanStatus({{ plan.id }})" class="btn btn-primary btn-small">
-                                        <i>✅</i> Activate
-                                    </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <h3>No Subscription Plans</h3>
-                    <p>Create your first subscription plan to get started.</p>
-                    <a href="{% url 'admin_create_plan' %}" class="btn btn-primary">
-                        <i>➕</i> Create First Plan
-                    </a>
-                </div>
-            {% endif %}
         </div>
     </div>
 
-    <!-- User Subscriptions Management -->
-    <div class="settings-section">
-        <div class="section-header">
-            <h3>👥 User Subscriptions</h3>
-            <p>Monitor and manage user subscriptions</p>
+    <!-- Revenue Trends Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">Revenue Trends</h3>
+            <div class="card-icon">📈</div>
         </div>
-
-        <div class="subscriptions-management">
-            <div class="section-actions">
-                <button onclick="exportSubscriptions()" class="btn btn-secondary">
-                    <i>📊</i> Export Data
-                </button>
-                <button onclick="refreshSubscriptions()" class="btn btn-secondary">
-                    <i>🔄</i> Refresh
-                </button>
+        <div class="card-content">
+            <div class="trends-content">
+                <div class="trend-item">
+                    <span class="trend-label">This Month</span>
+                    <span class="trend-value">${{ total_revenue|floatformat:0 }}</span>
+                </div>
+                <div class="trend-item">
+                    <span class="trend-label">Growth Rate</span>
+                    <span class="trend-value">+12.5%</span>
+                </div>
+                <div class="trend-item">
+                    <span class="trend-label">Avg. per User</span>
+                    <span class="trend-value">${% if active_subscriptions %}{{ total_revenue|div:active_subscriptions|floatformat:0 }}{% else %}0{% endif %}</span>
+                </div>
             </div>
+        </div>
+    </div>
 
-            {% if subscriptions %}
-                <div class="subscriptions-list">
-                    {% for subscription in subscriptions %}
-                        <div class="subscription-item">
-                            <div class="subscription-info">
-                                <h4>{{ subscription.user.get_full_name }}</h4>
-                                <div class="subscription-details">
-                                    <span class="detail-item">{{ subscription.plan.display_name }}</span>
-                                    <span class="status-badge status-{{ subscription.status }}">
-                                        {{ subscription.get_status_display }}
-                                    </span>
-                                </div>
-                                <div class="subscription-meta">
-                                    <small>Started: {{ subscription.start_date|date:"M d, Y" }}</small>
-                                    {% if subscription.end_date %}
-                                        <small>Ends: {{ subscription.end_date|date:"M d, Y" }}</small>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="subscription-actions">
-                                <a href="{% url 'admin_subscription_detail' subscription.id %}" class="btn btn-secondary btn-small">
-                                    <i>👁️</i> View Details
-                                </a>
-                                {% if subscription.status == 'active' %}
-                                    <button onclick="cancelSubscription({{ subscription.id }})" class="btn btn-secondary btn-small" style="color: #dc2626;">
-                                        <i>🚫</i> Cancel
-                                    </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
+    <!-- System Health Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">System Health</h3>
+            <div class="card-icon">🩺</div>
+        </div>
+        <div class="card-content">
+            <div class="health-indicators">
+                <div class="health-item">
+                    <span class="health-label">Active Plans</span>
+                    <span class="health-value">{{ plans|length }}</span>
                 </div>
-            {% else %}
-                <div class="empty-state">
-                    <h3>No User Subscriptions</h3>
-                    <p>No users have subscribed to any plans yet.</p>
+                <div class="health-item">
+                    <span class="health-label">Payment Success</span>
+                    <span class="health-value">98.5%</span>
                 </div>
-            {% endif %}
+                <div class="health-item">
+                    <span class="health-label">Avg. Response</span>
+                    <span class="health-value">1.2s</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Subscription Plans Section -->
+<div class="data-section">
+    <div class="section-header">
+        <h3>Subscription Plans</h3>
+        <div class="section-actions">
+            <input type="text" id="planSearch" placeholder="Search plans..." class="search-input">
+            <a href="{% url 'admin_create_plan' %}" class="action-btn">Create New Plan</a>
+        </div>
+    </div>
+
+    {% if plans %}
+    <div class="plans-grid">
+        {% for plan in plans %}
+        <div class="plan-card">
+            <div class="plan-header">
+                <h4>{{ plan.display_name }}</h4>
+                <span class="status-badge {% if plan.is_active %}status-active{% else %}status-inactive{% endif %}">
+                    {% if plan.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+            <div class="plan-price">
+                <span class="price-amount">${{ plan.price_monthly }}</span>
+                <span class="price-period">/month</span>
+            </div>
+            <div class="plan-features">
+                <div class="feature-item">📧 Email Support</div>
+                <div class="feature-item">📱 Mobile Access</div>
+                <div class="feature-item">📊 Analytics</div>
+            </div>
+            <div class="plan-actions">
+                <a href="{% url 'admin_edit_plan' plan.id %}" class="action-btn secondary btn-sm">Edit</a>
+                {% if plan.is_active %}
+                    <button onclick="togglePlanStatus({{ plan.id }})" class="action-btn secondary btn-sm danger">Deactivate</button>
+                {% else %}
+                    <button onclick="togglePlanStatus({{ plan.id }})" class="action-btn btn-sm">Activate</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>No Subscription Plans</h3>
+        <p>Create your first subscription plan to get started with monetization.</p>
+        <a href="{% url 'admin_create_plan' %}" class="action-btn">Create First Plan</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- User Subscriptions Section -->
+<div class="data-section">
+    <div class="section-header">
+        <h3>User Subscriptions</h3>
+        <div class="section-actions">
+            <select id="statusFilter" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="expired">Expired</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="pending">Pending</option>
+            </select>
+            <input type="text" id="subscriptionSearch" placeholder="Search users..." class="search-input">
+        </div>
+    </div>
+
+    {% if subscriptions %}
+    <div class="data-table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Start Date</th>
+                    <th>Revenue</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subscription in subscriptions %}
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">{{ subscription.user.first_name.0|default:'U'|upper }}</div>
+                            <div class="user-details">
+                                <div class="user-name">{{ subscription.user.get_full_name }}</div>
+                                <div class="user-email">{{ subscription.user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ subscription.plan.display_name }}</td>
+                    <td>
+                        <span class="status-badge status-{{ subscription.status }}">{{ subscription.get_status_display }}</span>
+                    </td>
+                    <td>{{ subscription.start_date|date:"M d, Y" }}</td>
+                    <td>${{ subscription.plan.price_monthly }}</td>
+                    <td>
+                        <a href="{% url 'admin_subscription_detail' subscription.id %}" class="action-btn secondary btn-sm">View</a>
+                        {% if subscription.status == 'active' %}
+                        <button onclick="cancelSubscription({{ subscription.id }})" class="action-btn secondary btn-sm danger">Cancel</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>No User Subscriptions</h3>
+        <p>No users have subscribed to any plans yet. Start by creating attractive subscription plans.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_scripts %}
 <style>
-.settings-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.settings-section {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.section-header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.section-header h3 {
-    color: #1f2937;
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.section-header p {
-    color: #6b7280;
-    font-size: 0.875rem;
-}
-
-.stats-overview {
+/* Dashboard Grid Layout */
+.dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    letter-spacing: -0.025em;
+}
+
+.card-icon {
+    font-size: 1.5rem;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover .card-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.card-content {
+    padding: 1.25rem 1.5rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1rem;
 }
 
 .stat-item {
     text-align: center;
-    padding: 1.5rem;
-    background: #f8fafc;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #4f46e5;
-    margin-bottom: 0.5rem;
+    border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .stat-label {
-    font-size: 0.875rem;
+    display: block;
+    font-size: 0.75rem;
     color: #64748b;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1f2937;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+/* Trends and Health */
+.trends-content,
+.health-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.trend-item,
+.health-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.trend-label,
+.health-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.trend-value,
+.health-value {
+    color: #6b7280;
+    font-size: 0.875rem;
     font-weight: 600;
 }
 
-.plans-management,
-.subscriptions-management {
-    margin-top: 1.5rem;
+/* Data Sections */
+.data-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    letter-spacing: -0.025em;
 }
 
 .section-actions {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.btn {
-    display: inline-flex;
+    gap: 0.75rem;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    border: none;
-    cursor: pointer;
 }
 
-.btn-primary {
-    background: #4f46e5;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #3730a3;
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
+.search-input,
+.filter-select {
+    padding: 0.5rem 0.75rem;
     border: 1px solid #d1d5db;
-}
-
-.btn-secondary:hover {
-    background: #e5e7eb;
-}
-
-.btn-small {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-}
-
-.plans-list,
-.subscriptions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.plan-item,
-.subscription-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 6px;
+    font-size: 0.875rem;
     background: white;
+}
+
+.search-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.filter-select {
+    min-width: 120px;
+}
+
+/* Plans Grid */
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.plan-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
 
-.plan-item:hover,
-.subscription-item:hover {
-    border-color: #4f46e5;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+.plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.1);
+    border-color: rgba(79, 70, 229, 0.2);
 }
 
-.plan-info,
-.subscription-info {
-    flex: 1;
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
 }
 
-.plan-info h4,
-.subscription-info h4 {
-    margin: 0 0 0.5rem 0;
-    color: #1f2937;
+.plan-header h4 {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
 }
 
 .plan-price {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #4f46e5;
-    margin-bottom: 0.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
 }
 
-.plan-status,
-.subscription-details {
+.price-amount {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #4f46e5;
+}
+
+.price-period {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.plan-features {
+    margin-bottom: 1.5rem;
+}
+
+.feature-item {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.plan-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Data Table */
+.data-table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.data-table thead {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table th {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.data-table td {
+    color: #6b7280;
+}
+
+.data-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.user-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.user-details {
+    min-width: 0;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.875rem;
+}
+
+.user-email {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* Status Badges */
 .status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .status-active {
-    background: #d1fae5;
+    background: rgba(5, 150, 105, 0.1);
     color: #059669;
 }
 
 .status-inactive {
-    background: #f3f4f6;
+    background: rgba(107, 114, 128, 0.1);
     color: #6b7280;
 }
 
-.status-active,
-.status-expired,
-.status-cancelled,
-.status-pending {
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.status-active {
-    background: #d1fae5;
-    color: #059669;
-}
-
 .status-expired {
-    background: #fee2e2;
+    background: rgba(220, 38, 38, 0.1);
     color: #dc2626;
 }
 
 .status-cancelled {
-    background: #f3f4f6;
+    background: rgba(107, 114, 128, 0.1);
     color: #6b7280;
 }
 
 .status-pending {
-    background: #fef3c7;
+    background: rgba(217, 119, 6, 0.1);
     color: #d97706;
 }
 
-.detail-item {
-    color: #6b7280;
-    font-size: 0.9rem;
-}
-
-.subscription-meta {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-}
-
-.subscription-meta small {
-    color: #6b7280;
-    font-size: 0.8rem;
-}
-
-.plan-actions,
-.subscription-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-shrink: 0;
-}
-
+/* Empty State */
 .empty-state {
     text-align: center;
     padding: 3rem 2rem;
-    color: #6b7280;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    opacity: 0.6;
+    margin-bottom: 1rem;
 }
 
 .empty-state h3 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #374151;
+    color: #1f2937;
     margin-bottom: 0.5rem;
 }
 
 .empty-state p {
+    color: #64748b;
     font-size: 0.9rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
-/* Mobile Responsive Design */
+/* Action Buttons */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    min-height: 44px;
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn.secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.action-btn.secondary:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+.action-btn.danger {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.action-btn.danger:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    min-height: 32px;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .settings-container {
-        padding: 0 1rem;
-    }
-
-    .settings-section {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .stats-overview {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-    }
-
-    .stat-item {
-        padding: 1rem;
-    }
-
-    .stat-number {
-        font-size: 1.5rem;
-    }
-
-    .stat-label {
-        font-size: 0.8rem;
-    }
-
-    .section-actions {
-        flex-direction: column;
-    }
-
-    .section-actions .btn {
-        width: 100%;
-        justify-content: center;
-        min-height: 44px;
-    }
-
-    .plan-item,
-    .subscription-item {
-        flex-direction: column;
-        align-items: flex-start;
+    .dashboard-grid {
+        grid-template-columns: 1fr;
         gap: 1rem;
+    }
+
+    .dashboard-card {
+        margin: 0 0.5rem;
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem 0.5rem;
+    }
+
+    .card-content {
+        padding: 1rem 1.25rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .data-section {
+        margin: 0 0.5rem;
         padding: 1.25rem;
     }
 
-    .plan-actions,
-    .subscription-actions {
-        width: 100%;
-        justify-content: stretch;
-    }
-
-    .plan-actions .btn-small,
-    .subscription-actions .btn-small {
-        flex: 1;
-        justify-content: center;
-        min-height: 40px;
-    }
-
-    .subscription-meta {
+    .section-header {
         flex-direction: column;
-        gap: 0.25rem;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .section-actions {
+        width: 100%;
+    }
+
+    .search-input {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .plans-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .plan-card {
+        padding: 1.25rem;
+    }
+
+    .plan-actions {
+        flex-direction: column;
+    }
+
+    .plan-actions .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .data-table {
+        font-size: 0.875rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.5rem;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 480px) {
-    .settings-section {
-        padding: 1rem;
+    .page-title {
+        font-size: 1.75rem;
     }
 
-    .stats-overview {
-        grid-template-columns: 1fr;
-    }
-
-    .stat-item {
-        padding: 0.875rem;
-    }
-
-    .plan-item,
-    .subscription-item {
-        padding: 1rem;
-    }
-
-    .plan-info h4,
-    .subscription-info h4 {
+    .card-title {
         font-size: 1rem;
     }
 
-    .plan-price {
-        font-size: 1.1rem;
+    .stat-value {
+        font-size: 1rem;
     }
 
-    .status-badge {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.6rem;
+    .action-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        width: 100%;
     }
 
-    .subscription-meta small {
-        font-size: 0.75rem;
+    .plan-header h4 {
+        font-size: 1rem;
+    }
+
+    .price-amount {
+        font-size: 1.25rem;
     }
 }
 
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-    .btn,
-    .btn-small {
-        min-height: 44px;
-        transition: transform 0.1s ease;
+/* Animation for cards */
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-    .btn:active,
-    .btn-small:active {
-        transform: scale(0.98);
-    }
+.dashboard-card {
+    animation: cardSlideIn 0.6s ease-out;
+}
 
-    .plan-item,
-    .subscription-item {
-        transition: transform 0.2s ease;
-    }
+.dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.4s; }
 
-    .plan-item:active,
-    .subscription-item:active {
-        transform: scale(0.98);
-    }
+/* Dark theme support */
+body.dark-theme .dashboard-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .card-header {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: #475569;
+}
+
+body.dark-theme .card-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .stat-label,
+body.dark-theme .trend-label,
+body.dark-theme .health-label {
+    color: #94a3b8;
+}
+
+body.dark-theme .stat-value,
+body.dark-theme .trend-value,
+body.dark-theme .health-value {
+    color: #f1f5f9;
+}
+
+body.dark-theme .data-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+body.dark-theme .section-header h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .plan-card {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border-color: rgba(71, 85, 105, 0.6);
+}
+
+body.dark-theme .plan-header h4 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .feature-item {
+    color: #e2e8f0;
+}
+
+body.dark-theme .data-table thead {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+}
+
+body.dark-theme .data-table th {
+    color: #f1f5f9;
+}
+
+body.dark-theme .data-table td {
+    color: #e2e8f0;
+}
+
+body.dark-theme .data-table tbody tr:hover {
+    background: #475569;
+}
+
+body.dark-theme .user-name {
+    color: #f1f5f9;
+}
+
+body.dark-theme .user-email {
+    color: #94a3b8;
+}
+
+body.dark-theme .page-title {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-theme .page-subtitle {
+    color: #94a3b8;
 }
 </style>
 
 <script>
+// Toggle plan status
 function togglePlanStatus(planId) {
     if (confirm('Are you sure you want to change this plan\'s status?')) {
         fetch(`/dashboard/management/plans/${planId}/toggle/`, {
@@ -558,6 +920,7 @@ function togglePlanStatus(planId) {
     }
 }
 
+// Cancel subscription
 function cancelSubscription(subscriptionId) {
     if (confirm('Are you sure you want to cancel this subscription?')) {
         fetch(`/dashboard/management/subscription/${subscriptionId}/cancel/`, {
@@ -582,6 +945,7 @@ function cancelSubscription(subscriptionId) {
     }
 }
 
+// Export functions
 function exportSubscriptions() {
     window.location.href = '/dashboard/management/subscriptions/export/';
 }
@@ -590,8 +954,73 @@ function exportPlans() {
     window.location.href = '/dashboard/management/plans/export/';
 }
 
+// Refresh data
 function refreshSubscriptions() {
     location.reload();
 }
+
+// Search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const planSearch = document.getElementById('planSearch');
+    const subscriptionSearch = document.getElementById('subscriptionSearch');
+    const statusFilter = document.getElementById('statusFilter');
+
+    // Plan search
+    if (planSearch) {
+        planSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const planCards = document.querySelectorAll('.plan-card');
+
+            planCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+
+    // Subscription search
+    if (subscriptionSearch) {
+        subscriptionSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.data-table tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+
+    // Status filter
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            const selectedStatus = this.value;
+            const rows = document.querySelectorAll('.data-table tbody tr');
+
+            rows.forEach(row => {
+                if (!selectedStatus) {
+                    row.style.display = '';
+                    return;
+                }
+
+                const statusBadge = row.querySelector('.status-badge');
+                const statusClass = Array.from(statusBadge.classList).find(cls => cls.startsWith('status-'));
+                const status = statusClass.replace('status-', '');
+
+                row.style.display = status === selectedStatus ? '' : 'none';
+            });
+        });
+    }
+
+    // Add loading animation to cards
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach(card => {
+        card.classList.add('loading');
+        setTimeout(() => {
+            card.classList.remove('loading');
+        }, 1000);
+    });
+});
 </script>
+{% endblock %}
 {% endblock %}

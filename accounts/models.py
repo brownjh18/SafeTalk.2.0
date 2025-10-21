@@ -25,17 +25,29 @@ class User(AbstractUser):
 
 class MoodEntry(models.Model):
     MOOD_CHOICES = [
-        ('happy', '😊 Happy'),
-        ('sad', '😢 Sad'),
-        ('anxious', '😰 Anxious'),
-        ('calm', '😌 Calm'),
-        ('angry', '😠 Angry'),
-        ('excited', '🤩 Excited'),
+        ('1', '😢 Very Sad'),
+        ('2', '😕 Sad'),
+        ('3', '😐 Neutral'),
+        ('4', '😊 Happy'),
+        ('5', '😄 Very Happy'),
+    ]
+
+    ENERGY_CHOICES = [
+        ('1', '😴 Very Low'),
+        ('2', '😪 Low'),
+        ('3', '😐 Moderate'),
+        ('4', '⚡ High'),
+        ('5', '🔥 Very High'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mood_entries')
     mood = models.CharField(max_length=20, choices=MOOD_CHOICES)
     mood_score = models.IntegerField(default=5)  # 1-10 scale for analytics
+    intensity = models.IntegerField(default=5)  # 1-10 intensity scale
+    energy_level = models.CharField(max_length=20, choices=ENERGY_CHOICES, blank=True, null=True)
+    activities = models.JSONField(default=list, blank=True)  # List of activities
+    triggers = models.JSONField(default=list, blank=True)  # List of mood triggers
+    gratitude = models.TextField(blank=True, null=True)  # Gratitude notes
     note = models.TextField(blank=True, null=True)
     date = models.DateField(default=timezone.now)
 

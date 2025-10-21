@@ -527,6 +527,116 @@ def mark_notification_read(request, notification_id):
 
 
 @login_required
+def chat_rooms_api(request):
+    """API endpoint to get chat rooms (conversations) for the current user"""
+    conversations = Conversation.objects.filter(
+        participants=request.user
+    ).annotate(
+        last_message_time=Max('messages__timestamp'),
+        unread_count=Count(
+            'messages',
+            filter=Q(messages__read_by__isnull=True) & ~Q(messages__sender=request.user)
+        )
+    ).order_by('-last_message_time').prefetch_related('participants', 'messages')
+
+    rooms_data = []
+    for conv in conversations:
+        other_participants = conv.participants.exclude(id=request.user.id)
+        if other_participants.exists():
+            other_participant = other_participants.first()
+            rooms_data.append({
+                'id': conv.id,
+                'participants': [{
+                    'id': other_participant.id,
+                    'first_name': other_participant.first_name,
+                    'last_name': other_participant.last_name,
+                }],
+                'last_message': {
+                    'decrypted_content': conv.last_message.content if conv.last_message else 'No messages yet',
+                    'timestamp': conv.last_message.timestamp.isoformat() if conv.last_message else None,
+                } if conv.last_message else None,
+            })
+
+    return JsonResponse({'rooms': rooms_data})
+
+
+@login_required
+def chat_room_messages_api(request, room_id):
+    """API endpoint to get messages for a chat room"""
+    conversation = get_object_or_404(
+        Conversation,
+        id=room_id,
+        participants=request.user
+    )
+
+    messages = conversation.messages.all().order_by('timestamp').select_related('sender')
+
+    messages_data = []
+    for msg in messages:
+        messages_data.append({
+            'id': msg.id,
+            'decrypted_content': msg.content,
+            'timestamp': msg.timestamp.isoformat(),
+            'sender': msg.sender.id,
+        })
+
+    return JsonResponse({'messages': messages_data})
+
+
+@login_required
+def chat_rooms_with_user_api(request, user_id):
+    """API endpoint to get chat rooms with a specific user"""
+    other_user = get_object_or_404(User, id=user_id)
+
+    # Check if conversation already exists
+    existing_conversation = Conversation.objects.filter(
+        participants=request.user
+    ).filter(
+        participants=other_user
+    ).annotate(
+        participant_count=Count('participants')
+    ).filter(participant_count=2).first()
+
+    if existing_conversation:
+        return JsonResponse({'rooms': [{'id': existing_conversation.id}]})
+    else:
+        return JsonResponse({'rooms': []})
+
+
+@login_required
+def counselors_api(request):
+    """API endpoint to get all counselors"""
+    counselors = User.objects.filter(role='counselor').exclude(id=request.user.id)
+
+    counselors_data = []
+    for counselor in counselors:
+        counselors_data.append({
+            'id': counselor.id,
+            'first_name': counselor.first_name,
+            'last_name': counselor.last_name,
+        })
+
+    return JsonResponse({'counselors': counselors_data})
+
+
+@login_required
+def users_api(request):
+    """API endpoint to get all users"""
+    users = User.objects.exclude(id=request.user.id)
+
+    users_data = []
+    for user in users:
+        users_data.append({
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'role': getattr(user, 'role', 'client'),
+        })
+
+    return JsonResponse({'users': users_data})
+
+
+@login_required
 def unread_notifications_api(request):
     """API endpoint to get unread notifications for the current user"""
     notifications = Notification.objects.filter(
