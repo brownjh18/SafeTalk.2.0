@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
     # 'djcelery_email',  # Commented out due to package availability issues
-    'tailwind',
+    # 'tailwind',  # Commented out - not installed
 ]
 
 MIDDLEWARE = [
