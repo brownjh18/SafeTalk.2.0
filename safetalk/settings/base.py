@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
     'djcelery_email',
+    'django_celery_beat',
     'tailwind',
 ]
 

@@ -8,6 +8,7 @@ psycopg2-binary==2.9.7
 dj-database-url==2.1.0
 gunicorn==21.2.0
 whitenoise==6.6.0
+django-celery-beat==2.5.0
 
 # Security & Auth
 cryptography==46.0.1
