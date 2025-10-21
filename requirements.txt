@@ -15,7 +15,7 @@ sentry-sdk==1.38.0
 celery==5.3.4
 redis==5.0.1
 requests==2.32.3
-Pillow==10.4.0
+Pillow==11.0.0
 qrcode==8.2
 django-phonenumber-field==8.3.0
 django-formtools==2.5.1
