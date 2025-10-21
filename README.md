@@ -8,6 +8,36 @@
 
 SafeTalk 2.0 is a comprehensive, modern mental health support platform featuring real-time messaging, AI-powered support, counseling services, and community features. Built with Django and cutting-edge web technologies, it provides a secure, accessible, and user-friendly environment for mental health support.
 
+## 🏗️ Environment-Based Configuration
+
+SafeTalk 2.0 uses a modular settings structure that separates development and production configurations:
+
+### Settings Structure
+```
+safetalk/settings/
+├── __init__.py
+├── base.py          # Shared settings for all environments
+├── development.py   # Development-specific settings
+└── production.py    # Production-specific settings
+```
+
+### Environment Selection
+The application automatically selects settings based on the `DJANGO_ENV` environment variable:
+- `DJANGO_ENV=development` → Uses `development.py`
+- `DJANGO_ENV=production` → Uses `production.py`
+- Default: `development`
+
+### Quick Setup
+```bash
+# Development
+cp .env.development .env
+python manage.py runserver
+
+# Production
+cp .env.production .env
+DJANGO_ENV=production python manage.py runserver
+```
+
 ## 🌟 Key Features
 
 ### 💬 **Advanced Messaging System**

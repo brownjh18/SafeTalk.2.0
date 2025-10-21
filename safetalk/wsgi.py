@@ -9,8 +9,16 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 
 import os
 
-from django.core.wsgi import get_wsgi_application
+# Determine settings module based on environment
+environment = os.getenv('DJANGO_ENV', 'development')
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'safetalk.settings')
+if environment == 'production':
+    settings_module = 'safetalk.settings.production'
+else:
+    settings_module = 'safetalk.settings.development'
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+
+from django.core.wsgi import get_wsgi_application
 
 application = get_wsgi_application()

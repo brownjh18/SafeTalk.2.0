@@ -6,7 +6,18 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'safetalk.settings')
+    # Determine settings module based on environment
+    environment = os.getenv('DJANGO_ENV', 'development')
+
+    if environment == 'production':
+        settings_module = 'safetalk.settings.production'
+    else:
+        settings_module = 'safetalk.settings.development'
+
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+
+    print(f"Using Django settings: {settings_module}")  # Debug output
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
