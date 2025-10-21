@@ -349,7 +349,7 @@
         <div class="nav-container">
             <!-- Logo Section -->
             <div class="nav-logo">
-                <img src="{% static 'img/SafeTalkLogo..png' %}" alt="SafeTalk Logo" class="nav-logo-img">
+                <img src="{% static 'img/SafeTalkLogo.png' %}" alt="SafeTalk Logo" class="nav-logo-img">
                 <span class="nav-logo-text">SafeTalk</span>
             </div>
 
@@ -746,8 +746,20 @@
                     console.log('Response status:', response.status);
                     console.log('Response headers:', response.headers);
 
-                    const data = await response.json();
-                    console.log('Response data:', data);
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    console.log('Content-Type:', contentType);
+
+                    let data;
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await response.json();
+                        console.log('Response data:', data);
+                    } else {
+                        // Handle non-JSON response (likely HTML redirect)
+                        const textData = await response.text();
+                        console.log('Non-JSON response:', textData.substring(0, 200) + '...');
+                        data = { success: response.ok, redirect_url: '/dashboard/' };
+                    }
 
                     if (response.ok && data.success) {
                         // Show success message
