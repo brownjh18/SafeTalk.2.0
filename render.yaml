@@ -8,12 +8,12 @@ services:
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-      python manage.py collectstatic --noinput
-      python manage.py migrate
-    startCommand: gunicorn safetalk.wsgi:application --workers 4 --bind 0.0.0.0:$PORT
+      DJANGO_ENV=production python manage.py collectstatic --noinput
+      DJANGO_ENV=production python manage.py migrate
+    startCommand: DJANGO_ENV=production daphne safetalk.asgi:application --port $PORT --bind 0.0.0.0
     envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: safetalk.settings
+      - key: DJANGO_ENV
+        value: production
       - key: DEBUG
         value: false
       - key: SECRET_KEY
@@ -34,7 +34,10 @@ services:
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: ALLOWED_HOSTS
-        value: safetalk-web.onrender.com
+        fromService:
+          type: web
+          name: safetalk-web
+          property: host
 
   - type: worker
     name: safetalk-celery
@@ -45,8 +48,8 @@ services:
       pip install -r requirements.txt
     startCommand: celery -A safetalk worker --loglevel=info
     envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: safetalk.settings
+      - key: DJANGO_ENV
+        value: production
       - key: DEBUG
         value: false
       - key: DATABASE_URL
@@ -70,8 +73,8 @@ services:
       pip install -r requirements.txt
     startCommand: celery -A safetalk beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: safetalk.settings
+      - key: DJANGO_ENV
+        value: production
       - key: DEBUG
         value: false
       - key: DATABASE_URL
