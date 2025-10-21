@@ -8,9 +8,9 @@ services:
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-      export DJANGO_ENV=production && python manage.py collectstatic --noinput
-      export DJANGO_ENV=production && python manage.py migrate
-    startCommand: export DJANGO_ENV=production && daphne safetalk.asgi:application --port $PORT --bind 0.0.0.0
+      DJANGO_ENV=production python manage.py collectstatic --noinput
+      DJANGO_ENV=production python manage.py migrate
+    startCommand: DJANGO_ENV=production daphne safetalk.asgi:application --port $PORT --bind 0.0.0.0
     envVars:
       - key: DJANGO_ENV
         value: production
