@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-0np=snxn1r6rwi#cyi#q6@b_5o_tts!f!+o6qx_v_k8dg5fe6z')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,testserver').split(',')
 
@@ -138,17 +138,16 @@ DATABASES = {
 }
 
 # Fallback to SQLite for development
-if DEBUG:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {
-            'timeout': 20,  # Connection timeout in seconds
-            'check_same_thread': False,  # Allow connections from multiple threads
-        },
-        'CONN_MAX_AGE': 60,  # Keep connections open for 60 seconds
-        'CONN_HEALTH_CHECKS': True,  # Enable connection health checks
-    }
+DATABASES['default'] = {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': BASE_DIR / 'db.sqlite3',
+    'OPTIONS': {
+        'timeout': 20,  # Connection timeout in seconds
+        'check_same_thread': False,  # Allow connections from multiple threads
+    },
+    'CONN_MAX_AGE': 60,  # Keep connections open for 60 seconds
+    'CONN_HEALTH_CHECKS': True,  # Enable connection health checks
+}
 
 
 # Password validation
@@ -342,12 +341,18 @@ GEOIP_DB_PATH = os.path.join(BASE_DIR, 'GeoLite2-Country.mmdb')
 # Security headers
 SECURITY_HEADERS = {
     'CSP_ENABLED': os.getenv('CSP_ENABLED', 'True').lower() == 'true',
-    'HSTS_ENABLED': os.getenv('HSTS_ENABLED', 'True').lower() == 'true',
+    'HSTS_ENABLED': os.getenv('HSTS_ENABLED', 'False').lower() == 'true',  # Disabled for initial deployment
     'X_FRAME_OPTIONS': os.getenv('X_FRAME_OPTIONS', 'DENY'),
     'X_CONTENT_TYPE_OPTIONS': os.getenv('X_CONTENT_TYPE_OPTIONS', 'nosniff'),
     'X_XSS_PROTECTION': os.getenv('X_XSS_PROTECTION', '1; mode=block'),
     'REFERRER_POLICY': os.getenv('REFERRER_POLICY', 'strict-origin-when-cross-origin'),
 }
+
+# Production security settings
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
+SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
 
 # Django Allauth settings
 AUTHENTICATION_BACKENDS = [
