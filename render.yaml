@@ -6,9 +6,9 @@ services:
     env: python
     pythonVersion: 3.12.4
     buildCommand: |
-      pip install --upgrade pip setuptools wheel
-      pip install -r requirements.txt
-      DJANGO_SETTINGS_MODULE=safetalk.settings.production python manage.py collectstatic --noinput
+      pip install --upgrade pip setuptools wheel &&
+      pip install -r requirements.txt &&
+      DJANGO_SETTINGS_MODULE=safetalk.settings.production python manage.py collectstatic --noinput &&
       DJANGO_SETTINGS_MODULE=safetalk.settings.production python manage.py migrate
     startCommand: DJANGO_SETTINGS_MODULE=safetalk.settings.production daphne safetalk.asgi:application --port $PORT --bind 0.0.0.0
     envVars:
@@ -46,7 +46,7 @@ services:
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-    startCommand: DJANGO_SETTINGS_MODULE=safetalk.settings.production DJANGO_ENV=production celery -A safetalk worker --loglevel=info
+    startCommand: DJANGO_SETTINGS_MODULE=safetalk.settings.production celery -A safetalk worker --loglevel=info
     envVars:
       - key: DJANGO_ENV
         value: production
@@ -101,7 +101,7 @@ services:
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-    startCommand: DJANGO_SETTINGS_MODULE=safetalk.settings.production DJANGO_ENV=production celery -A safetalk beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    startCommand: DJANGO_SETTINGS_MODULE=safetalk.settings.production celery -A safetalk beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     envVars:
       - key: DJANGO_ENV
         value: production
