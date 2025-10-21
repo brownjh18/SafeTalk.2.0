@@ -23,7 +23,7 @@ django-ratelimit==4.1.0
 # Async & Background Tasks
 celery[redis]==5.3.4
 flower==2.0.1
-redis==5.0.1
+redis==4.6.0
 
 # Payment
 stripe==12.5.1
