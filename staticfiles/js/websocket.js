@@ -92,11 +92,17 @@ class ChatWebSocket {
             case 'message':
                 this.handleNewMessage(data.message);
                 break;
+            case 'notification':
+                this.handleNewNotification(data.notification);
+                break;
             case 'typing':
                 this.handleTypingIndicator(data);
                 break;
             case 'reaction':
                 this.handleReaction(data);
+                break;
+            case 'read_status':
+                this.handleReadStatusUpdate(data);
                 break;
             default:
                 console.log('Unknown message type:', data.type);
@@ -118,13 +124,46 @@ class ChatWebSocket {
         }
     }
 
+    handleNewNotification(notification) {
+        // Add notification to the UI
+        this.addNotificationToUI(notification);
+
+        // Play notification sound
+        if (this.shouldPlaySound()) {
+            this.playNotificationSound();
+        }
+
+        // Show visual indicator for new notification
+        this.showNotificationIndicator();
+
+        // Update unread count
+        this.updateUnreadCount();
+    }
+
+    handleReadStatusUpdate(data) {
+        // Update the read status of messages in the UI
+        this.updateMessageReadStatus(data.message_id, data.user_id);
+
+        // Update unread count
+        this.updateUnreadCount();
+    }
+
     handleTypingIndicator(data) {
         const typingIndicator = document.getElementById('typing-indicator');
         if (!typingIndicator) return;
 
-        if (data.is_typing && data.user !== document.querySelector('[data-current-user]').dataset.currentUser) {
-            typingIndicator.textContent = `${data.user} is typing...`;
-            typingIndicator.style.display = 'block';
+        if (data.is_typing && data.user !== this.userId) {
+            // Get user display name
+            const userDisplayName = data.user_display_name || data.user;
+            typingIndicator.innerHTML = `
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span>${userDisplayName} is typing...</span>
+            `;
+            typingIndicator.style.display = 'flex';
         } else {
             typingIndicator.style.display = 'none';
         }

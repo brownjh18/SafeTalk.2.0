@@ -36,16 +36,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 timeout = setTimeout(() => {
-                    fetch(`/chat/search-users/?q=${encodeURIComponent(query)}`)
+                    fetch(`/messaging/search-users/?q=${encodeURIComponent(query)}`)
                         .then(response => response.json())
                         .then(data => {
                             searchResults.innerHTML = '';
-                            data.results.forEach(user => {
+                            data.users.forEach(user => {
                                 const userDiv = document.createElement('div');
                                 userDiv.className = 'search-result-item';
                                 userDiv.innerHTML = `
                                     <span>${user.username} (${user.role})</span>
-                                    <a href="/chat/start-chat/${user.id}/" class="start-chat-btn">Start Chat</a>
+                                    <a href="/messaging/start-chat/${user.id}/" class="start-chat-btn">Start Chat</a>
                                 `;
                                 searchResults.appendChild(userDiv);
                             });
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('reaction_type', reactionType);
 
-        fetch(`/chat/toggle-reaction/${messageId}/`, {
+        fetch(`/messaging/toggle-reaction/${messageId}/`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -342,7 +342,17 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('attachment', fileInput.files[0]);
         }
 
-        fetch(window.location.href, {
+        // Get conversation ID from URL
+        const urlParts = window.location.pathname.split('/');
+        const conversationIndex = urlParts.indexOf('conversation');
+        const conversationId = conversationIndex !== -1 ? urlParts[conversationIndex + 1] : null;
+
+        if (!conversationId) {
+            showToast('Error: Could not determine conversation. Please make sure you have selected a conversation.');
+            return;
+        }
+
+        fetch(`/messaging/conversation/${conversationId}/send/`, {
             method: 'POST',
             body: formData
         })
@@ -453,7 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('reason', 'harassment'); // Default reason, could be made configurable
 
-        fetch(`/chat/report-user/${userId}/`, {
+        fetch(`/messaging/report-user/${userId}/`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -477,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function blockUser(userId) {
         const formData = new FormData();
 
-        fetch(`/chat/block-user/${userId}/`, {
+        fetch(`/messaging/block-user/${userId}/`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -489,7 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 showToast('User blocked successfully');
                 // Redirect back to messages
-                setTimeout(() => window.location.href = '/chat/messages/', 1000);
+                setTimeout(() => window.location.href = '/messaging/', 1000);
             } else {
                 showToast('Error blocking user: ' + data.error);
             }
@@ -505,7 +515,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('reason', 'inappropriate');
         formData.append('message_id', messageId);
 
-        fetch(`/chat/report-user/${userId}/`, {
+        fetch(`/messaging/report-user/${userId}/`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -654,7 +664,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Initiate call via API
-        fetch(`/chat/initiate-call/${sessionId}/`, {
+        fetch(`/messaging/initiate-call/${sessionId}/`, {
             method: 'POST',
             body: new FormData(), // Empty form data
             headers: {
@@ -679,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function acceptCall(callId) {
         // Accept call via API
-        fetch(`/chat/accept-call/${callId}/`, {
+        fetch(`/messaging/accept-call/${callId}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
@@ -703,7 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function declineCall(callId) {
         // Decline call via API
-        fetch(`/chat/decline-call/${callId}/`, {
+        fetch(`/messaging/decline-call/${callId}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
