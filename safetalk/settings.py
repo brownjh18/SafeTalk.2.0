@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-0np=snxn1r6rwi#cyi#q6@b_5o_tts!f!+o6qx_v_k8dg5fe6z')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,testserver,safetalk-w0vu.onrender.com').split(',')
 
@@ -67,13 +67,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'safetalk.middleware.SecurityMiddleware',
-    'safetalk.middleware.AuditMiddleware',
-    'safetalk.middleware.ComplianceMiddleware',
-    'safetalk.middleware.PerformanceMiddleware',
-    'safetalk.middleware.MaintenanceMiddleware',
-    'safetalk.middleware.CORSHeadersMiddleware',
-    'accounts.views.SubscriptionRequiredMiddleware',
+    # 'safetalk.middleware.SecurityMiddleware',  # Commented out for initial deployment
+    # 'safetalk.middleware.AuditMiddleware',
+    # 'safetalk.middleware.ComplianceMiddleware',
+    # 'safetalk.middleware.PerformanceMiddleware',
+    # 'safetalk.middleware.MaintenanceMiddleware',
+    # 'safetalk.middleware.CORSHeadersMiddleware',
+    # 'accounts.views.SubscriptionRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'safetalk.urls'
@@ -211,7 +211,7 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Ensure static files are served in production
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -351,11 +351,11 @@ SECURITY_HEADERS = {
     'REFERRER_POLICY': os.getenv('REFERRER_POLICY', 'strict-origin-when-cross-origin'),
 }
 
-# Production security settings
-SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True').lower() == 'true'
-SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True').lower() == 'true'
-CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'True').lower() == 'true'
-SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
+# Production security settings - disabled for initial deployment
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
+SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
 
 # Django Allauth settings
 AUTHENTICATION_BACKENDS = [

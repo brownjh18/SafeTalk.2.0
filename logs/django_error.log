@@ -18337,3 +18337,41 @@ Traceback (most recent call last):
     )
 ValueError: You have multiple authentication backends configured and therefore must provide the `backend` argument or set the `backend` attribute on the user.
 ERROR 2025-10-21 07:22:43,236 basehttp 13028 29424 "POST /accounts/register/ HTTP/1.1" 500 94735
+ERROR 2025-10-21 15:33:43,287 basehttp 24476 13888 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:33:43,290 basehttp 24476 15148 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:33:44,710 basehttp 24476 28140 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:33:44,710 basehttp 24476 31676 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:33:44,713 basehttp 24476 22728 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:33:44,714 basehttp 24476 29916 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:52,812 basehttp 29692 21240 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:52,814 basehttp 29692 14616 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:52,816 basehttp 29692 2868 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:52,818 basehttp 29692 23352 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:54,121 basehttp 29692 5476 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:54,122 basehttp 29692 5556 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:54,125 basehttp 29692 28644 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:54,125 basehttp 29692 29948 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:59,005 basehttp 29692 22052 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:59,008 basehttp 29692 25724 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:59,010 basehttp 29692 31236 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:34:59,014 basehttp 29692 1780 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:40,358 basehttp 23076 14616 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:40,359 basehttp 23076 33268 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:40,363 basehttp 23076 2868 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:40,364 basehttp 23076 11328 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:41,553 basehttp 23076 9456 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:41,555 basehttp 23076 30796 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:41,558 basehttp 23076 28548 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:41,559 basehttp 23076 24512 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:59,773 basehttp 23076 23576 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:59,776 basehttp 23076 30984 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:59,778 basehttp 23076 31400 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:37:59,782 basehttp 23076 26520 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:56:14,265 basehttp 23076 16360 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:56:14,266 basehttp 23076 24656 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:56:14,267 basehttp 23076 8976 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:56:14,268 basehttp 23076 23300 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:56:15,378 basehttp 23076 31576 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:56:15,380 basehttp 23076 19996 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:56:15,381 basehttp 23076 15824 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-10-21 15:56:15,382 basehttp 23076 6576 You're accessing the development server over HTTPS, but it only supports HTTP.
